@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"com.xollence.greentaxi","c":"GreenTaxiApplication","l":"GreenTaxiApplication()","url":"%3Cinit%3E()"},{"p":"com.xollence.greentaxi","c":"GreenTaxiApplication","l":"main(String[])","url":"main(java.lang.String[])"}]
