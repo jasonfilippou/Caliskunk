@@ -4,6 +4,7 @@ import com.company.rest.products.model.exceptions.InvalidProductTypeException;
 import lombok.*;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,7 +19,7 @@ import java.util.Set;
 public class LiteProduct
 {
 	// Minimal information required by our application.
-	@Id
+	@Id @GeneratedValue
 	private Long id;	// Unique
 	private String name;
 	private Long costInCents;
@@ -35,8 +36,7 @@ public class LiteProduct
 
 	}
 
-	public LiteProduct(@NonNull final Long id, @NonNull final String name,
-	                   @NonNull final String type, @NonNull final Long costInCents)
+	public LiteProduct(@NonNull final String name,  @NonNull final String type, @NonNull final Long costInCents)
 	{
 		if(!PRODUCT_TYPES.contains(type))
 		{
@@ -58,12 +58,7 @@ public class LiteProduct
 		private String type;
 		private Long costInCents;
 		
-		public LiteProductBuilder id(Long id)
-		{
-			this.id = id;
-			return this;
-		}
-		
+
 		public LiteProductBuilder name(String name)
 		{
 			this.name = name;
@@ -84,7 +79,7 @@ public class LiteProduct
 
 		public LiteProduct build()
 		{
-			return new LiteProduct(id, name, type, costInCents);
+			return new LiteProduct( name, type, costInCents);
 		}
 	}
 

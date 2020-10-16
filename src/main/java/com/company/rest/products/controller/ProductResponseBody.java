@@ -13,7 +13,7 @@ import lombok.Data;
 public class ProductResponseBody
 {
 	private String name;
-	private Long id;
+	private Long id;            // This is a piece of info we have generated and serve to the client.
 	private String productType;
 	private Long costInCents;
 	private String categoryId;

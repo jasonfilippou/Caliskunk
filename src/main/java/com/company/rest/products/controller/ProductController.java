@@ -19,16 +19,20 @@ import org.springframework.web.bind.annotation.*;
 class ProductController
 {
 	private final LiteProductRepository repository;
+	private final BackendService service;
 
 	@Autowired
-	public ProductController(final LiteProductRepository repository)
+	public ProductController(final LiteProductRepository repository,
+	                         final BackendService service)
 	{
 		this.repository = repository;
+		this.service = service;
 	}
 
 	/* *************************************************************************************** */
 	/* ********************   UTILITIES FOR RESPONDING TO CLIENT ***************************** */
 	/* *************************************************************************************** */
+
 	private static ResponseEntity<ResponseMessage> response(String requestStatus, String message,
 	                                                        Object data, HttpStatus httpStatus)
 	{
@@ -72,7 +76,7 @@ class ProductController
 		// First, we check to see if the product is in our local cache. If it is,
 		// we should notify client of conflict and do nothing else.
 		// Otherwise, we make the backend POST request as is normal.
-		return repository.findById(request.getId())
+		return repository.findByName(request.getName().strip())
 			.map(product ->
 		     {
 		        log.warn("A POST request was made for an already existing resource: " + request + ".");
@@ -82,7 +86,7 @@ class ProductController
 			.orElseGet(() ->
 	         {
 	         	final LiteProduct liteProduct = repository.save(createLiteProductOutOfRequest(request));
-	            BackendService.postProduct(request);
+	            service.postProduct(request);
 	            return success("Successfully created product!",
 	                           liteProduct, HttpStatus.CREATED);
 	         });
@@ -92,12 +96,12 @@ class ProductController
 	{
 		return LiteProduct
 				.builder()
-				.id(request.getId())
 				.name(request.getName())
 				.costInCents(request.getCostInCents())
 				.type(request.getProductType())
 				.build();
 	}
+
 	/* *************************************************************************************** */
 	/* ************************************ GET ONE ****************************************** */
 	/* *************************************************************************************** */
@@ -106,9 +110,11 @@ class ProductController
 	public ResponseEntity<ResponseMessage> getProduct(@PathVariable Long id)
 	{
 		// First make a cheap check to ensure the product will be there.
-		LiteProduct cachedProductInstance = repository.findById(id)
+		final LiteProduct cachedProductInstance = repository.findById(id)
 		                 .orElseThrow(() -> new ProductNotFoundException(id)); // Nicely formatted by registered advice class
 		throw new UnimplementedMethodPlaceholder();
+		// TODO: remember to appropriately handle the special exceptions
+		//  that the backend sends.
 	}
 
 
@@ -121,38 +127,29 @@ class ProductController
 	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductRequestBody request,
 	                                         @PathVariable Long id)
 	{
-		if(!id.equals(request.getId()))
-		{
-			final String inconsistency = "Inconsistent PUT request: endpoint ID was " + id + " while item ID was " + request.getId() + ".";
-			log.warn(inconsistency);
-			return failure(inconsistency, HttpStatus.CONFLICT);
-		}
-		else
-		{
-			return repository
-					.findById(request.getId())
-			        .map(liteProduct ->
+		return repository
+				.findByName(request.getName().strip())
+	                .map(liteProduct ->
 					{
 					  updateLiteProduct(liteProduct, request);
-					  BackendService.putProduct(id, request);
+					  service.putProduct(id, request);
 					  return success("Successfully updated product with id: "
 					                 + id, liteProduct, HttpStatus.OK);
 					})
                  .orElseGet(() ->
                     {
                         LiteProduct liteProduct = repository.save(createLiteProductOutOfRequest(request));
-                        BackendService.putProduct(id, request);
+                        service.putProduct(id, request);
                         return success("Successfully created product!", liteProduct,
                                        HttpStatus.CREATED);
                     });
-		}
 	}
 
 	private void updateLiteProduct(LiteProduct product, ProductRequestBody request)
 	{
 		product.setName(request.getName());
-		product.setId(request.getId());
 		product.setCostInCents(request.getCostInCents());
+		product.setType(request.getProductType());
 	}
 
 	/* *************************************************************************************** */

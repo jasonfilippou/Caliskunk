@@ -10,7 +10,6 @@ import java.io.Serializable;
 public class ProductRequestBody implements Serializable
 {
 	@JsonProperty("name")  @NonNull private String name;
-	@JsonProperty("product_id")  @NonNull private Long id;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
 	@JsonProperty("category_id")  private String categoryId;
