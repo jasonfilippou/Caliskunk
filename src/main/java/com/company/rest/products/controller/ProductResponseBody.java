@@ -52,31 +52,5 @@ public class ProductResponseBody
 		this.sku = sku;
 		this.upc = upc;
 	}
-
-	// The following might not be required given Lombok's @Builder annotation
-//	public static class Builder
-//	{
-//		private String name;
-//		private Long id;
-//		private String productType;
-//		private Long costInCents;
-//		private String categoryId;
-//		private String description;
-//		private Boolean availableOnline;
-//		private Boolean availableForPickup;
-//		private Boolean availableElectronically;
-//		private String labelColor;
-//		private String sku;
-//		private String upc;
-//
-//
-//		public ProductResponseBody build()
-//		{
-//			return new ProductResponseBody(name, id, productType, costInCents,  categoryId,
-//							  description,  availableOnline, availableForPickup,  availableElectronically,
-//							  labelColor, sku, upc);
-//		}
-//	}
-	
 	
 }

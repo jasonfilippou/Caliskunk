@@ -10,8 +10,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Builder(access = AccessLevel.PUBLIC)
 @Entity
+// Lombok's @Builder annotation was giving me trouble
+// with this class (maybe because of the other annotations?).
+// So I went ahead and implemented my own Builder instead.
+//@Builder(access = AccessLevel.PUBLIC)
 public class LiteProduct
 {
 	// Minimal information required by our application.
@@ -42,6 +45,47 @@ public class LiteProduct
 		this.name = name;
 		this.id = id;
 		this.costInCents = costInCents;
+	}
+	
+	public static LiteProductBuilder builder()
+	{
+		return new LiteProductBuilder();
+	}
+	public static class LiteProductBuilder 
+	{
+		private Long id;
+		private String name;
+		private String type;
+		private Long costInCents;
+		
+		public LiteProductBuilder id(Long id)
+		{
+			this.id = id;
+			return this;
+		}
+		
+		public LiteProductBuilder name(String name)
+		{
+			this.name = name;
+			return this;
+		}
+				
+		public LiteProductBuilder type(String type)
+		{
+			this.type = type;
+			return this;
+		}
+				
+		public LiteProductBuilder costInCents(Long costInCents)
+		{
+			this.costInCents = costInCents;
+			return this;
+		}
+
+		public LiteProduct build()
+		{
+			return new LiteProduct(id, name, type, costInCents);
+		}
 	}
 
 }
