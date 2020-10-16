@@ -31,32 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-# Java related
-target/**
-*.jar
-*.war
-*.ear
-*.class
-
-# eclipse specific
-*.pydevproject
-.metadata
-bin/**
-tmp/**
-tmp/**/*
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.settings/
-.loadpath
-
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# Should the following be uncommented?
