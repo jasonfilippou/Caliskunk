@@ -1,4 +1,4 @@
-package com.company.rest.products.model.exceptions;
+package com.company.rest.products.util.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,7 +12,7 @@ public class ModelExceptionsAdvice
 	@ResponseBody
 	@ExceptionHandler(InvalidProductTypeException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String employeeNotFoundHandler(InvalidProductTypeException ex)
+	public String invalidProductTypeHandler(InvalidProductTypeException ex)
 	{
 		return ex.getMessage();
 	}

@@ -1,4 +1,4 @@
-package com.company.rest.products.controller;
+package com.company.rest.products.util.loggers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;

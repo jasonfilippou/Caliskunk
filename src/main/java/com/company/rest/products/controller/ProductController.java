@@ -1,11 +1,13 @@
 package com.company.rest.products.controller;
 
-import com.company.rest.products.controller.exceptions.ProductNotFoundException;
 import com.company.rest.products.model.BackendService;
-import com.company.rest.products.model.LiteProduct;
-import com.company.rest.products.model.LiteProductRepository;
+import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.util.ResponseMessage;
-import com.company.rest.products.util.UnimplementedMethodPlaceholder;
+import com.company.rest.products.util.exceptions.BackendServiceException;
+import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
+import com.company.rest.products.util.json_objects.BackendResponseBody;
+import com.company.rest.products.util.json_objects.ProductPostRequestBody;
+import com.company.rest.products.util.json_objects.ProductResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,46 +15,45 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+
 @RestController // So no serving views of any kind
 @Component
 @Slf4j
-class ProductController
+public class ProductController
 {
-	private final LiteProductRepository repository;
-	private final BackendService service;
+	private final BackendService backendService;
 
 	@Autowired
-	public ProductController(final LiteProductRepository repository,
-	                         final BackendService service)
+	public ProductController(final BackendService backendService)
 	{
-		this.repository = repository;
-		this.service = service;
+		this.backendService = backendService;
 	}
 
 	/* *************************************************************************************** */
 	/* ********************   UTILITIES FOR RESPONDING TO CLIENT ***************************** */
 	/* *************************************************************************************** */
 
-	private static ResponseEntity<ResponseMessage> response(String requestStatus, String message,
+	private ResponseEntity<ResponseMessage> response(String requestStatus, String message,
 	                                                        Object data, HttpStatus httpStatus)
 	{
 		return new ResponseEntity<>(new ResponseMessage(requestStatus,message,data), httpStatus);
 	}
 
-	private static ResponseEntity<ResponseMessage> failure(String message, HttpStatus httpStatus)
+	private ResponseEntity<ResponseMessage> failure(String message, HttpStatus httpStatus)
 	{
-		return response(ResponseMessage.FAILURE,message,null, httpStatus);
+		return response(ResponseMessage.FAILURE, message,null, httpStatus);
 	}
 
-	private static ResponseEntity<ResponseMessage> failure(Throwable thrown, HttpStatus httpStatus)
+	private ResponseEntity<ResponseMessage> failure(Throwable thrown, HttpStatus httpStatus)
 	{
 		return failure(thrown.getMessage(), httpStatus);
 	}
 
-	private static ResponseEntity<ResponseMessage> success(String message,
-	                                                        Object data, HttpStatus httpStatus)
+	private ResponseEntity<ResponseMessage> success(String message,
+	                                                Object data)
 	{
-		return response(ResponseMessage.SUCCESS, message, data, httpStatus);
+		return response(ResponseMessage.SUCCESS, message, data, HttpStatus.OK);
 	}
 
 	/* *************************************************************************************** */
@@ -66,40 +67,34 @@ class ProductController
 		// Then, if the client clicks on a specific product,
 		// that will trigger a resource-specific GET, which we will
 		// pull from the backend.
-		return success("Successfully hit GET ALL endpoint",
-		               repository.findAll(), HttpStatus.OK);
+		throw new UnimplementedMethodPlaceholder();
 	}
 
 	@PostMapping(value = "/products")
-	public ResponseEntity<ResponseMessage> postProduct(@RequestBody ProductRequestBody request)
+	public ResponseEntity<ResponseMessage> postProduct(@RequestBody ProductPostRequestBody request)
 	{
 		// First, we check to see if the product is in our local cache. If it is,
 		// we should notify client of conflict and do nothing else.
 		// Otherwise, we make the backend POST request as is normal.
-		return repository.findByName(request.getName().strip())
-			.map(product ->
-		     {
-		        log.warn("A POST request was made for an already existing resource: " + request + ".");
-		        return failure("Product with ID " + product.getId() +
-		                        " already exists!", HttpStatus.CONFLICT);
-		     })
-			.orElseGet(() ->
-	         {
-	         	final LiteProduct liteProduct = repository.save(createLiteProductOutOfRequest(request));
-	            service.postProduct(request);
-	            return success("Successfully created product!",
-	                           liteProduct, HttpStatus.CREATED);
-	         });
-	}
-
-	private static LiteProduct createLiteProductOutOfRequest(ProductRequestBody request)
-	{
-		return LiteProduct
-				.builder()
-				.name(request.getName())
-				.costInCents(request.getCostInCents())
-				.type(request.getProductType())
-				.build();
+		if(!LiteProduct.PRODUCT_TYPES.contains(request.getProductType()))
+		{
+			return failure("Invalid product type provided: Valid categories are: " +
+			               new ArrayList<>(LiteProduct.PRODUCT_TYPES) + ".",
+			               HttpStatus.BAD_REQUEST);
+		}
+		else
+		{
+			try
+			{
+				BackendResponseBody backendResponse = backendService.postProduct(request);
+				ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
+				return success("Successfully posted product!", productResponse);
+			}
+			catch (BackendServiceException exc)
+			{
+				return failure(exc, exc.getStatus());
+			}
+		}
 	}
 
 	/* *************************************************************************************** */
@@ -107,14 +102,19 @@ class ProductController
 	/* *************************************************************************************** */
 
 	@GetMapping("/product/{id}")
-	public ResponseEntity<ResponseMessage> getProduct(@PathVariable Long id)
+	public ResponseEntity<ResponseMessage> getProduct(@PathVariable String id)
 	{
-		// First make a cheap check to ensure the product will be there.
-		final LiteProduct cachedProductInstance = repository.findById(id)
-		                 .orElseThrow(() -> new ProductNotFoundException(id)); // Nicely formatted by registered advice class
-		throw new UnimplementedMethodPlaceholder();
-		// TODO: remember to appropriately handle the special exceptions
-		//  that the backend sends.
+		try
+		{
+			BackendResponseBody backendResponse = backendService.getProduct(id);
+			ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
+			return success("Successfully got product with ID " + id + ".",
+			               productResponse);
+		}
+		catch (BackendServiceException e)
+		{
+			return failure(e, e.getStatus());
+		}
 	}
 
 
@@ -124,32 +124,10 @@ class ProductController
 
 
 	@PutMapping("/products/{id}")
-	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductRequestBody request,
+	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductPostRequestBody request,
 	                                         @PathVariable Long id)
 	{
-		return repository
-				.findByName(request.getName().strip())
-	                .map(liteProduct ->
-					{
-					  updateLiteProduct(liteProduct, request);
-					  service.putProduct(id, request);
-					  return success("Successfully updated product with id: "
-					                 + id, liteProduct, HttpStatus.OK);
-					})
-                 .orElseGet(() ->
-                    {
-                        LiteProduct liteProduct = repository.save(createLiteProductOutOfRequest(request));
-                        service.putProduct(id, request);
-                        return success("Successfully created product!", liteProduct,
-                                       HttpStatus.CREATED);
-                    });
-	}
-
-	private void updateLiteProduct(LiteProduct product, ProductRequestBody request)
-	{
-		product.setName(request.getName());
-		product.setCostInCents(request.getCostInCents());
-		product.setType(request.getProductType());
+		throw new UnimplementedMethodPlaceholder();
 	}
 
 	/* *************************************************************************************** */
@@ -157,7 +135,7 @@ class ProductController
 	/* *************************************************************************************** */
 
 	@PatchMapping("/products/{id}")
-	public ResponseEntity<ResponseMessage> patchProduct(@RequestBody ProductRequestBody request,
+	public ResponseEntity<ResponseMessage> patchProduct(@RequestBody ProductPostRequestBody request,
 	                                         @PathVariable Long id)
 	{
 		throw new UnimplementedMethodPlaceholder();

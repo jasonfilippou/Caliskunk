@@ -1,4 +1,4 @@
-package com.company.rest.products.model.exceptions;
+package com.company.rest.products.util.exceptions;
 
 public class ResourceAlreadyCreatedException extends RuntimeException
 {

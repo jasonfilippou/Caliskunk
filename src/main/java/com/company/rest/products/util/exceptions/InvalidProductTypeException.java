@@ -1,10 +1,10 @@
-package com.company.rest.products.model.exceptions;
+package com.company.rest.products.util.exceptions;
 
 public class InvalidProductTypeException extends RuntimeException
 {
 	public InvalidProductTypeException(String categoryId)
 	{
-		super("Invalid category provided: " + categoryId + ".");
+		super("Invalid prroduct category provided: " + categoryId + ".");
 	}
 }
 

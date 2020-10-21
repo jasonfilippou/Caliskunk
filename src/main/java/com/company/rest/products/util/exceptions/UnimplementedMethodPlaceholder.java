@@ -1,4 +1,4 @@
-package com.company.rest.products.util;
+package com.company.rest.products.util.exceptions;
 
 public class UnimplementedMethodPlaceholder extends RuntimeException
 {

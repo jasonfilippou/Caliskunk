@@ -26,9 +26,9 @@ public class Util
 		return str.length() > idx ? str.substring(0, idx) : str;
 	}
 
-	public static void logException(Throwable thrown)
+	public static void logException(Throwable thrown, String methodName)
 	{
-		log.error("An instance of " + thrown.getClass().getName() +
-		          " was thrown, with message: " + thrown.getMessage() + ".");
+		log.error("Method " + methodName + " received an instance of " + thrown.getClass().getName() +
+		          ", with message: " + thrown.getMessage() + ".");
 	}
 }

@@ -1,6 +1,6 @@
 com.company.rest.products
 com.company.rest.products.controller
-com.company.rest.products.controller.exceptions
+com.company.rest.products.util.exceptions
 com.company.rest.products.model
 com.company.rest.products.model.exceptions
 com.company.rest.products.util
