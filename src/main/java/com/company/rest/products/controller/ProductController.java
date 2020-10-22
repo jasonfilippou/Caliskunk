@@ -9,12 +9,12 @@ import com.company.rest.products.util.json_objects.BackendResponseBody;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 import com.company.rest.products.util.json_objects.ProductResponseBody;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.patterns.HasThisTypePatternTriedToSneakInSomeGenericOrParameterizedTypePatternMatchingStuffAnywhereVisitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 
 @RestController // So no serving views of any kind
@@ -37,6 +37,7 @@ public class ProductController
 	private ResponseEntity<ResponseMessage> response(String requestStatus, String message,
 	                                                        Object data, HttpStatus httpStatus)
 	{
+		HasThisTypePatternTriedToSneakInSomeGenericOrParameterizedTypePatternMatchingStuffAnywhereVisitor h = new HasThisTypePatternTriedToSneakInSomeGenericOrParameterizedTypePatternMatchingStuffAnywhereVisitor();
 		return new ResponseEntity<>(new ResponseMessage(requestStatus,message,data), httpStatus);
 	}
 
@@ -63,23 +64,21 @@ public class ProductController
 	@GetMapping(value = "/products")
 	public ResponseEntity<ResponseMessage> getAll()
 	{
-		// For GET ALL, we will leverage the cached instances.
-		// Then, if the client clicks on a specific product,
-		// that will trigger a resource-specific GET, which we will
-		// pull from the backend.
 		throw new UnimplementedMethodPlaceholder();
 	}
 
 	@PostMapping(value = "/products")
 	public ResponseEntity<ResponseMessage> postProduct(@RequestBody ProductPostRequestBody request)
 	{
-		// First, we check to see if the product is in our local cache. If it is,
-		// we should notify client of conflict and do nothing else.
-		// Otherwise, we make the backend POST request as is normal.
-		if(!LiteProduct.PRODUCT_TYPES.contains(request.getProductType()))
+		if(!LiteProduct.PRODUCT_TYPES.contains(request.getProductType().toUpperCase()))
 		{
 			return failure("Invalid product type provided: Valid categories are: " +
 			               new ArrayList<>(LiteProduct.PRODUCT_TYPES) + ".",
+			               HttpStatus.BAD_REQUEST);
+		}
+		else if(request.getCostInCents() < 0)
+		{
+			return failure("Negative cost provided: " + request.getCostInCents() +".",
 			               HttpStatus.BAD_REQUEST);
 		}
 		else

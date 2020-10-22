@@ -81,8 +81,8 @@ public class BackendService
 		return LiteProduct.builder()
 							.squareItemId(response.getItemId())
 		                    .squareItemVariationId(response.getItemVariationId())
-							.name(response.getName())
-							.type(response.getProductType())
+							.name(response.getName().toUpperCase().trim()) // Uppercasing name to make it case-insensitive
+							.type(response.getProductType().toUpperCase().trim()) // Product types uppercased by convention
 							.costInCents(response.getCostInCents())
                           .build();
 	}

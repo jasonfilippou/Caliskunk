@@ -88,26 +88,26 @@ public class SquareService
 		CatalogItemVariation itemVariationData = itemVariationResponse.getCatalogObject().getItemVariationData();
 
 		return SquareServiceResponseBody.builder()
-		                                // Pull some data from the CatalogObjects
-		                                .itemId(itemObject.getId())
-		                                .itemVariationId(itemVarObject.getId())
-		                                .isDeleted(itemObject.getIsDeleted())
-		                                .presentAtAllLocations(itemObject.getPresentAtAllLocations())
-		                                .version(itemObject.getVersion())
-		                                .updatedAt(itemObject.getUpdatedAt())
+			                                // Pull some data from the CatalogObjects
+			                                .itemId(itemObject.getId())
+			                                .itemVariationId(itemVarObject.getId())
+			                                .isDeleted(itemObject.getIsDeleted())
+			                                .presentAtAllLocations(itemObject.getPresentAtAllLocations())
+			                                .version(itemObject.getVersion())
+			                                .updatedAt(itemObject.getUpdatedAt())
 
-		                                // Now from the CatalogItem
-		                                .name(itemData.getName())
-		                                .availableElectronically(itemData.getAvailableElectronically())
-		                                .availableForPickup(itemData.getAvailableForPickup())
-		                                .availableOnline(itemData.getAvailableOnline())
-		                                .categoryId(itemData.getCategoryId())
-		                                .description(itemData.getDescription())
-		                                .labelColor(itemData.getLabelColor())
-		                                .productType(itemData.getProductType())
+			                                // Now from the CatalogItem
+			                                .name(itemData.getName())
+			                                .availableElectronically(itemData.getAvailableElectronically())
+			                                .availableForPickup(itemData.getAvailableForPickup())
+			                                .availableOnline(itemData.getAvailableOnline())
+			                                .categoryId(itemData.getCategoryId())
+			                                .description(itemData.getDescription())
+			                                .labelColor(itemData.getLabelColor())
+			                                .productType(itemData.getProductType())
 
-		                                // And from the CatalogItemVariation data.
-		                                .costInCents(itemVariationData.getPriceMoney().getAmount())
+			                                // And from the CatalogItemVariation data.
+			                                .costInCents(itemVariationData.getPriceMoney().getAmount())
 		                                .build();
 	}
 

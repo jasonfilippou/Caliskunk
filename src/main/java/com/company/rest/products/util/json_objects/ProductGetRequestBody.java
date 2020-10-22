@@ -8,8 +8,8 @@ import lombok.NonNull;
 
 import java.io.Serializable;
 
-@Data
 @Builder(access = AccessLevel.PUBLIC)   // To allow access to base class fields from a `Builder` instance.
+@Data
 public class ProductGetRequestBody implements Serializable
 {
 	@JsonProperty @NonNull	private String id;
