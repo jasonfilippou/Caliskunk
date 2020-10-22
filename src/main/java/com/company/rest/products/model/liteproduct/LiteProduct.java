@@ -27,7 +27,8 @@ public class LiteProduct
 	 // Model the product types as a Hash Set in case we end up with several
 	 // and need fast retrieval. The types are uppercased by convention.
 	public final static Set<String> PRODUCT_TYPES = new HashSet<>
-			 (Arrays.asList("FLOWER", "TOPICAL", "VAPORIZER", "EDIBLE", "PET"));
+			 (Arrays.asList("FLOWER", "TOPICAL", "VAPORIZER", "EDIBLE", "PREROLL", "CONCENTRATE",
+			                "TINCTURE", "PET", "ACCESSORY", "OTHER"));
 
 
 	public LiteProduct(@NonNull final String squareItemId, @NonNull final String squareItemVariationId,

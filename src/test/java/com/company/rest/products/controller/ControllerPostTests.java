@@ -1,6 +1,8 @@
 package com.company.rest.products.controller;
 
 import com.company.rest.products.model.BackendService;
+import com.company.rest.products.model.sample_jsons.post.ExpectedPostResponses;
+import com.company.rest.products.model.sample_jsons.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.json_objects.BackendResponseBody;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
@@ -36,38 +38,7 @@ public class ControllerPostTests
 	@MockBean
 	private BackendService service;     // The class that will be mocked
 
-	private ProductPostRequestBody buildPostRequest(@NonNull final String name, final @NonNull String productType,
-	                                               final @NonNull Long costInCents,  final  String categoryID,
-	                                               final String description, final Boolean availableOnline,
-	                                               final boolean availableForPickup, final Boolean availableElectronically,
-	                                               final String labelColor, final String sku, final String upc)
-	{
-		return ProductPostRequestBody
-				.builder()
-					.name(name)
-					.productType(productType)
-					.costInCents(costInCents)
-					.categoryId(categoryID)
-					.description(description)
-					.availableOnline(availableOnline)
-					.availableElectronically(availableElectronically)
-					.availableForPickup(availableForPickup)
-					.labelColor(labelColor)
-					.sku(sku)
-					.upc(upc)
-				.build();
-	}
 
-	private ProductPostRequestBody buildPostRequest(@NonNull final String name, final @NonNull String productType,
-	                                               final @NonNull Long costInCents)
-	{
-		return ProductPostRequestBody
-				.builder()
-					.name(name)
-					.productType(productType)
-					.costInCents(costInCents)
-				.build();
-	}
 
 	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
@@ -120,8 +91,12 @@ public class ControllerPostTests
 	@Test
 	public void testPost()
 	{
-		final ProductPostRequestBody request = buildPostRequest("Culeothesis Necrosis", "Flower",
-		                                                        6000L); // 'L for long literal
+		final ProductPostRequestBody request = ProductPostRequestBody
+													.builder()
+														.name("Culeothesis Necrosis")
+														.productType("Flower")
+														.costInCents(600L) // 'L for long literal
+													.build();
 
 		BackendResponseBody expected = BackendResponseBody.builder()
 									                         .name(request.getName())
@@ -140,6 +115,19 @@ public class ControllerPostTests
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 	}
 
+	@Test
+	public void testManyPosts()
+	{
+		int numRequests = GoodPostRequests.POST_REQUESTS.length,
+			numResponses = ExpectedPostResponses.RESPONSES.length;
+		assertEquals("Mismatch between number of requests: " + numRequests
+		             + " and number of expected responses: " + numResponses, numRequests, numResponses);
+		for(int i = 0; i <  numRequests; i++)
+		{
+			assertTrue("Mismatch in response #" + i + " (0-indexed).",
+			           responseMatchesPostRequest(GoodPostRequests.POST_REQUESTS[i],  ExpectedPostResponses.RESPONSES[i]));
+		}
+	}
 
 
 	@Test

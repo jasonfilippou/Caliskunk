@@ -8,7 +8,6 @@ import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 public class GoodPostRequests
 {
 
-
 	public static final ProductPostRequestBody[] POST_REQUESTS =
 	{
 
@@ -173,6 +172,7 @@ public class GoodPostRequests
 			                            .labelColor("67FA25")
 			                            .description("It's still not Cochran")
 										.sku("BB67BB21")
+										.sku("BB6BBB21")        // Allowed
 									.build(),
 
 
@@ -182,7 +182,7 @@ public class GoodPostRequests
 
 			ProductPostRequestBody.builder()
 			                            .name("Midnight Delight 0.5g")
-			                            .productType("flower")
+			                            .productType("vaporizer")
 			                            .costInCents(5500L)
 			                            .labelColor("AA89BD")
 										.categoryId("HIGH-CBD")
@@ -190,7 +190,7 @@ public class GoodPostRequests
 
 			ProductPostRequestBody.builder()
 			                            .name("Midnight Delight 1g")
-			                            .productType("flower")
+			                            .productType("vaporizer")
 			                            .costInCents(7500L)
 			                            .labelColor("BB89BA")
 										.categoryId("HIGH-CBD")
@@ -198,539 +198,273 @@ public class GoodPostRequests
 									.build(),
 
 			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Silverback Gorilla 1/4 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Silverback Gorilla 1/4 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Silverback Gorilla 1/4 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Silverback Gorilla 1/4 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
+			                            .name("Deathstar OG 0.5g")
+			                            .productType("vaporizer")
+			                            .costInCents(6000L)
 			                            .labelColor("106B0C")
+										.description("It will knock you out.")
 									.build(),
 
 			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
+			                            .name("Deathstar OG 1g")
+			                            .productType("vaporizer")
 			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
+			                            .labelColor("89BB1D")
+										.description("It will knock you out.")
 									.build(),
 
 			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
+			                            .name("Afternoon Booster 0.3g disposable cart")
+			                            .productType("vaporizer")
+			                            .costInCents(2000L)
+			                            .labelColor("89BB1D")
+										.description("Disposable cartridge.")
+										.availableOnline(true)
 									.build(),
-
-			ProductPostRequestBody.builder()
-			                            .name("Culeothesis Necrosis 1 oz")
-			                            .productType("flower")
-			                            .costInCents(10000L)
-			                            .labelColor("106B0C")
-									.build()
-
-
-
 
 			/* ********************************************************************** */
 			/* **************************** TOPICALS ******************************** */
 			/* ********************************************************************** */
 
+			ProductPostRequestBody.builder()
+			                            .name("Synergy Kush 120mg")
+			                            .productType("topical")
+			                            .costInCents(4000L)
+			                            .labelColor("51F90A")
+									.build(),
 
+			ProductPostRequestBody.builder()
+			                            .name("Tranquil Northern Wind 100mg")
+			                            .productType("topical")
+			                            .costInCents(4000L)
+			                            .labelColor("10AD14")
+									.build(),
 
+			ProductPostRequestBody.builder()
+			                            .name("July 200mg")
+			                            .productType("topical")
+			                            .costInCents(10000L)
+			                            .labelColor("106B0C")
+									.build(),
 
 			/* ********************************************************************** */
 			/* **************************** EDIBLES ******************************** */
 			/* ********************************************************************** */
 
+			ProductPostRequestBody.builder()
+			                            .name("Betty's Eddies 5 x 50mg gummies")
+			                            .productType("edible")
+			                            .costInCents(45000L)
+			                            .labelColor("AAF55F")
+									.build(),
 
+			ProductPostRequestBody.builder()
+			                            .name("Betty's Eddies 5 x 25mg gummies")
+			                            .productType("edible")
+			                            .costInCents(25000L)
+			                            .labelColor("AAF55F")   // No reason to not have same label color
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Paradise scent 10x10mg chews")
+			                            .productType("edible")
+			                            .costInCents(5000L)
+			                            .labelColor("106B0C")
+										.upc("042100AAA264")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Weed Pasta")
+			                            .productType("edible")
+			                            .costInCents(15000L)
+			                            .description("Enough said!")
+									.build(),
+
+			/* ********************************************************************** */
+			/* **************************** TINCTURES ******************************* */
+			/* ********************************************************************** */
+
+			ProductPostRequestBody.builder()
+			                            .name("Mary's Medicinal's 200mg")
+			                            .productType("tincture")
+			                            .costInCents(10000L)
+			                            .labelColor("106B0C")
+										.categoryId("HIGH-CBD")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Dreamy Tincture 100mg")
+			                            .productType("tincture")
+			                            .costInCents(5000L)
+			                            .name("Cloudy Mixture 100mg")       // Allowable
+			                            .name("Cloudy Mixture 120mg")       // And again
+			                            .labelColor("60B555")
+										.description("Excellent for daydreamers!")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Dreamy Tincture 200mg")
+			                            .productType("tincture")
+			                            .costInCents(8000L)
+										.sku("AAAF7B118")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Cleopatra's Choice 100mg")
+			                            .productType("tincture")
+			                            .description(null)      // Should be allowed, and treated equivalently to it not being there
+			                            .costInCents(80000L)
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Northern Lights 100mg")
+			                            .productType("tincture")
+			                            .costInCents(10000L)
+			                            .costInCents(111000L)   // Allowed
+										.description("The famous strain, now in tincture form!")
+									.build(),
+
+			/* ********************************************************************** */
+			/* **************************** CONCENTRATES ******************************* */
+			/* ********************************************************************** */
+
+			ProductPostRequestBody.builder()
+			                            .name("Ghost Shatter 2g")
+			                            .productType("concentrate")
+			                            .costInCents(20000L)
+			                            .labelColor("FAF678")
+			                            .categoryId("HIGH-THC")
+										.description("Prepare to leave planet Earth.")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("The Black Death 1g")
+			                            .productType("concentrate")
+			                            .costInCents(12000L)
+			                            .labelColor("106B0C")
+										.categoryId("HIGH-THC")
+										.upc("042100005264")
+									.build(),
+			ProductPostRequestBody.builder()
+			                            .name("Kemal Ataturk 1g")
+			                            .productType("concentrate")
+			                            .costInCents(10000L)
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("White Persian 1.5g")
+			                            .productType("concentrate")
+			                            .costInCents(15000L)
+			                            .labelColor("FF895F")
+										.categoryId("HIGH-CBD")
+									.build(),
 
 
 			/* ********************************************************************** */
-			/* **************************** PETS ******************************** */
+			/* **************************** PETS ************************************ */
 			/* ********************************************************************** */
+
+			ProductPostRequestBody.builder()
+			                            .name("Tailwagger 50ml")
+			                            .productType("pet")
+			                            .costInCents(3000L)
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Tailwagger 100ml")
+			                            .productType("pet")
+			                            .costInCents(5000L)
+										.description("Now on sale!")
+										.description("Now on sale!")        // Should be allowed
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Feline Tocker 40ml")
+			                            .productType("pet")
+			                            .costInCents(2700L)
+			                            .description("For kittens 6 months or older.")
+									.build(),
+
+			/* ********************************************************************** */
+			/* **************************** PREROLLS ***************************** */
+			/* ********************************************************************** */
+
+			ProductPostRequestBody.builder()
+			                            .name("Pineapple Express 1g")
+			                            .productType("preroll")
+			                            .costInCents(1200L)
+			                            .labelColor("22AB0D")
+										.description("Will help you take the edge of")
+										.categoryId("HIGH-THC")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Clandestine Giraffe 1.5g")
+			                            .productType("preroll")
+			                            .costInCents(1500L)
+			                            .labelColor("A52C6A")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Culeothesis Necrosis 1.5g infused")
+			                            .productType("preroll")
+			                            .costInCents(2500L)
+			                            .labelColor("10221C")
+										.description("Paper dipped in concentrates before rolling.")
+										.categoryId("INFUSED")
+									.build(),
+
+
+			/* ********************************************************************** */
+			/* **************************** ACCESSORIES ***************************** */
+			/* ********************************************************************** */
+
+			ProductPostRequestBody.builder()
+			                            .name("\"Mr Meeseeks\" limited edition bong")
+			                            .productType("accessory")
+			                            .costInCents(25000L)
+			                            .labelColor("C45981")
+										.description("Ah geez, Rick!")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("\"Responsible Toker\" rolling tray")
+			                            .productType("accessory")
+			                            .costInCents(1500L)
+									.build(),
+
+			/* ********************************************************************** */
+			/* **************************** OTHER ****************************** */
+			/* ********************************************************************** */
+
+			ProductPostRequestBody.builder()
+			                            .name("500 points bundle")
+			                            .productType("other")
+			                            .costInCents(4000L)
+			                            .labelColor("106B0C")
+										.categoryId("POINTS")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("1,000 points bundle")
+			                            .productType("other")
+			                            .costInCents(70000L)
+			                            .labelColor("106B0C")
+										.description("Biggest value for money yet!")
+										.categoryId("POINTS")
+									.build(),
+
+			ProductPostRequestBody.builder()
+			                            .name("Sativa Seeds, 2oz")
+			                            .productType("other")
+			                            .costInCents(300000L)
+			                            .labelColor("106B0C")
+										.description("1/2 Pineapple Express and 1/2 Skywalker OG")
+										.categoryId("SEEDS")
+										.sku("C761BB2211")
+			                            .upc("042100005264")
+										.upc("DDECA0FBBA3F")        // Overwrite should be allowed
+									.build(),
 
 
 	};
