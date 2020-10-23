@@ -71,10 +71,10 @@ public class SquareService
 			itemResponse = sendCatalogItemUpsertRequest(request);
 			itemVariationResponse = sendCatalogItemVariationUpsertRequest(request);
 		}
-		catch (InterruptedException | ExecutionException | TimeoutException e)
+		catch (Throwable t)
 		{
-			logException(e, this.getClass().getEnclosingMethod().getName());
-			throw new SquareServiceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+			logException(t, this.getClass().getEnclosingMethod().getName());
+			throw new SquareServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return combine(itemResponse, itemVariationResponse);
 	}
@@ -204,24 +204,24 @@ public class SquareService
 	 */
 	public SquareServiceResponseBody getProduct(String itemId, String itemVarId) throws SquareServiceException
 	{
-		final Boolean includeRelatedObjects = true;
+		final Boolean INCLUDE_RELATED_OBJECTS = true;     // We will make use of the additional info returned later.
 		final BatchRetrieveCatalogObjectsRequest request =
 					new BatchRetrieveCatalogObjectsRequest
 						.Builder(Arrays.asList(itemId, itemVarId))
-							.includeRelatedObjects(includeRelatedObjects)
+							.includeRelatedObjects(INCLUDE_RELATED_OBJECTS)
 						.build();
 		try
 		{
-			BatchRetrieveCatalogObjectsResponse response =
+			final BatchRetrieveCatalogObjectsResponse response =
 					catalogApi.batchRetrieveCatalogObjectsAsync(request).get(SECONDS_TO_WAIT, TIME_UNIT_USED);
 			validateBatchRetrievalResponse(response);
 			CatalogObject[] itemAndVar = fetchItemAndVar(response.getObjects());
 			return SquareServiceResponseBody.fromSquareData(itemAndVar[0], itemAndVar[1]);
 		}
-		catch (InterruptedException | ExecutionException | TimeoutException e)
+		catch (Throwable t)
 		{
-			logException(e, this.getClass().getEnclosingMethod().getName());
-			throw new SquareServiceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+			logException(t, this.getClass().getEnclosingMethod().getName());
+			throw new SquareServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

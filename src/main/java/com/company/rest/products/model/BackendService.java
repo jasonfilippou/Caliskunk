@@ -11,10 +11,14 @@ import com.squareup.square.models.CatalogItem;
 import com.squareup.square.models.CatalogItemVariation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.company.rest.products.util.Util.logException;
 
@@ -86,10 +90,10 @@ public class BackendService
 	public BackendServiceResponseBody getProduct(String id) throws BackendServiceException
 	{
 		// Cheap check first; if the product doesn't exist, why go to Square API with the request?
-		Optional<LiteProduct> cached = localRepo.findBySquareItemId(id);
+		final Optional<LiteProduct> cached = localRepo.findBySquareItemId(id);
 		if(cached.isEmpty())
 		{
-			ProductNotFoundException exc = new ProductNotFoundException(id);
+			final ProductNotFoundException exc = new ProductNotFoundException(id);
             logException(exc, this.getClass().getEnclosingMethod().getName());
             throw new BackendServiceException(exc, HttpStatus.NOT_FOUND);
 		}
@@ -97,7 +101,8 @@ public class BackendService
 		{
 			try
 			{
-				SquareServiceResponseBody response = squareService.getProduct(id, cached.get().getSquareItemVariationId());
+				final SquareServiceResponseBody response = squareService
+															.getProduct(id, cached.get().getSquareItemVariationId());
 				return BackendServiceResponseBody.fromSquareResponseBody(response);
 			}
 			catch(SquareServiceException exc)
@@ -112,11 +117,23 @@ public class BackendService
 	 * Serve a GET ALL request
 	 * @return A {@link BackendServiceResponseBody} instance.
 	 */
-	public BackendServiceResponseBody getAllProducts()
+	public List<BackendServiceResponseBody> getAllProducts(int page, int itemsInPage, String sortBy)
 	{
 		// Paginated and sorted output whether it is on Square
 		// or the cache.
-		throw new UnimplementedMethodPlaceholder();
+		try
+		{
+			// TODO: Maybe we can have the user somehow offer us the field to sort on.
+			return localRepo.findAll(PageRequest.of(page, itemsInPage, Sort.by(sortBy).ascending()))
+			                .stream().parallel()
+			                .map(BackendServiceResponseBody::fromLiteProduct)
+			                .collect(Collectors.toList());
+		}
+		catch(Throwable t)
+		{
+			logException(t, this.getClass().getEnclosingMethod().getName());
+            throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 

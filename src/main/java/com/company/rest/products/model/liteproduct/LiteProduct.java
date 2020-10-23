@@ -21,9 +21,9 @@ public class LiteProduct
 	@Id
 	private String squareItemId;	        // Unique on Square
 	private String squareItemVariationId;	// Unique on Square
-	private String name;
+	private String productName;
 	private Long costInCents;
-	private String type;
+	private String productType;
 
 	 // Model the product types as a Hash Set in case we end up with several
 	 // and need fast retrieval. The types are uppercased by convention.
@@ -33,17 +33,17 @@ public class LiteProduct
 
 
 	public LiteProduct(@NonNull final String squareItemId, @NonNull final String squareItemVariationId,
-	                   @NonNull final String name, @NonNull final Long costInCents, @NonNull final String type)
+	                   @NonNull final String productName, @NonNull final Long costInCents, @NonNull final String productType)
 	{
-		if(!PRODUCT_TYPES.contains(type))
+		if(!PRODUCT_TYPES.contains(productType))
 		{
-			InvalidProductTypeException exc = new InvalidProductTypeException(type);
+			InvalidProductTypeException exc = new InvalidProductTypeException(productType);
 			logException(exc, this.getClass().getEnclosingMethod().getName());
-			throw new InvalidProductTypeException(type);
+			throw new InvalidProductTypeException(productType);
 		}
 		else
 		{
-			this.name = name;
+			this.productName = productName;
 			this.squareItemId = squareItemId;
 			this.squareItemVariationId = squareItemVariationId;
 			this.costInCents = costInCents;
@@ -57,8 +57,8 @@ public class LiteProduct
 			return LiteProduct.builder()
 								.squareItemId(response.getItemId())
 			                    .squareItemVariationId(response.getItemVariationId())
-								.name(response.getName().toUpperCase().trim()) // Uppercasing name to make it case-insensitive
-								.type(response.getProductType().toUpperCase().trim()) // Product types uppercased by convention
+								.productName(response.getName().toUpperCase().trim()) // Uppercasing name to make it case-insensitive
+								.productType(response.getProductType().toUpperCase().trim()) // Product types uppercased by convention
 								.costInCents(response.getCostInCents())
                               .build();
 	}

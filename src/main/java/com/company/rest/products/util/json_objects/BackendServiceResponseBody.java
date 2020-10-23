@@ -1,5 +1,6 @@
 package com.company.rest.products.util.json_objects;
 
+import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -61,6 +62,19 @@ public class BackendServiceResponseBody implements Serializable
 					.version(squareResponse.getVersion())
 					.taxIDs(squareResponse.getTaxIDs())
 					.updatedAt(squareResponse.getUpdatedAt())
+				.build();
+	}
+
+	// The following is useful for getAll()
+	public static BackendServiceResponseBody fromLiteProduct(LiteProduct product)
+	{
+		// Right now all it does is copy data over, but this can change in the future.
+		return builder()
+					.name(product.getProductName())
+					.costInCents(product.getCostInCents())
+					.itemId(product.getSquareItemId())
+					.itemVariationId(product.getSquareItemVariationId())
+					.productType(product.getProductType())
 				.build();
 	}
 }
