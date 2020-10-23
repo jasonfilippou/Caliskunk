@@ -44,7 +44,7 @@ public class SquareService
 	// Necessary objects to connect to API
 	private static final SquareClient client = new SquareClient.Builder()
 			.environment(Environment.SANDBOX)
-			.accessToken(System.getenv("SQUARE_SANDBOX_ACCESS_TOKEN"))
+			.accessToken("123abe")
 			.build();
 	private static final CatalogApi catalogApi = client.getCatalogApi();
 

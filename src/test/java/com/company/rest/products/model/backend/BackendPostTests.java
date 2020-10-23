@@ -1,5 +1,6 @@
 package com.company.rest.products.model.backend;
 
+import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
@@ -12,16 +13,24 @@ import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@ContextConfiguration(classes = CaliSkunkApplication.class)
+@ComponentScan(basePackages = {"com.company.rest.products"})
 public class BackendPostTests
 {
 
@@ -29,13 +38,13 @@ public class BackendPostTests
 	/* ************************************ Fields and utilities ************************************************** */
 	/* *********************************************************************************************************** */
 
-	@Autowired
+	@InjectMocks
 	private BackendService backendService; // The class we are testing
 
-	@MockBean
+	@Mock
 	private SquareService squareService;     // One class that will be mocked
 
-	@MockBean
+	@Mock
 	private LiteProductRepository repository;     // Another class that will be mocked
 
 
@@ -92,11 +101,11 @@ public class BackendPostTests
 						                                                  .isDeleted(false)
 		                                                             .build();
 
-		when(squareService.postProduct(request)).thenReturn(expected);
+		when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn(expected);
 		final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(expected);
-		when(repository.save(cachedMiniProduct)).thenReturn(cachedMiniProduct);
+		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 
-		final BackendServiceResponseBody response = backendService.postProduct(request);
+		BackendServiceResponseBody response = backendService.postProduct(request);
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 	}
 
