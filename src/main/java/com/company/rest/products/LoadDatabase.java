@@ -15,8 +15,8 @@ public class LoadDatabase
 	{
 		log.info("Preloading" + repository.save(LiteProduct
 													.builder()
-														.name(name)
-														.type(type)
+														.productName(name)
+														.productType(type)
 														.costInCents(costInCents)
 													.build()
 													));

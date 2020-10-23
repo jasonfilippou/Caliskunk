@@ -1,0 +1,23 @@
+{
+  "properties": [
+    {
+      "name": "SQUARE_SANDBOX_ACCESS_TOKEN",
+      "type": "java.lang.String",
+      "description": "Description for SQUARE_SANDBOX_ACCESS_TOKEN."
+    },
+    {
+      "name": "SQUARE_SANDBOX_APPLICATION_ID",
+      "type": "java.lang.String",
+      "description": "Description for SQUARE_SANDBOX_APPLICATION_ID."
+    },
+    {
+      "name": "SQUARE_PRODUCTION_APPLICATION_ID",
+      "type": "java.lang.String",
+      "description": "Description for SQUARE_PRODUCTION_APPLICATION_ID."
+    },
+    {
+      "name": "SQUARE_PRODUCTION_ACCESS_TOKEN",
+      "type": "java.lang.String",
+      "description": "Description for SQUARE_PRODUCTION_ACCESS_TOKEN."
+    }
+  ] }
