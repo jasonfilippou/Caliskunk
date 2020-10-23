@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,10 +40,10 @@ public class BackendService
 	private final LiteProductRepository localRepo;
 
 	@Autowired
-	public BackendService(LiteProductRepository localRepo)
+	public BackendService(LiteProductRepository localRepo, SquareService squareService)
 	{
 		this.localRepo = localRepo;
-		this.squareService = new SquareService();
+		this.squareService = squareService;
 	}
 
 
