@@ -1,19 +1,18 @@
 package com.company.rest.products.model.sample_jsons.post;
 
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
-import com.company.rest.products.util.json_objects.ProductResponseBody;
+import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
 
 import java.util.ArrayList;
 
-public class ExpectedPostResponses
+public class ExpectedSquareServicePostResponses
 {
+	public static final SquareServiceResponseBody[] RESPONSES = buildExpectedResponses();
 
-	public static final ProductResponseBody[] RESPONSES = buildExpectedResponses();
-
-	private static ProductResponseBody[] buildExpectedResponses()
+	private static SquareServiceResponseBody[] buildExpectedResponses()
 	{
 		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
-		ProductResponseBody[] retVal = new ProductResponseBody[numRequests];
+		SquareServiceResponseBody[] retVal = new SquareServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
 			retVal[i] = expectedResponse(GoodPostRequests.POST_REQUESTS[i]);
@@ -21,11 +20,12 @@ public class ExpectedPostResponses
 		return retVal;
 	}
 
-	private static ProductResponseBody expectedResponse(ProductPostRequestBody request)
+	private static SquareServiceResponseBody expectedResponse(ProductPostRequestBody request)
 	{
-		return ProductResponseBody.builder()
+		return SquareServiceResponseBody.builder()
 		                            .name(request.getName())
 		                            .itemId("random_id")
+		                            .itemVariationId("random_var_id")
 		                            .isDeleted(false)
 		                            .costInCents(request.getCostInCents())
 		                            .labelColor(request.getLabelColor())
@@ -39,6 +39,8 @@ public class ExpectedPostResponses
 		                            .sku(request.getSku())
 		                            .upc(request.getUpc())
 		                            .taxIDs(new ArrayList<>())
+		                            .updatedAt("Whenever")
+		                            .version(0L)    // Random version
 		                          .build();
 	}
 }

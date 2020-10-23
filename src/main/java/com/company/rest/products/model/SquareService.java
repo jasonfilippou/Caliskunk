@@ -82,10 +82,10 @@ public class SquareService
 	private SquareServiceResponseBody combine(UpsertCatalogObjectResponse itemResponse,
 	                                          UpsertCatalogObjectResponse itemVariationResponse)
 	{
-		CatalogObject itemObject = itemResponse.getCatalogObject();
-		CatalogObject itemVarObject = itemVariationResponse.getCatalogObject();
-		CatalogItem itemData = itemResponse.getCatalogObject().getItemData();
-		CatalogItemVariation itemVariationData = itemVariationResponse.getCatalogObject().getItemVariationData();
+		final CatalogObject itemObject = itemResponse.getCatalogObject();
+		final CatalogObject itemVarObject = itemVariationResponse.getCatalogObject();
+		final CatalogItem itemData = itemResponse.getCatalogObject().getItemData();
+		final CatalogItemVariation itemVariationData = itemVariationResponse.getCatalogObject().getItemVariationData();
 
 		return SquareServiceResponseBody.builder()
 			                                // Pull some data from the CatalogObjects

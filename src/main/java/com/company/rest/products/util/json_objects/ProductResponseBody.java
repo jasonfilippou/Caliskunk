@@ -12,7 +12,7 @@ import java.util.List;
 @Builder(access = AccessLevel.PUBLIC)
 public class ProductResponseBody implements Serializable
 {
-	// For now this class is almost identical to BackendResponseBody, in order for us
+	// For now this class is almost identical to BackendServiceResponseBody, in order for us
 	// to give a breadth of information to the user. However, this can change,
 	// so separate logic can be useful when refactoring.
 	@JsonProperty("item_id") @NonNull private String itemId;
@@ -33,7 +33,7 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("tax_ids") private List<String> taxIDs;
 	@JsonProperty("updatedAt") private String updatedAt;
 
-	public static ProductResponseBody fromBackendResponseBody(BackendResponseBody backendResponse)
+	public static ProductResponseBody fromBackendResponseBody(BackendServiceResponseBody backendResponse)
 	{
 		// Right now all it does is copy data over, but this can change in the future.
 

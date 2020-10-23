@@ -5,7 +5,7 @@ import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.exceptions.BackendServiceException;
 import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
-import com.company.rest.products.util.json_objects.BackendResponseBody;
+import com.company.rest.products.util.json_objects.BackendServiceResponseBody;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 import com.company.rest.products.util.json_objects.ProductResponseBody;
 import lombok.extern.slf4j.Slf4j;
@@ -85,8 +85,8 @@ public class ProductController
 		{
 			try
 			{
-				BackendResponseBody backendResponse = backendService.postProduct(request);
-				ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
+				final BackendServiceResponseBody backendResponse = backendService.postProduct(request);
+				final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 				return success("Successfully posted product!", productResponse);
 			}
 			catch (BackendServiceException exc)
@@ -105,7 +105,7 @@ public class ProductController
 	{
 		try
 		{
-			BackendResponseBody backendResponse = backendService.getProduct(id);
+			BackendServiceResponseBody backendResponse = backendService.getProduct(id);
 			ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully got product with ID " + id + ".",
 			               productResponse);

@@ -15,13 +15,13 @@ import java.util.List;
  */
 @Data
 @Builder(access = AccessLevel.PUBLIC)
-public class BackendResponseBody implements Serializable
+public class BackendServiceResponseBody implements Serializable
 {
 	// For now this class is almost identical to SquareServiceResponseBody, in order for us
 	// to give a breadth of information to the user. However, this can change,
 	// so separate logic can be useful when refactoring.
 	@JsonProperty @NonNull private String itemId;
-	@JsonProperty @NonNull private String itemVarId;
+	@JsonProperty @NonNull private String itemVariationId;
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
@@ -39,12 +39,12 @@ public class BackendResponseBody implements Serializable
 	@JsonProperty("tax_ids") private List<String> taxIDs;
 	@JsonProperty("updatedAt") private String updatedAt;
 
-	public static BackendResponseBody fromSquareResponseBody(SquareServiceResponseBody squareResponse)
+	public static BackendServiceResponseBody fromSquareResponseBody(SquareServiceResponseBody squareResponse)
 	{
 		// Right now all it does is copy data over, but this can change in the future.
 		return builder()
 					.itemId(squareResponse.getItemId())
-					.itemVarId(squareResponse.getItemVariationId())
+					.itemVariationId(squareResponse.getItemVariationId())
 					.name(squareResponse.getName())
 					.productType(squareResponse.getProductType())
 					.costInCents(squareResponse.getCostInCents())

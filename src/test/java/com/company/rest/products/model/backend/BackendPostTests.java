@@ -1,5 +1,123 @@
 package com.company.rest.products.model.backend;
 
+import com.company.rest.products.model.BackendService;
+import com.company.rest.products.model.SquareService;
+import com.company.rest.products.model.liteproduct.LiteProduct;
+import com.company.rest.products.model.liteproduct.LiteProductRepository;
+import com.company.rest.products.model.sample_jsons.post.ExpectedSquareServicePostResponses;
+import com.company.rest.products.model.sample_jsons.post.GoodPostRequests;
+import com.company.rest.products.util.json_objects.BackendServiceResponseBody;
+import com.company.rest.products.util.json_objects.ProductPostRequestBody;
+import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
+import lombok.NonNull;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static java.util.Optional.ofNullable;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class BackendPostTests
 {
+
+	/* *********************************************************************************************************** */
+	/* ************************************ Fields and utilities ************************************************** */
+	/* *********************************************************************************************************** */
+
+	@Autowired
+	private BackendService backendService; // The class we are testing
+
+	@MockBean
+	private SquareService squareService;     // One class that will be mocked
+
+	@MockBean
+	private LiteProductRepository repository;     // Another class that will be mocked
+
+
+	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
+	                                           @NonNull BackendServiceResponseBody responseBody)
+	{
+		return
+				// Basic data that will always be provided:
+				postRequestBody.getName().equals(responseBody.getName()) &&
+				postRequestBody.getProductType().equals(responseBody.getProductType()) &&
+				postRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
+
+				// Subsequent fields that may or may not have been provided, so we
+				// use an Optional to protect ourselves against NPEs:
+				ofNullable(postRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically()) ) &&
+				ofNullable(postRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup()) ) &&
+				ofNullable(postRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline()) ) &&
+				ofNullable(postRequestBody.getCategoryId()).equals(ofNullable(responseBody.getCategoryId()) ) &&
+				ofNullable(postRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor()) ) &&
+				ofNullable(postRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription()) ) &&
+				ofNullable(postRequestBody.getSku()).equals(ofNullable(responseBody.getSku()) ) &&
+				ofNullable(postRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc())) &&
+
+				// Let us also ensure that the POST didn't trip the object's deletion flag:
+				! responseBody.getIsDeleted()   &&
+
+				// And make sure that the backend returned some kind of tangible ID
+				// for BOTH item _and_ item variation...
+
+				( responseBody.getItemId() != null ) &&
+				( responseBody.getItemVariationId() != null );
+	}
+
+	/* *********************************************************************************************************** */
+	/* ***************************************** TESTS *********************************************************** */
+	/* *********************************************************************************************************** */
+
+	@Test
+	public void testOnePost()
+	{
+		final ProductPostRequestBody request = ProductPostRequestBody
+													.builder()
+														.name("Culeothesis Necrosis")
+														.productType("Flower")
+														.costInCents(600L) // 'L for long literal
+													.build();
+
+		final SquareServiceResponseBody expected = SquareServiceResponseBody.builder()
+						                                                  .name(request.getName())
+						                                                  .itemId("RANDOM_ITEM_ID")
+						                                                  .itemVariationId("RANDOM_ITEM_VAR_ID")
+						                                                  .productType(request.getProductType())
+						                                                  .costInCents(request.getCostInCents())
+						                                                  .isDeleted(false)
+		                                                             .build();
+
+		when(squareService.postProduct(Mockito.any(ProductPostRequestBody.class))).thenReturn(expected);
+//		when(squareService.postProduct(request)).thenReturn(expected);
+		final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(expected);
+		when(repository.save(cachedMiniProduct)).thenReturn(cachedMiniProduct);
+
+		final BackendServiceResponseBody response = backendService.postProduct(request);
+		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
+	}
+
+	@Test
+	public void testManyPosts()
+	{
+		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
+		for(int i = 0; i <  numRequests; i++)
+		{
+			// Mock
+			when(squareService.postProduct(GoodPostRequests.POST_REQUESTS[i]))
+					.thenReturn(ExpectedSquareServicePostResponses.RESPONSES[i]);
+
+			// Call backend service
+			final BackendServiceResponseBody response = backendService.postProduct(GoodPostRequests.POST_REQUESTS[i]);
+
+			// Assess response
+			assertTrue("Mismatch in response #" + i + " (0-indexed).",
+			           responseMatchesPostRequest(GoodPostRequests.POST_REQUESTS[i], response));
+		}
+	}
 }

@@ -1,6 +1,7 @@
 package com.company.rest.products.model.liteproduct;
 
 import com.company.rest.products.util.exceptions.InvalidProductTypeException;
+import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -47,5 +48,18 @@ public class LiteProduct
 			this.squareItemVariationId = squareItemVariationId;
 			this.costInCents = costInCents;
 		}
+	}
+
+	/* Some static methods to create LiteProducts on the fly from various layer responses. */
+
+	public static LiteProduct fromSquareResponse(SquareServiceResponseBody response)
+	{
+			return LiteProduct.builder()
+								.squareItemId(response.getItemId())
+			                    .squareItemVariationId(response.getItemVariationId())
+								.name(response.getName().toUpperCase().trim()) // Uppercasing name to make it case-insensitive
+								.type(response.getProductType().toUpperCase().trim()) // Product types uppercased by convention
+								.costInCents(response.getCostInCents())
+                              .build();
 	}
 }

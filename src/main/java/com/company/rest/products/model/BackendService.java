@@ -4,7 +4,7 @@ import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
 import com.company.rest.products.util.exceptions.*;
-import com.company.rest.products.util.json_objects.BackendResponseBody;
+import com.company.rest.products.util.json_objects.BackendServiceResponseBody;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
 import com.squareup.square.models.CatalogItem;
@@ -13,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
 import java.util.Optional;
+
 import static com.company.rest.products.util.Util.logException;
 
 /**
@@ -36,7 +38,7 @@ public class BackendService
 	public BackendService(LiteProductRepository localRepo)
 	{
 		this.localRepo = localRepo;
-		squareService = new SquareService();
+		this.squareService = new SquareService();
 	}
 
 
@@ -48,13 +50,13 @@ public class BackendService
 	 * @see LiteProductRepository
 	 * @throws BackendServiceException if the resource is already there.
 	 */
-	public BackendResponseBody postProduct(ProductPostRequestBody request) throws BackendServiceException
+	public BackendServiceResponseBody postProduct(ProductPostRequestBody request) throws BackendServiceException
 	{
 		// First, make a local check to ensure that there's no name clash for
 		// the product uploaded. This is one of the advantages of having a cache.
 		if(localRepo.findByName(request.getName()).isPresent())
 		{
-			ResourceAlreadyCreatedException exc = new ResourceAlreadyCreatedException();
+			final ResourceAlreadyCreatedException exc = new ResourceAlreadyCreatedException();
             logException(exc, this.getClass().getEnclosingMethod().getName());
             throw new BackendServiceException(exc, HttpStatus.CONFLICT);
 		}
@@ -64,9 +66,9 @@ public class BackendService
 		{
 			try
 			{
-				SquareServiceResponseBody response = squareService.postProduct(request);
-				localRepo.save(createLiteProductOutOfResponse(response));
-				return BackendResponseBody.fromSquareResponseBody(response);
+				final SquareServiceResponseBody response = squareService.postProduct(request);
+				localRepo.save(LiteProduct.fromSquareResponse(response));
+				return BackendServiceResponseBody.fromSquareResponseBody(response);
 			}
 			catch(SquareServiceException exc)
 			{
@@ -76,23 +78,12 @@ public class BackendService
 		}
 	}
 
-	private static LiteProduct createLiteProductOutOfResponse(SquareServiceResponseBody response)
-	{
-		return LiteProduct.builder()
-							.squareItemId(response.getItemId())
-		                    .squareItemVariationId(response.getItemVariationId())
-							.name(response.getName().toUpperCase().trim()) // Uppercasing name to make it case-insensitive
-							.type(response.getProductType().toUpperCase().trim()) // Product types uppercased by convention
-							.costInCents(response.getCostInCents())
-                          .build();
-	}
-
 	/**
 	 * Send a GET request for a specific product.
 	 * @param id The product's unique ID.
 	 * @return A {@link ProductPostRequestBody} instance with the entire client-facing product data.
 	 */
-	public BackendResponseBody getProduct(String id) throws BackendServiceException
+	public BackendServiceResponseBody getProduct(String id) throws BackendServiceException
 	{
 		// Cheap check first; if the product doesn't exist, why go to Square API with the request?
 		Optional<LiteProduct> cached = localRepo.findBySquareItemId(id);
@@ -107,7 +98,7 @@ public class BackendService
 			try
 			{
 				SquareServiceResponseBody response = squareService.getProduct(id, cached.get().getSquareItemVariationId());
-				return BackendResponseBody.fromSquareResponseBody(response);
+				return BackendServiceResponseBody.fromSquareResponseBody(response);
 			}
 			catch(SquareServiceException exc)
 			{
@@ -119,10 +110,12 @@ public class BackendService
 
 	/**
 	 * Serve a GET ALL request
-	 * @return A {@link BackendResponseBody} instance.
+	 * @return A {@link BackendServiceResponseBody} instance.
 	 */
-	public BackendResponseBody getAllProducts()
+	public BackendServiceResponseBody getAllProducts()
 	{
+		// Paginated and sorted output whether it is on Square
+		// or the cache.
 		throw new UnimplementedMethodPlaceholder();
 	}
 
@@ -132,7 +125,7 @@ public class BackendService
 	 * @param id The product's unique id, provided by the request.
 	 * @param request The request body.
 	 */
-	public BackendResponseBody putProduct(String id, ProductPostRequestBody request)
+	public BackendServiceResponseBody putProduct(String id, ProductPostRequestBody request)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
@@ -141,7 +134,7 @@ public class BackendService
 	 * Send a PATCH request for a specific product.
 	 * @param id The product's unique id.
 	 */
-	public BackendResponseBody patchProduct(String id, ProductPostRequestBody request)
+	public BackendServiceResponseBody patchProduct(String id, ProductPostRequestBody request)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
@@ -150,7 +143,7 @@ public class BackendService
 	 * Send a DELETE request for a specific product.
 	 * @param id The product's unique id.
 	 */
-	public BackendResponseBody deleteProduct(String id, ProductPostRequestBody newProduct)
+	public BackendServiceResponseBody deleteProduct(String id, ProductPostRequestBody newProduct)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}

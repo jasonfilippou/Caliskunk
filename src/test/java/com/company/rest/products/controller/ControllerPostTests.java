@@ -1,10 +1,10 @@
 package com.company.rest.products.controller;
 
 import com.company.rest.products.model.BackendService;
-import com.company.rest.products.model.sample_jsons.post.ExpectedPostResponses;
+import com.company.rest.products.model.sample_jsons.post.ExpectedBackendServicePostResponses;
 import com.company.rest.products.model.sample_jsons.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
-import com.company.rest.products.util.json_objects.BackendResponseBody;
+import com.company.rest.products.util.json_objects.BackendServiceResponseBody;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 import com.company.rest.products.util.json_objects.ProductResponseBody;
 import lombok.NonNull;
@@ -36,7 +36,7 @@ public class ControllerPostTests
 	private ProductController controller; // The class we are testing
 
 	@MockBean
-	private BackendService service;     // The class that will be mocked
+	private BackendService backendService;     // The class that will be mocked
 
 
 
@@ -58,10 +58,20 @@ public class ControllerPostTests
 				ofNullable(postRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor()) ) &&
 				ofNullable(postRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription()) ) &&
 				ofNullable(postRequestBody.getSku()).equals(ofNullable(responseBody.getSku()) ) &&
-				ofNullable(postRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc()))
+				ofNullable(postRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc())) &&
 
 				// Let us also ensure that the POST didn't trip the object's deletion flag:
-				&&  ! responseBody.getIsDeleted();
+				! responseBody.getIsDeleted()  &&
+
+				// And make sure that the backend returned some kind of tangible ID for the item
+
+				( responseBody.getItemId() != null ) ;
+	}
+
+	private ProductResponseBody checkAndGet(ResponseEntity<ResponseMessage> responseEntity)
+	{
+		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
+		return getResponseData(responseEntity);
 	}
 
 
@@ -71,25 +81,11 @@ public class ControllerPostTests
 	}
 
 	/* *********************************************************************************************************** */
-	/* ************************************ Tests ************************************************** */
+	/* ***************************************** TESTS *********************************************************** */
 	/* *********************************************************************************************************** */
 
 	@Test
-	public void testGetAll()
-	{
-
-	}
-
-
-	@Test
-	public void testGetOne()
-	{
-
-	}
-
-
-	@Test
-	public void testPost()
+	public void testOnePost()
 	{
 		final ProductPostRequestBody request = ProductPostRequestBody
 													.builder()
@@ -98,49 +94,40 @@ public class ControllerPostTests
 														.costInCents(600L) // 'L for long literal
 													.build();
 
-		BackendResponseBody expected = BackendResponseBody.builder()
-									                         .name(request.getName())
-		                                                     .itemId("RANDOM_ITEM_ID")
-		                                                     .itemVarId("RANDOM_ITEM_VAR_ID")
-									                         .productType(request.getProductType())
-									                         .costInCents(request.getCostInCents())
-									                         .isDeleted(false)
-									                      .build();
+		final BackendServiceResponseBody expected = BackendServiceResponseBody.builder()
+			                                                                .name(request.getName())
+			                                                                .itemId("RANDOM_ITEM_ID")
+			                                                                .itemVariationId("RANDOM_ITEM_VAR_ID")
+			                                                                .productType(request.getProductType())
+			                                                                .costInCents(request.getCostInCents())
+			                                                                .isDeleted(false)
+		                                                                .build();
 
-		when(service.postProduct(request)).thenReturn(expected);
+		when(backendService.postProduct(request)).thenReturn(expected);
 
-		ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
-		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-		ProductResponseBody response = getResponseData(responseEntity);
+		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
+		final ProductResponseBody response = checkAndGet(responseEntity);
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 	}
 
 	@Test
 	public void testManyPosts()
 	{
-		int numRequests = GoodPostRequests.POST_REQUESTS.length,
-			numResponses = ExpectedPostResponses.RESPONSES.length;
-		assertEquals("Mismatch between number of requests: " + numRequests
-		             + " and number of expected responses: " + numResponses, numRequests, numResponses);
+		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
+			// Mock
+			when(backendService.postProduct(GoodPostRequests.POST_REQUESTS[i]))
+					.thenReturn(ExpectedBackendServicePostResponses.RESPONSES[i]);
+
+			// Call controller
+			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.POST_REQUESTS[i]);
+			final ProductResponseBody response = checkAndGet(responseEntity);
+
+			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesPostRequest(GoodPostRequests.POST_REQUESTS[i],  ExpectedPostResponses.RESPONSES[i]));
+			           responseMatchesPostRequest(GoodPostRequests.POST_REQUESTS[i], response));
 		}
-	}
-
-
-	@Test
-	public void testPut()
-	{
-
-	}
-
-
-	@Test
-	public void testPatch()
-	{
-
 	}
 
 }
