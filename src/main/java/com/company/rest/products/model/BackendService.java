@@ -58,10 +58,10 @@ public class BackendService
 	{
 		// First, make a local check to ensure that there's no name clash for
 		// the product uploaded. This is one of the advantages of having a cache.
-		if(localRepo.findByName(request.getName()).isPresent())
+		if(localRepo.findByProductName(request.getName()).isPresent())
 		{
 			final ResourceAlreadyCreatedException exc = new ResourceAlreadyCreatedException();
-            logException(exc, this.getClass().getEnclosingMethod().getName());
+            logException(exc, this.getClass().getName() + "::postProduct");
             throw new BackendServiceException(exc, HttpStatus.CONFLICT);
 		}
 		else
@@ -71,12 +71,13 @@ public class BackendService
 			try
 			{
 				final SquareServiceResponseBody response = squareService.postProduct(request);
-				localRepo.save(LiteProduct.fromSquareResponse(response));
-				return BackendServiceResponseBody.fromSquareResponseBody(response);
+				localRepo.save(LiteProduct. buildLiteProduct(response, request.getClientProductId(), request.getProductType()));
+				return BackendServiceResponseBody.buildBackendResponseBody(response, request.getClientProductId(),
+				                                                           request.getProductType());
 			}
 			catch(SquareServiceException exc)
 			{
-				logException(exc, this.getClass().getEnclosingMethod().getName());
+				logException(exc, this.getClass().getName() + "::postProduct");
                 throw new BackendServiceException(exc, exc.getStatus());
 			}
 		}
@@ -90,24 +91,26 @@ public class BackendService
 	public BackendServiceResponseBody getProduct(String id) throws BackendServiceException
 	{
 		// Cheap check first; if the product doesn't exist, why go to Square API with the request?
-		final Optional<LiteProduct> cached = localRepo.findBySquareItemId(id);
+		final Optional<LiteProduct> cached = localRepo.findByClientProductId(id);
 		if(cached.isEmpty())
 		{
 			final ProductNotFoundException exc = new ProductNotFoundException(id);
-            logException(exc, this.getClass().getEnclosingMethod().getName());
+            logException(exc, this.getClass().getName() + "::getProduct");
             throw new BackendServiceException(exc, HttpStatus.NOT_FOUND);
 		}
 		else
 		{
 			try
 			{
-				final SquareServiceResponseBody response = squareService
-															.getProduct(id, cached.get().getSquareItemVariationId());
-				return BackendServiceResponseBody.fromSquareResponseBody(response);
+				final String squareItemId = cached.get().getSquareItemId();
+				final String squareItemVariationId = cached.get().getSquareItemVariationId();
+				final String productType = cached.get().getProductType();
+				final SquareServiceResponseBody response = squareService.getProduct(squareItemId, squareItemVariationId);
+				return BackendServiceResponseBody.buildBackendResponseBody(response, id, productType);
 			}
 			catch(SquareServiceException exc)
 			{
-				logException(exc, this.getClass().getEnclosingMethod().getName());
+				logException(exc, this.getClass().getName() + "::getProduct");
 				throw new BackendServiceException(exc, exc.getStatus());
 			}
 		}
@@ -117,7 +120,7 @@ public class BackendService
 	 * Serve a GET ALL request
 	 * @return A {@link BackendServiceResponseBody} instance.
 	 */
-	public List<BackendServiceResponseBody> getAllProducts(int page, int itemsInPage, String sortBy)
+	public List<BackendServiceResponseBody> getAllProducts(Integer page, Integer itemsInPage, String sortBy)
 	{
 		// Paginated and sorted output whether it is on Square
 		// or the cache.
@@ -131,7 +134,7 @@ public class BackendService
 		}
 		catch(Throwable t)
 		{
-			logException(t, this.getClass().getEnclosingMethod().getName());
+			logException(t, this.getClass().getName() + "::getAllProducts");
             throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

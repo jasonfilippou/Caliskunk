@@ -4,20 +4,20 @@ import com.company.rest.products.util.exceptions.SquareServiceException;
 import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
-import com.squareup.square.Environment;
-import com.squareup.square.SquareClient;
 import com.squareup.square.api.CatalogApi;
+import com.squareup.square.exceptions.ApiException;
 import com.squareup.square.models.*;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static com.company.rest.products.util.Util.*;
 
@@ -33,20 +33,25 @@ import static com.company.rest.products.util.Util.*;
 @Component
 public class SquareService
 {
-	public final static String PRICE_MODEL = "FIXED_PRICING";
-	public final static String CURRENCY = "USD";
-	public final static String CODE_FOR_CATALOG_ITEMS = "ITEM";
-	public final static String CODE_FOR_CATALOG_ITEM_VARIATIONS = "ITEM_VARIATION";
-	public final static Integer ABBRV_CHARS = 3;
-	public final static Integer SECONDS_TO_WAIT = 10;
-	public final static TimeUnit TIME_UNIT_USED = TimeUnit.SECONDS;
+	public static final String PRICE_MODEL = "FIXED_PRICING";
+	public static final String CURRENCY = "USD";
+	public static final String CODE_FOR_CATALOG_ITEMS = "ITEM";
+	public static final String CODE_FOR_CATALOG_ITEM_VARIATIONS = "ITEM_VARIATION";
+	public static final Integer ABBRV_CHARS = 3;
+	public static final Integer SECONDS_TO_WAIT = 10;
+	public static final TimeUnit TIME_UNIT_USED = TimeUnit.SECONDS;
+	public static final String DEFAULT_SQUARE_CATALOG_ITEM_TYPE = "REGULAR";
 
-	// Necessary objects to connect to API
-	private static final SquareClient client = new SquareClient.Builder()
-			.environment(Environment.SANDBOX)
-			.accessToken("123abe")
-			.build();
-	private static final CatalogApi catalogApi = client.getCatalogApi();
+	private final CatalogWrapper catalogWrapper;
+
+	/**
+	 * Constructor takes an autowired {@link CatalogWrapper} instance  as a parameter.
+	 */
+	@Autowired
+	public SquareService(final CatalogWrapper catalogWrapper)
+	{
+		this.catalogWrapper = catalogWrapper;
+	}
 
 
 	/**
@@ -56,7 +61,7 @@ public class SquareService
 	 * @param request A {@link ProductPostRequestBody} instance containing details of the request.
 	 * @throws SquareServiceException if any Exception is sent to us by Square.
 	 */
-	public SquareServiceResponseBody postProduct(ProductPostRequestBody request) throws SquareServiceException
+	public SquareServiceResponseBody postProduct(@NonNull final ProductPostRequestBody request) throws SquareServiceException
 	{
 
 		//  Create a CatalogItem and a CatalogItemVariation registered to that item.
@@ -73,14 +78,14 @@ public class SquareService
 		}
 		catch (Throwable t)
 		{
-			logException(t, this.getClass().getEnclosingMethod().getName());
+			logException(t, this.getClass().getName() + "postProduct");
 			throw new SquareServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return combine(itemResponse, itemVariationResponse);
 	}
 
-	private SquareServiceResponseBody combine(UpsertCatalogObjectResponse itemResponse,
-	                                          UpsertCatalogObjectResponse itemVariationResponse)
+	private SquareServiceResponseBody combine(@NonNull UpsertCatalogObjectResponse itemResponse,
+	                                          @NonNull UpsertCatalogObjectResponse itemVariationResponse)
 	{
 		final CatalogObject itemObject = itemResponse.getCatalogObject();
 		final CatalogObject itemVarObject = itemVariationResponse.getCatalogObject();
@@ -88,9 +93,10 @@ public class SquareService
 		final CatalogItemVariation itemVariationData = itemVariationResponse.getCatalogObject().getItemVariationData();
 
 		return SquareServiceResponseBody.builder()
+
 			                                // Pull some data from the CatalogObjects
-			                                .itemId(itemObject.getId())
-			                                .itemVariationId(itemVarObject.getId())
+			                                .squareItemId(itemObject.getId())
+			                                .squareItemVariationId(itemVarObject.getId())
 			                                .isDeleted(itemObject.getIsDeleted())
 			                                .presentAtAllLocations(itemObject.getPresentAtAllLocations())
 			                                .version(itemObject.getVersion())
@@ -104,48 +110,51 @@ public class SquareService
 			                                .categoryId(itemData.getCategoryId())
 			                                .description(itemData.getDescription())
 			                                .labelColor(itemData.getLabelColor())
-			                                .productType(itemData.getProductType())
+		                                    .taxIDs(itemData.getTaxIds())
 
-			                                // And from the CatalogItemVariation data.
+			                                // And from the CatalogItemVariation.
 			                                .costInCents(itemVariationData.getPriceMoney().getAmount())
+		                                    .sku(itemVariationData.getSku())
+		                                    .upc(itemVariationData.getUpc())
+
+
 		                                .build();
 	}
 
-	/* CatalogItem upsert request helpers */
+	/* ****************************** CatalogItem upsert request helpers  ****************************** */
 
-	// To avoid the warning about changing the lambda to a method reference.
-	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(ProductPostRequestBody request)
-													throws InterruptedException, ExecutionException, TimeoutException
+	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(@NonNull final ProductPostRequestBody request)
+																		throws  IOException, ApiException
 	{
 		final UpsertCatalogObjectRequest catalogItemUpsertRequest =  createCatalogItemUpsertRequest(request);
-		final UpsertCatalogObjectResponse response;
-		response = catalogApi.upsertCatalogObjectAsync(catalogItemUpsertRequest).get(SECONDS_TO_WAIT, TIME_UNIT_USED);
+		final UpsertCatalogObjectResponse response = catalogWrapper.upsertObject(catalogItemUpsertRequest);
 		log.info("New CatalogItem created on Square, with ID " + response.getCatalogObject().getId() + ".");
 		return response;
 	}
 
 
-	private  UpsertCatalogObjectRequest createCatalogItemUpsertRequest(ProductPostRequestBody request)
+	private  UpsertCatalogObjectRequest createCatalogItemUpsertRequest(@NonNull final ProductPostRequestBody request)
 	{
 		return new UpsertCatalogObjectRequest(UUID.randomUUID().toString(),
 		                                      createObjectFieldForCatalogItemUpsertRequest(request));
 	}
 
-	private  CatalogObject createObjectFieldForCatalogItemUpsertRequest(ProductPostRequestBody request)
+	private  CatalogObject createObjectFieldForCatalogItemUpsertRequest(@NonNull final ProductPostRequestBody request)
 	{
-		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, request.getName())
+		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, request.getClientProductId())
 									.itemData(createCatalogItem(request))
 								.build();
 	}
 
-	private CatalogItem createCatalogItem(ProductPostRequestBody request)
+	private CatalogItem createCatalogItem(@NonNull final ProductPostRequestBody request)
 	{
 		return new CatalogItem
 				.Builder()
 					.name(request.getName())
 					.abbreviation(abbreviate(request.getName(), ABBRV_CHARS))
 					.categoryId(request.getCategoryId())
-					.productType(request.getProductType())
+//					.productType(request.getProductType())  // TODO: Ensure that my correction below is appropriate
+					.productType(DEFAULT_SQUARE_CATALOG_ITEM_TYPE)
 					.description(request.getDescription())
 					.labelColor(request.getLabelColor())
 					.availableElectronically(request.getAvailableElectronically())
@@ -156,33 +165,34 @@ public class SquareService
 
 
 
-	/*  CatalogItemVariation upsert request helpers */
+	/* ************************* CatalogItemVariation upsert request helpers  ****************************** */
 
-	private  UpsertCatalogObjectResponse sendCatalogItemVariationUpsertRequest(ProductPostRequestBody request)
-											throws InterruptedException, ExecutionException, TimeoutException
+	private  UpsertCatalogObjectResponse sendCatalogItemVariationUpsertRequest(final ProductPostRequestBody request)
+															throws IOException, ApiException
+
 	{
 		final UpsertCatalogObjectRequest catalogItemVariationUpsertRequest =
 				createCatalogItemVariationUpsertRequest(request);
-		return catalogApi.upsertCatalogObjectAsync(catalogItemVariationUpsertRequest)
-		                                                 .get(SECONDS_TO_WAIT, TIME_UNIT_USED);
+		final UpsertCatalogObjectResponse response = catalogWrapper.upsertObject(catalogItemVariationUpsertRequest);
+		log.info("New CatalogItemVariation created on Square, with ID " + response.getCatalogObject().getId() + ".");
+		return response;
 	}
 
-	private  UpsertCatalogObjectRequest createCatalogItemVariationUpsertRequest(ProductPostRequestBody request)
+	private  UpsertCatalogObjectRequest createCatalogItemVariationUpsertRequest(final ProductPostRequestBody request)
 	{
 		return new UpsertCatalogObjectRequest(UUID.randomUUID().toString(),
 		                                      createObjectFieldForItemVariationUpsertRequest(request));
 	}
 
-	private  CatalogObject createObjectFieldForItemVariationUpsertRequest(ProductPostRequestBody request)
+	private  CatalogObject createObjectFieldForItemVariationUpsertRequest(final ProductPostRequestBody request)
 	{
 		return new CatalogObject
-				.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS,
-		                  request.getName())
+				.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS, "#RANDOM_ITEM_VAR_ID")
 					.itemVariationData(createCatalogItemVariation(request))
 				.build();
 	}
 
-	private  CatalogItemVariation createCatalogItemVariation(ProductPostRequestBody request)
+	private  CatalogItemVariation createCatalogItemVariation(final ProductPostRequestBody request)
 	{
 		return new CatalogItemVariation
 				.Builder()
@@ -197,25 +207,25 @@ public class SquareService
 
 	/**
 	 * Send a GET request for a specific product.
-	 * @param itemId The relevant {@link CatalogItem}'s unique ID on Square.
+	 * @param squareItemId The relevant {@link CatalogItem}'s unique ID on Square.
 	 * @param itemVarId The relevant {@link CatalogItemVariation}'s unique ID on Square.
 	 * @return A {@link ProductPostRequestBody} instance with the entire client-facing product data.
 	 * @throws SquareServiceException if Square sends an Exception.
 	 */
-	public SquareServiceResponseBody getProduct(String itemId, String itemVarId) throws SquareServiceException
+	public SquareServiceResponseBody getProduct(@NonNull final String squareItemId, @NonNull final String itemVarId)
+																				throws SquareServiceException
 	{
 		final Boolean INCLUDE_RELATED_OBJECTS = true;     // We will make use of the additional info returned later.
 		final BatchRetrieveCatalogObjectsRequest request =
 					new BatchRetrieveCatalogObjectsRequest
-						.Builder(Arrays.asList(itemId, itemVarId))
+						.Builder(Arrays.asList(squareItemId, itemVarId))
 							.includeRelatedObjects(INCLUDE_RELATED_OBJECTS)
 						.build();
 		try
 		{
-			final BatchRetrieveCatalogObjectsResponse response =
-					catalogApi.batchRetrieveCatalogObjectsAsync(request).get(SECONDS_TO_WAIT, TIME_UNIT_USED);
+			final BatchRetrieveCatalogObjectsResponse response = catalogWrapper.batchRetrieveObjects(request);
 			validateBatchRetrievalResponse(response);
-			CatalogObject[] itemAndVar = fetchItemAndVar(response.getObjects());
+			final CatalogObject[] itemAndVar = fetchItemAndVar(response.getObjects());
 			return SquareServiceResponseBody.fromSquareData(itemAndVar[0], itemAndVar[1]);
 		}
 		catch (Throwable t)
@@ -225,24 +235,23 @@ public class SquareService
 		}
 	}
 
-	private  void validateBatchRetrievalResponse(BatchRetrieveCatalogObjectsResponse response)
+	private  void validateBatchRetrievalResponse(final BatchRetrieveCatalogObjectsResponse response)
 	{
 		//  TODO: see if you can instead look for non-null pointers for object.getItemData()
 		//      or object.getItemVariationData(). It's a bit more efficient than comparing strings.
 		assertAndIfNotLogAndThrow(response.getObjects().size() == 2 &&
 		                          (response.getObjects()
-		                                   .stream()
-		                                   .allMatch(catalogObject ->
-			                                             catalogObject.getType().equals(CODE_FOR_CATALOG_ITEMS)
-	                                                                ||
-			                                             catalogObject.getType().equals(CODE_FOR_CATALOG_ITEM_VARIATIONS)
-		                                            ) //</allMatch>
-		                          ), //</response.getObjects()...>
-                    "Bad batch retrieval response received: " + response);
+	                                   .stream()
+	                                   .allMatch(catalogObject ->
+		                                             catalogObject.getType().equals(CODE_FOR_CATALOG_ITEMS)
+                                                                ||
+		                                             catalogObject.getType().equals(CODE_FOR_CATALOG_ITEM_VARIATIONS)
+	                                            )
+		                          ),"Bad batch retrieval response received: " + response);
 	}
 
 //
-	private CatalogObject[] fetchItemAndVar(List<CatalogObject> objects)
+	private CatalogObject[] fetchItemAndVar(final List<CatalogObject> objects)
 	{
 		final CatalogObject[] retVal = new CatalogObject[2];
 		final String badDataMsg =  "Bad CatalogObject data retrieved: " + objects;

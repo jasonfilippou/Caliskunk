@@ -15,6 +15,7 @@ public class ProductPostRequestBody implements Serializable
 	@JsonProperty("name")  @NonNull 	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
+	@JsonProperty("product_id") @NonNull private String clientProductId;
 	@JsonProperty("category_id")  private String categoryId;
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;

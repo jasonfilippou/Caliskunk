@@ -21,8 +21,9 @@ public class BackendServiceResponseBody implements Serializable
 	// For now this class is almost identical to SquareServiceResponseBody, in order for us
 	// to give a breadth of information to the user. However, this can change,
 	// so separate logic can be useful when refactoring.
-	@JsonProperty @NonNull private String itemId;
-	@JsonProperty @NonNull private String itemVariationId;
+	@JsonProperty("product_id") @NonNull private String clientProductId;    // Provided by client.
+	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
+	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
@@ -40,14 +41,16 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("tax_ids") private List<String> taxIDs;
 	@JsonProperty("updatedAt") private String updatedAt;
 
-	public static BackendServiceResponseBody fromSquareResponseBody(SquareServiceResponseBody squareResponse)
+	public static BackendServiceResponseBody buildBackendResponseBody(final SquareServiceResponseBody squareResponse,
+	                                                                  final String clientProductId,
+	                                                                  final String productType)
 	{
-		// Right now all it does is copy data over, but this can change in the future.
 		return builder()
-					.itemId(squareResponse.getItemId())
-					.itemVariationId(squareResponse.getItemVariationId())
+					.clientProductId(clientProductId)
+					.squareItemId(squareResponse.getSquareItemId())
+					.squareItemVariationId(squareResponse.getSquareItemVariationId())
 					.name(squareResponse.getName())
-					.productType(squareResponse.getProductType())
+					.productType(productType)
 					.costInCents(squareResponse.getCostInCents())
 					.categoryId(squareResponse.getCategoryId())
 					.description(squareResponse.getDescription())
@@ -72,8 +75,9 @@ public class BackendServiceResponseBody implements Serializable
 		return builder()
 					.name(product.getProductName())
 					.costInCents(product.getCostInCents())
-					.itemId(product.getSquareItemId())
-					.itemVariationId(product.getSquareItemVariationId())
+					.clientProductId(product.getClientProductId())
+					.squareItemId(product.getSquareItemId())
+					.squareItemVariationId(product.getSquareItemVariationId())
 					.productType(product.getProductType())
 				.build();
 	}

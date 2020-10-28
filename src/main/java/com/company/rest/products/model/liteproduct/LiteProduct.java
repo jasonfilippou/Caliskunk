@@ -19,11 +19,12 @@ import static com.company.rest.products.util.Util.logException;
 public class LiteProduct
 {
 	@Id
-	private String squareItemId;	        // Unique on Square
-	private String squareItemVariationId;	// Unique on Square
+	private String clientProductId;                  // Provided by user
+	private String squareItemId;	                // Provided by Square, guaranteed unique across all codes.
+	private String squareItemVariationId;	        // Unique on Square
 	private String productName;
-	private Long costInCents;
 	private String productType;
+	private Long costInCents;
 
 	 // Model the product types as a Hash Set in case we end up with several
 	 // and need fast retrieval. The types are uppercased by convention.
@@ -32,17 +33,19 @@ public class LiteProduct
 			                "TINCTURE", "PET", "ACCESSORY", "OTHER"));
 
 
-	public LiteProduct(@NonNull final String squareItemId, @NonNull final String squareItemVariationId,
-	                   @NonNull final String productName, @NonNull final Long costInCents, @NonNull final String productType)
+	public LiteProduct(@NonNull final String clientProductId, @NonNull final String squareItemId,
+	                   @NonNull final String squareItemVariationId, @NonNull final String productName,
+	                   @NonNull final String productType, @NonNull final Long costInCents)
 	{
 		if(!PRODUCT_TYPES.contains(productType))
 		{
 			InvalidProductTypeException exc = new InvalidProductTypeException(productType);
-			logException(exc, this.getClass().getEnclosingMethod().getName());
+			logException(exc, this.getClass().getName() + "::LiteProduct");
 			throw new InvalidProductTypeException(productType);
 		}
 		else
 		{
+			this.clientProductId = clientProductId;
 			this.productName = productName;
 			this.squareItemId = squareItemId;
 			this.squareItemVariationId = squareItemVariationId;
@@ -52,13 +55,15 @@ public class LiteProduct
 
 	/* Some static methods to create LiteProducts on the fly from various layer responses. */
 
-	public static LiteProduct fromSquareResponse(SquareServiceResponseBody response)
+	public static LiteProduct buildLiteProduct(@NonNull final SquareServiceResponseBody response, @NonNull final String id,
+	                                           @NonNull final String productType)
 	{
 			return LiteProduct.builder()
-								.squareItemId(response.getItemId())
-			                    .squareItemVariationId(response.getItemVariationId())
-								.productName(response.getName().toUpperCase().trim()) // Uppercasing name to make it case-insensitive
-								.productType(response.getProductType().toUpperCase().trim()) // Product types uppercased by convention
+			                    .clientProductId(id)
+								.squareItemId(response.getSquareItemId())
+			                    .squareItemVariationId(response.getSquareItemVariationId())
+								.productName(response.getName().trim().toUpperCase()) // Uppercasing name to make it case-insensitive
+								.productType(productType.trim().toUpperCase()) // Product types uppercased by convention
 								.costInCents(response.getCostInCents())
                               .build();
 	}

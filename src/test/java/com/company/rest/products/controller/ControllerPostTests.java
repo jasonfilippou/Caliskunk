@@ -10,9 +10,9 @@ import com.company.rest.products.util.json_objects.ProductResponseBody;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -32,10 +32,10 @@ public class ControllerPostTests
 	/* ************************************ Fields and utilities ************************************************** */
 	/* *********************************************************************************************************** */
 
-	@Autowired
+	@InjectMocks
 	private ProductController controller; // The class we are testing
 
-	@MockBean
+	@Mock
 	private BackendService backendService;     // The class that will be mocked
 
 
@@ -48,34 +48,31 @@ public class ControllerPostTests
 				postRequestBody.getName().equals(responseBody.getName()) &&
 				postRequestBody.getProductType().equals(responseBody.getProductType()) &&
 				postRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
+				postRequestBody.getClientProductId().equals(responseBody.getClientProductId()) &&
 
 				// Subsequent fields that may or may not have been provided, so we
 				// use an Optional to protect ourselves against NPEs:
-				ofNullable(postRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically()) ) &&
-				ofNullable(postRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup()) ) &&
-				ofNullable(postRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline()) ) &&
-				ofNullable(postRequestBody.getCategoryId()).equals(ofNullable(responseBody.getCategoryId()) ) &&
-				ofNullable(postRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor()) ) &&
-				ofNullable(postRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription()) ) &&
-				ofNullable(postRequestBody.getSku()).equals(ofNullable(responseBody.getSku()) ) &&
+				ofNullable(postRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically())) &&
+				ofNullable(postRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup())) &&
+				ofNullable(postRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline())) &&
+				ofNullable(postRequestBody.getCategoryId()).equals(ofNullable(responseBody.getCategoryId())) &&
+				ofNullable(postRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
+				ofNullable(postRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription())) &&
+				ofNullable(postRequestBody.getSku()).equals(ofNullable(responseBody.getSku())) &&
 				ofNullable(postRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc())) &&
 
 				// Let us also ensure that the POST didn't trip the object's deletion flag:
-				! responseBody.getIsDeleted()  &&
-
-				// And make sure that the backend returned some kind of tangible ID for the item
-
-				( responseBody.getItemId() != null ) ;
+				responseBody.getIsDeleted() == null || !responseBody.getIsDeleted();
 	}
 
-	private ProductResponseBody checkAndGet(ResponseEntity<ResponseMessage> responseEntity)
+	private ProductResponseBody checkAndGet(final ResponseEntity<ResponseMessage> responseEntity)
 	{
 		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
 		return getResponseData(responseEntity);
 	}
 
 
-	private ProductResponseBody getResponseData(ResponseEntity<ResponseMessage> responseEntity)
+	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
 	{
 		return (ProductResponseBody) Objects.requireNonNull(responseEntity.getBody()).getData();
 	}
@@ -91,19 +88,39 @@ public class ControllerPostTests
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
-														.costInCents(600L) // 'L for long literal
+														.clientProductId("RANDOM_ID")
+														.costInCents(10000L) // 'L for long literal
+														.description("Will eat your face.")
+														.labelColor("7FFFD4")
+														.upc("RANDOM_UPC")
+														.sku("RANDOM_SKU")
+														.availableOnline(true)
+														.availableElectronically(true) // Whatever that means
+														.availableForPickup(true)
+														.categoryId("ITEMS")
 													.build();
 
-		final BackendServiceResponseBody expected = BackendServiceResponseBody.builder()
-			                                                                .name(request.getName())
-			                                                                .itemId("RANDOM_ITEM_ID")
-			                                                                .itemVariationId("RANDOM_ITEM_VAR_ID")
-			                                                                .productType(request.getProductType())
-			                                                                .costInCents(request.getCostInCents())
-			                                                                .isDeleted(false)
-		                                                                .build();
+		final BackendServiceResponseBody preparedResponse = BackendServiceResponseBody
+														.builder()
+	                                                        .name(request.getName())
+	                                                        .clientProductId(request.getClientProductId())
+															.squareItemId("RANDOM_SQUARE_ITEM_ID")
+	                                                        .squareItemVariationId("RANDOM_SQUARE_ITEM_VAR_ID")
+	                                                        .productType(request.getProductType())
+	                                                        .costInCents(request.getCostInCents())
+	                                                        .availableElectronically(request.getAvailableElectronically())
+															.availableForPickup(request.getAvailableForPickup())
+															.availableOnline(request.getAvailableOnline())
+															.isDeleted(false)
+															.sku(request.getSku())
+															.upc(request.getUpc())
+															.categoryId(request.getCategoryId())
+															.description(request.getDescription())
+															.labelColor(request.getLabelColor())
+															.presentAtAllLocations(true)
+                                                          .build();
 
-		when(backendService.postProduct(request)).thenReturn(expected);
+		when(backendService.postProduct(request)).thenReturn(preparedResponse);
 
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
 		final ProductResponseBody response = checkAndGet(responseEntity);

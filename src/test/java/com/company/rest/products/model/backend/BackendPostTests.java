@@ -16,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -56,6 +55,7 @@ public class BackendPostTests
 				postRequestBody.getName().equals(responseBody.getName()) &&
 				postRequestBody.getProductType().equals(responseBody.getProductType()) &&
 				postRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
+				postRequestBody.getClientProductId().equals(responseBody.getClientProductId()) &&
 
 				// Subsequent fields that may or may not have been provided, so we
 				// use an Optional to protect ourselves against NPEs:
@@ -69,14 +69,9 @@ public class BackendPostTests
 				ofNullable(postRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc())) &&
 
 				// Let us also ensure that the POST didn't trip the object's deletion flag:
-				! responseBody.getIsDeleted()   &&
+				(responseBody.getIsDeleted() == null) || (!responseBody.getIsDeleted());
 
-				// And make sure that the backend returned some kind of tangible ID
-				// for BOTH item _and_ item variation...
-
-				( responseBody.getItemId() != null ) &&
-				( responseBody.getItemVariationId() != null );
-	}
+		}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
@@ -89,23 +84,32 @@ public class BackendPostTests
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
-														.costInCents(600L) // 'L for long literal
+														.clientProductId("RANDOM_ID")
+														.costInCents(10000L) // 'L for long literal
+														.description("Will eat your face.")
+														.labelColor("7FFFD4")
+														.upc("RANDOM_UPC")
+														.sku("RANDOM_SKU")
+														.availableOnline(true)
+														.availableElectronically(true) // Whatever that means
+														.availableForPickup(true)
+														.categoryId("ITEMS")
 													.build();
 
-		final SquareServiceResponseBody expected = SquareServiceResponseBody.builder()
+		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
+																	.builder()
 						                                                  .name(request.getName())
-						                                                  .itemId("RANDOM_ITEM_ID")
-						                                                  .itemVariationId("RANDOM_ITEM_VAR_ID")
-						                                                  .productType(request.getProductType())
+						                                                  .squareItemId("RANDOM_ITEM_ID")
+						                                                  .squareItemVariationId("RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(request.getCostInCents())
 						                                                  .isDeleted(false)
 		                                                             .build();
 
-		when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn(expected);
-		final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(expected);
+		when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn(preparedResponse);
+		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProduct(preparedResponse, request.getClientProductId(),
+		                                                                   request.getProductType());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
-
-		BackendServiceResponseBody response = backendService.postProduct(request);
+		final BackendServiceResponseBody response = backendService.postProduct(request);
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 	}
 
@@ -116,7 +120,7 @@ public class BackendPostTests
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Mock
-			when(squareService.postProduct(GoodPostRequests.POST_REQUESTS[i]))
+			when(squareService.postProduct(any(ProductPostRequestBody.class)))
 					.thenReturn(ExpectedSquareServicePostResponses.RESPONSES[i]);
 
 			// Call backend service

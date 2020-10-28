@@ -15,7 +15,7 @@ public class ProductResponseBody implements Serializable
 	// For now this class is almost identical to BackendServiceResponseBody, in order for us
 	// to give a breadth of information to the user. However, this can change,
 	// so separate logic can be useful when refactoring.
-	@JsonProperty("item_id") @NonNull private String itemId;    // User doesn't need square IDs, just the one he gave us.
+	@JsonProperty("product_id") @NonNull private String clientProductId;    // Provided by client.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
@@ -33,12 +33,12 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("tax_ids") private List<String> taxIDs;
 	@JsonProperty("updatedAt") private String updatedAt;
 
-	public static ProductResponseBody fromBackendResponseBody(BackendServiceResponseBody backendResponse)
+	public static ProductResponseBody fromBackendResponseBody(final BackendServiceResponseBody backendResponse)
 	{
 		// Right now all it does is copy data over, but this can change in the future.
 
 		return builder()
-					.itemId(backendResponse.getItemId())
+					.clientProductId(backendResponse.getClientProductId())
 					.name(backendResponse.getName())
 					.productType(backendResponse.getProductType())
 					.costInCents(backendResponse.getCostInCents())
