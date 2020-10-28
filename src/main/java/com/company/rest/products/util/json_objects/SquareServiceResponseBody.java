@@ -18,10 +18,9 @@ import java.util.List;
 @Builder(access = AccessLevel.PUBLIC)
 public class SquareServiceResponseBody implements Serializable
 {
-	@JsonProperty("item_id") @NonNull private String itemId;         // CatalogItem contained in Square.
-	@JsonProperty("item_variation_id") @NonNull private String itemVariationId; // The variation the Item is tied with.
+	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
+	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
 	@JsonProperty("name")  @NonNull	private String name;
-	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
 	@JsonProperty("category_id")  private String categoryId;
 	@JsonProperty("description")  private String description;
@@ -38,16 +37,17 @@ public class SquareServiceResponseBody implements Serializable
 	@JsonProperty("updatedAt") private String updatedAt;
 
 
-	public static SquareServiceResponseBody fromSquareData(@NonNull CatalogObject itemObject,
-	                                                       @NonNull CatalogObject itemVarObject)
+	public static SquareServiceResponseBody fromSquareData(@NonNull final CatalogObject itemObject,
+	                                                       @NonNull final CatalogObject itemVarObject)
 	{
 		@NonNull final CatalogItem item = itemObject.getItemData();
 		@NonNull final CatalogItemVariation variation = itemVarObject.getItemVariationData();
 
 		return SquareServiceResponseBody
 						.builder()
+
 							// Data contained in the CatalogObject instance
-							.itemId(itemObject.getId())
+							.squareItemId(itemObject.getId())
 							.updatedAt(itemObject.getUpdatedAt())
 							.isDeleted(itemObject.getIsDeleted())
 							.presentAtAllLocations(itemObject.getPresentAtAllLocations())
@@ -61,9 +61,10 @@ public class SquareServiceResponseBody implements Serializable
 							.availableOnline(item.getAvailableOnline())
 							.categoryId(item.getCategoryId())
 							.labelColor(item.getLabelColor())
-							.productType(item.getProductType())
+
 
 							// Data pulled from CatalogItemVariation instance
+							.squareItemVariationId(itemVarObject.getId())
 							.costInCents(variation.getPriceMoney().getAmount())
 							.sku(variation.getSku())
 							.upc(variation.getUpc())

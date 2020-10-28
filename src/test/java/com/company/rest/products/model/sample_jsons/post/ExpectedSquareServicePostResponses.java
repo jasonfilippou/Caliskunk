@@ -3,8 +3,6 @@ package com.company.rest.products.model.sample_jsons.post;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
 
-import java.util.ArrayList;
-
 public class ExpectedSquareServicePostResponses
 {
 	public static final SquareServiceResponseBody[] RESPONSES = buildExpectedResponses();
@@ -24,8 +22,8 @@ public class ExpectedSquareServicePostResponses
 	{
 		return SquareServiceResponseBody.builder()
 		                            .name(request.getName())
-		                            .itemId("random_id")
-		                            .itemVariationId("random_var_id")
+	                                .squareItemId("RANDOM_ITEM_ID")
+		                            .squareItemVariationId("random_var_id")
 		                            .isDeleted(false)
 		                            .costInCents(request.getCostInCents())
 		                            .labelColor(request.getLabelColor())
@@ -35,12 +33,8 @@ public class ExpectedSquareServicePostResponses
 		                            .availableOnline(request.getAvailableOnline())
 		                            .description(request.getDescription())
 		                            .categoryId(request.getCategoryId())
-		                            .productType(request.getProductType())
 		                            .sku(request.getSku())
 		                            .upc(request.getUpc())
-		                            .taxIDs(new ArrayList<>())
-		                            .updatedAt("Whenever")
-		                            .version(0L)    // Random version
 		                          .build();
 	}
 }

@@ -3,7 +3,7 @@ package com.company.rest.products.model.sample_jsons.post;
 import com.company.rest.products.util.json_objects.ProductPostRequestBody;
 import com.company.rest.products.util.json_objects.ProductResponseBody;
 
-import java.util.ArrayList;
+import static com.company.rest.products.model.SquareService.DEFAULT_SQUARE_CATALOG_ITEM_TYPE;
 
 /* Questionable whether this class is useful. */
 public class ExpectedControllerPostResponses
@@ -26,7 +26,7 @@ public class ExpectedControllerPostResponses
 	{
 		return ProductResponseBody.builder()
 		                            .name(request.getName())
-		                            .itemId("random_id")
+		                            .clientProductId(request.getClientProductId())
 		                            .isDeleted(false)
 		                            .costInCents(request.getCostInCents())
 		                            .labelColor(request.getLabelColor())
@@ -36,10 +36,9 @@ public class ExpectedControllerPostResponses
 		                            .availableOnline(request.getAvailableOnline())
 		                            .description(request.getDescription())
 		                            .categoryId(request.getCategoryId())
-		                            .productType(request.getProductType())
+		                            .productType(DEFAULT_SQUARE_CATALOG_ITEM_TYPE)
 		                            .sku(request.getSku())
 		                            .upc(request.getUpc())
-		                            .taxIDs(new ArrayList<>())
 		                          .build();
 	}
 }

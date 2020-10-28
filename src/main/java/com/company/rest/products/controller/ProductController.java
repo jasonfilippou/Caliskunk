@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import static com.company.rest.products.util.Util.logException;
 
@@ -25,6 +26,9 @@ import static com.company.rest.products.util.Util.logException;
 public class ProductController
 {
 	private final BackendService backendService;
+	public static final Integer DEFAULT_PAGE_SIZE = 10;
+	public static final Integer DEFAULT_PAGE_IDX = 0;
+	public 	static final String SORT_BY = "costInCents";
 
 	@Autowired
 	public ProductController(final BackendService backendService)
@@ -63,10 +67,14 @@ public class ProductController
 	/* *************************************************************************************** */
 
 	@GetMapping(value = "/products")
-	public ResponseEntity<ResponseMessage> getAll(@PathVariable(required = false) int page,
-	                                              @PathVariable(required = false) int itemsInPage, String sortBy)
+	public ResponseEntity<ResponseMessage> getAll(@PathVariable(required = false, name = "page") Integer page,
+	                                              @PathVariable(required = false, name="items_in_page") Integer itemsInPage,
+	                                              @PathVariable(required = false, name = "sort_by") String sortBy)
 	{
-		if(page < 0 && itemsInPage < 0)
+		if(page == null) page = DEFAULT_PAGE_IDX;
+		if(itemsInPage == null)	itemsInPage = DEFAULT_PAGE_SIZE;
+		if(sortBy == null) sortBy = "costInCents";
+		if((page < 0) || (itemsInPage < 1)) // Autoboxed
 		{
 			log.error("Received a bad GET ALL request (page=" +page +", itemsInPage = " + itemsInPage + ".");
 			return failure("Please provide non-negative page and items per page parameters", HttpStatus.BAD_REQUEST);
@@ -76,11 +84,12 @@ public class ProductController
 			return success("Successfully retrieved all products!",
 			               backendService.getAllProducts(page, itemsInPage, sortBy)
 			                             .parallelStream()
-			                             .map(ProductResponseBody::fromBackendResponseBody));
+			                             .map(ProductResponseBody::fromBackendResponseBody)
+			                             .collect(Collectors.toList()));
 		}
 		catch(BackendServiceException exc)
 		{
-			logException(exc, this.getClass().getEnclosingMethod().getName());
+			logException(exc, this.getClass().getName() + "::getAll");
 			return failure(exc, exc.getStatus());
 		}
 	}
@@ -88,7 +97,7 @@ public class ProductController
 	@PostMapping(value = "/products")
 	public ResponseEntity<ResponseMessage> postProduct(@RequestBody ProductPostRequestBody request)
 	{
-		if(!LiteProduct.PRODUCT_TYPES.contains(request.getProductType().toUpperCase()))
+		if(!LiteProduct.PRODUCT_TYPES.contains(request.getProductType().trim().toUpperCase()))
 		{
 			log.error("Received a bad product type; accepted product types are: " +
 			          String.join("", LiteProduct.PRODUCT_TYPES));
@@ -106,12 +115,13 @@ public class ProductController
 			try
 			{
 				final BackendServiceResponseBody backendResponse = backendService.postProduct(request);
-				final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
+				final ProductResponseBody productResponse = ProductResponseBody
+																.fromBackendResponseBody(backendResponse);
 				return success("Successfully posted product!", productResponse);
 			}
 			catch (BackendServiceException exc)
 			{
-				logException(exc, this.getClass().getEnclosingMethod().getName());
+				logException(exc, this.getClass().getName() + "::postProduct");
 				return failure(exc, exc.getStatus());
 			}
 		}
@@ -122,7 +132,7 @@ public class ProductController
 	/* *************************************************************************************** */
 
 	@GetMapping("/product/{id}")
-	public ResponseEntity<ResponseMessage> getProduct(@PathVariable String id)
+	public ResponseEntity<ResponseMessage> getProduct(@PathVariable("id") String id)
 	{
 		try
 		{
@@ -146,7 +156,7 @@ public class ProductController
 
 	@PutMapping("/products/{id}")
 	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductPostRequestBody request,
-	                                         @PathVariable Long id)
+	                                         @PathVariable("id") String id)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
@@ -157,7 +167,7 @@ public class ProductController
 
 	@PatchMapping("/products/{id}")
 	public ResponseEntity<ResponseMessage> patchProduct(@RequestBody ProductPostRequestBody request,
-	                                         @PathVariable Long id)
+	                                         @PathVariable("id") String id)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
