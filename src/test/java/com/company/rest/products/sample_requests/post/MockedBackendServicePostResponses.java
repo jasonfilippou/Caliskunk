@@ -1,24 +1,24 @@
-package com.company.rest.products.model.sample_jsons.post;
+package com.company.rest.products.sample_requests.post;
 
-import com.company.rest.products.util.json_objects.BackendServiceResponseBody;
-import com.company.rest.products.util.json_objects.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 
-public class ExpectedBackendServicePostResponses
+public class MockedBackendServicePostResponses
 {
-	public static final BackendServiceResponseBody[] RESPONSES = buildExpectedResponses();
+	public static final BackendServiceResponseBody[] RESPONSES = buildMockedResponses();
 
-	private static BackendServiceResponseBody[] buildExpectedResponses()
+	private static BackendServiceResponseBody[] buildMockedResponses()
 	{
 		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
 		BackendServiceResponseBody[] retVal = new BackendServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
-			retVal[i] = expectedResponse(GoodPostRequests.POST_REQUESTS[i]);
+			retVal[i] = mockedResponse(GoodPostRequests.POST_REQUESTS[i]);
 		}
 		return retVal;
 	}
 
-	private static BackendServiceResponseBody expectedResponse(ProductPostRequestBody request)
+	private static BackendServiceResponseBody mockedResponse(ProductPostRequestBody request)
 	{
 		return BackendServiceResponseBody.builder()
 			                                 .name(request.getName())
@@ -33,7 +33,6 @@ public class ExpectedBackendServicePostResponses
 			                                 .availableForPickup(request.getAvailableForPickup())
 			                                 .availableOnline(request.getAvailableOnline())
 			                                 .description(request.getDescription())
-			                                 .categoryId(request.getCategoryId())
 			                                 .productType(request.getProductType())
 			                                 .sku(request.getSku())
 			                                 .upc(request.getUpc())

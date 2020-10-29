@@ -2,10 +2,9 @@ package com.company.rest.products.model;
 
 import com.company.rest.products.util.exceptions.SquareServiceException;
 import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
-import com.company.rest.products.util.json_objects.ProductPostRequestBody;
-import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.api.CatalogApi;
-import com.squareup.square.exceptions.ApiException;
 import com.squareup.square.models.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static com.company.rest.products.util.Util.*;
@@ -74,11 +73,11 @@ public class SquareService
 		try
 		{
 			itemResponse = sendCatalogItemUpsertRequest(request);
-			itemVariationResponse = sendCatalogItemVariationUpsertRequest(request);
+			itemVariationResponse = sendCatalogItemVariationUpsertRequest(request, itemResponse.getCatalogObject().getId());
 		}
 		catch (Throwable t)
 		{
-			logException(t, this.getClass().getName() + "postProduct");
+			logException(t, this.getClass().getName() + "::postProduct");
 			throw new SquareServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return combine(itemResponse, itemVariationResponse);
@@ -107,7 +106,6 @@ public class SquareService
 			                                .availableElectronically(itemData.getAvailableElectronically())
 			                                .availableForPickup(itemData.getAvailableForPickup())
 			                                .availableOnline(itemData.getAvailableOnline())
-			                                .categoryId(itemData.getCategoryId())
 			                                .description(itemData.getDescription())
 			                                .labelColor(itemData.getLabelColor())
 		                                    .taxIDs(itemData.getTaxIds())
@@ -117,14 +115,13 @@ public class SquareService
 		                                    .sku(itemVariationData.getSku())
 		                                    .upc(itemVariationData.getUpc())
 
-
 		                                .build();
 	}
 
 	/* ****************************** CatalogItem upsert request helpers  ****************************** */
 
 	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(@NonNull final ProductPostRequestBody request)
-																		throws  IOException, ApiException
+																		throws  ExecutionException, InterruptedException
 	{
 		final UpsertCatalogObjectRequest catalogItemUpsertRequest =  createCatalogItemUpsertRequest(request);
 		final UpsertCatalogObjectResponse response = catalogWrapper.upsertObject(catalogItemUpsertRequest);
@@ -152,8 +149,6 @@ public class SquareService
 				.Builder()
 					.name(request.getName())
 					.abbreviation(abbreviate(request.getName(), ABBRV_CHARS))
-					.categoryId(request.getCategoryId())
-//					.productType(request.getProductType())  // TODO: Ensure that my correction below is appropriate
 					.productType(DEFAULT_SQUARE_CATALOG_ITEM_TYPE)
 					.description(request.getDescription())
 					.labelColor(request.getLabelColor())
@@ -167,36 +162,34 @@ public class SquareService
 
 	/* ************************* CatalogItemVariation upsert request helpers  ****************************** */
 
-	private  UpsertCatalogObjectResponse sendCatalogItemVariationUpsertRequest(final ProductPostRequestBody request)
-															throws IOException, ApiException
-
+	private  UpsertCatalogObjectResponse sendCatalogItemVariationUpsertRequest(final ProductPostRequestBody request, String id)
+															throws ExecutionException, InterruptedException
 	{
-		final UpsertCatalogObjectRequest catalogItemVariationUpsertRequest =
-				createCatalogItemVariationUpsertRequest(request);
+		final UpsertCatalogObjectRequest catalogItemVariationUpsertRequest = createCatalogItemVariationUpsertRequest(request, id);
 		final UpsertCatalogObjectResponse response = catalogWrapper.upsertObject(catalogItemVariationUpsertRequest);
 		log.info("New CatalogItemVariation created on Square, with ID " + response.getCatalogObject().getId() + ".");
 		return response;
 	}
 
-	private  UpsertCatalogObjectRequest createCatalogItemVariationUpsertRequest(final ProductPostRequestBody request)
+	private  UpsertCatalogObjectRequest createCatalogItemVariationUpsertRequest(final ProductPostRequestBody request, String id)
 	{
 		return new UpsertCatalogObjectRequest(UUID.randomUUID().toString(),
-		                                      createObjectFieldForItemVariationUpsertRequest(request));
+		                                      createObjectFieldForItemVariationUpsertRequest(request, id));
 	}
 
-	private  CatalogObject createObjectFieldForItemVariationUpsertRequest(final ProductPostRequestBody request)
+	private  CatalogObject createObjectFieldForItemVariationUpsertRequest(final ProductPostRequestBody request, String id)
 	{
 		return new CatalogObject
 				.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS, "#RANDOM_ITEM_VAR_ID")
-					.itemVariationData(createCatalogItemVariation(request))
+					.itemVariationData(createCatalogItemVariation(request, id))
 				.build();
 	}
 
-	private  CatalogItemVariation createCatalogItemVariation(final ProductPostRequestBody request)
+	private  CatalogItemVariation createCatalogItemVariation(final ProductPostRequestBody request, String id)
 	{
 		return new CatalogItemVariation
 				.Builder()
-					.itemId(request.getName())
+					.itemId(id)
 					.name(request.getName())
 					.sku(request.getSku())
 					.upc(request.getUpc())

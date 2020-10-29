@@ -3,10 +3,9 @@ package com.company.rest.products.model.square;
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.model.sample_jsons.post.GoodPostRequests;
-import com.company.rest.products.util.json_objects.ProductPostRequestBody;
-import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
-import com.squareup.square.exceptions.ApiException;
+import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +19,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
@@ -57,7 +56,6 @@ public class SquarePostTests
 		       	ofNullable(request.getAvailableElectronically()).equals(ofNullable(response.getAvailableElectronically())) &&
 				ofNullable(request.getAvailableForPickup()).equals(ofNullable(response.getAvailableForPickup())) &&
 				ofNullable(request.getAvailableOnline()).equals(ofNullable(response.getAvailableOnline())) &&
-				ofNullable(request.getCategoryId()).equals(ofNullable(response.getCategoryId())) &&
 				ofNullable(request.getLabelColor()).equals(ofNullable(response.getLabelColor())) &&
 				ofNullable(request.getDescription()).equals(ofNullable(response.getDescription())) &&
 				ofNullable(request.getSku()).equals(ofNullable(response.getSku())) &&
@@ -73,8 +71,11 @@ public class SquarePostTests
 	/* *********************************************************************************************************** */
 
 	@Before
-    public void setUp() throws IOException, ApiException
+    public void setUp() throws ExecutionException, InterruptedException
 	{
+
+		// Uncomment the following if you want to mock the CatalogWrapper calls.
+
 		//  I need a way to return different kinds of expected responses depending on the arguments
 		// of the methods that are being mocked. The following trick owed to:
 		// https://stackoverflow.com/questions/22338536/mockito-return-value-based-on-property-of-a-parameter
@@ -126,26 +127,13 @@ public class SquarePostTests
     }
 
 	@Test
-	public void testUpsertCatalogItem()
-	{
-
-	}
-
-
-	@Test
-	public void testUpsertCatalogItemVariation()
-	{
-
-	}
-
-	@Test
 	public void testOnePost()
 	{
 		final ProductPostRequestBody request = ProductPostRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
-														.clientProductId("RANDOM_ID")
+														.clientProductId("#RANDOM_ITEM_ID")
 														.costInCents(10000L) // 'L for long literal
 														.description("Will eat your face.")
 														.labelColor("7FFFD4")
@@ -154,7 +142,6 @@ public class SquarePostTests
 														.availableOnline(true)
 														.availableElectronically(true) // Whatever that means
 														.availableForPickup(true)
-														.categoryId("ITEMS")
 													.build();
 		// catalog calls already mocked by setUp(); we can just call the method we want to debug.
 		final SquareServiceResponseBody response = squareService.postProduct(request);

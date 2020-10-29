@@ -1,24 +1,24 @@
-package com.company.rest.products.model.sample_jsons.post;
+package com.company.rest.products.sample_requests.post;
 
-import com.company.rest.products.util.json_objects.ProductPostRequestBody;
-import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 
-public class ExpectedSquareServicePostResponses
+public class MockedSquareServicePostResponses
 {
-	public static final SquareServiceResponseBody[] RESPONSES = buildExpectedResponses();
+	public static final SquareServiceResponseBody[] RESPONSES = buildMockedResponses();
 
-	private static SquareServiceResponseBody[] buildExpectedResponses()
+	private static SquareServiceResponseBody[] buildMockedResponses()
 	{
 		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
 		SquareServiceResponseBody[] retVal = new SquareServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
-			retVal[i] = expectedResponse(GoodPostRequests.POST_REQUESTS[i]);
+			retVal[i] = mockedResponse(GoodPostRequests.POST_REQUESTS[i]);
 		}
 		return retVal;
 	}
 
-	private static SquareServiceResponseBody expectedResponse(ProductPostRequestBody request)
+	private static SquareServiceResponseBody mockedResponse(ProductPostRequestBody request)
 	{
 		return SquareServiceResponseBody.builder()
 		                            .name(request.getName())
@@ -32,7 +32,6 @@ public class ExpectedSquareServicePostResponses
 		                            .availableForPickup(request.getAvailableForPickup())
 		                            .availableOnline(request.getAvailableOnline())
 		                            .description(request.getDescription())
-		                            .categoryId(request.getCategoryId())
 		                            .sku(request.getSku())
 		                            .upc(request.getUpc())
 		                          .build();

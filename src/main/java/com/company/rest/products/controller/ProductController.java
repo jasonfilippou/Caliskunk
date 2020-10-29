@@ -5,9 +5,9 @@ import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.exceptions.BackendServiceException;
 import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
-import com.company.rest.products.util.json_objects.BackendServiceResponseBody;
-import com.company.rest.products.util.json_objects.ProductPostRequestBody;
-import com.company.rest.products.util.json_objects.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -154,7 +154,7 @@ public class ProductController
 	/* *************************************************************************************** */
 
 
-	@PutMapping("/products/{id}")
+	@PutMapping("/product/{id}")
 	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductPostRequestBody request,
 	                                         @PathVariable("id") String id)
 	{
@@ -165,7 +165,7 @@ public class ProductController
 	/* *************************************** PATCH ***************************************** */
 	/* *************************************************************************************** */
 
-	@PatchMapping("/products/{id}")
+	@PatchMapping("/product/{id}")
 	public ResponseEntity<ResponseMessage> patchProduct(@RequestBody ProductPostRequestBody request,
 	                                         @PathVariable("id") String id)
 	{
@@ -176,7 +176,7 @@ public class ProductController
 	/* *************************************** DELETE ***************************************** */
 	/* *************************************************************************************** */
 
-	@DeleteMapping("/products/{id}")
+	@DeleteMapping("/product/{id}")
 	public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id)
 	{
 		throw new UnimplementedMethodPlaceholder();

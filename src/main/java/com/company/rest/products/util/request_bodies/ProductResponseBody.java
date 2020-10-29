@@ -1,15 +1,13 @@
-package com.company.rest.products.util.json_objects;
+package com.company.rest.products.util.request_bodies;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
 @Data
 @Builder(access = AccessLevel.PUBLIC)
+//@AllArgsConstructor
 public class ProductResponseBody implements Serializable
 {
 	// For now this class is almost identical to BackendServiceResponseBody, in order for us
@@ -18,7 +16,7 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("product_id") @NonNull private String clientProductId;    // Provided by client.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
-	@JsonProperty("cost")  @NonNull private Long costInCents;
+	@JsonProperty("cost_in_cents")  @NonNull private Long costInCents;
 	@JsonProperty("category_id")  private String categoryId;
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;

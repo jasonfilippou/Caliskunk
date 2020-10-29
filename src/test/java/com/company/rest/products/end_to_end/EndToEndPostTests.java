@@ -1,17 +1,14 @@
-package com.company.rest.products.controller;
+package com.company.rest.products.end_to_end;
 
-import com.company.rest.products.model.BackendService;
-import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
+import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.sample_requests.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
-import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,23 +19,18 @@ import java.util.Objects;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ControllerPostTests
+public class EndToEndPostTests
 {
 
 	/* *********************************************************************************************************** */
 	/* ************************************ Fields and utilities ************************************************** */
 	/* *********************************************************************************************************** */
 
-	@InjectMocks
-	private ProductController controller; // The class we are testing
-
-	@Mock
-	private BackendService backendService;     // The class that will be mocked
-
+	@Autowired
+	private ProductController controller;
 
 	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
@@ -64,7 +56,7 @@ public class ControllerPostTests
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
-	private ProductResponseBody checkAndGet(final ResponseEntity<ResponseMessage> responseEntity)
+	private ProductResponseBody getAndCheckResponse(final ResponseEntity<ResponseMessage> responseEntity)
 	{
 		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
 		return getResponseData(responseEntity);
@@ -98,29 +90,8 @@ public class ControllerPostTests
 														.availableForPickup(true)
 													.build();
 
-		final BackendServiceResponseBody preparedResponse = BackendServiceResponseBody
-														.builder()
-	                                                        .name(request.getName())
-	                                                        .clientProductId(request.getClientProductId())
-															.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-	                                                        .squareItemVariationId("#RANDOM_SQUARE_ITEM_VAR_ID")
-	                                                        .productType(request.getProductType())
-	                                                        .costInCents(request.getCostInCents())
-	                                                        .availableElectronically(request.getAvailableElectronically())
-															.availableForPickup(request.getAvailableForPickup())
-															.availableOnline(request.getAvailableOnline())
-															.isDeleted(false)
-															.sku(request.getSku())
-															.upc(request.getUpc())
-															.description(request.getDescription())
-															.labelColor(request.getLabelColor())
-															.presentAtAllLocations(true)
-                                                          .build();
-
-		when(backendService.postProduct(request)).thenReturn(preparedResponse);
-
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
-		final ProductResponseBody response = checkAndGet(responseEntity);
+		final ProductResponseBody response = getAndCheckResponse(responseEntity);
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 	}
 
@@ -130,14 +101,9 @@ public class ControllerPostTests
 		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
-			// Mock
-			when(backendService.postProduct(GoodPostRequests.POST_REQUESTS[i]))
-				.thenReturn(MockedBackendServicePostResponses.RESPONSES[i]);
-
 			// Call controller
 			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.POST_REQUESTS[i]);
-			final ProductResponseBody response = checkAndGet(responseEntity);
-
+			final ProductResponseBody response = getAndCheckResponse(responseEntity);
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
 			           responseMatchesPostRequest(GoodPostRequests.POST_REQUESTS[i], response));

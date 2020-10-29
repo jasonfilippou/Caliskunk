@@ -1,4 +1,4 @@
-package com.company.rest.products.util.json_objects;
+package com.company.rest.products.util.request_bodies;
 
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,7 +52,6 @@ public class BackendServiceResponseBody implements Serializable
 					.name(squareResponse.getName())
 					.productType(productType)
 					.costInCents(squareResponse.getCostInCents())
-					.categoryId(squareResponse.getCategoryId())
 					.description(squareResponse.getDescription())
 					.isDeleted(squareResponse.getIsDeleted())
 					.availableOnline(squareResponse.getAvailableOnline())
