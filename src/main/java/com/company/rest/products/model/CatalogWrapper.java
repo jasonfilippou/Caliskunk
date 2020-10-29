@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * An abstraction over the <a href="https://github.com/square/square-java-sdk/blob/master/doc/catalog.md">Square
@@ -43,9 +44,10 @@ public class CatalogWrapper
 	 * @see UpsertCatalogObjectRequest
 	 * @see UpsertCatalogObjectResponse
 	 */
-	public UpsertCatalogObjectResponse upsertObject(UpsertCatalogObjectRequest request) throws IOException, ApiException
+	public UpsertCatalogObjectResponse upsertObject(UpsertCatalogObjectRequest request)
+															throws ExecutionException, InterruptedException
 	{
-	    return catalog.upsertCatalogObject(request);  // Moved from the async call to this for now
+	    return catalog.upsertCatalogObjectAsync(request).get();  // Moved from the async call to this for now
 	}
 
 
@@ -56,8 +58,9 @@ public class CatalogWrapper
 	 * @see UpsertCatalogObjectRequest
 	 * @see UpsertCatalogObjectResponse
 	 */
-	public BatchRetrieveCatalogObjectsResponse batchRetrieveObjects(BatchRetrieveCatalogObjectsRequest request) throws IOException, ApiException
+	public BatchRetrieveCatalogObjectsResponse batchRetrieveObjects(BatchRetrieveCatalogObjectsRequest request)
+																			throws ExecutionException, InterruptedException
 	{
-		return catalog.batchRetrieveCatalogObjects(request);
+		return catalog.batchRetrieveCatalogObjectsAsync(request).get();
 	}
 }

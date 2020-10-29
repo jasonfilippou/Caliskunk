@@ -5,11 +5,11 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.model.sample_jsons.post.ExpectedSquareServicePostResponses;
-import com.company.rest.products.model.sample_jsons.post.GoodPostRequests;
-import com.company.rest.products.util.json_objects.BackendServiceResponseBody;
-import com.company.rest.products.util.json_objects.ProductPostRequestBody;
-import com.company.rest.products.util.json_objects.SquareServiceResponseBody;
+import com.company.rest.products.sample_requests.post.MockedSquareServicePostResponses;
+import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,8 +47,8 @@ public class BackendPostTests
 	private LiteProductRepository repository;     // Another class that will be mocked
 
 
-	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
-	                                           @NonNull BackendServiceResponseBody responseBody)
+	private boolean responseMatchesPostRequest(@NonNull final ProductPostRequestBody postRequestBody,
+	                                           @NonNull final BackendServiceResponseBody responseBody)
 	{
 		return
 				// Basic data that will always be provided:
@@ -62,7 +62,6 @@ public class BackendPostTests
 				ofNullable(postRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically()) ) &&
 				ofNullable(postRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup()) ) &&
 				ofNullable(postRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline()) ) &&
-				ofNullable(postRequestBody.getCategoryId()).equals(ofNullable(responseBody.getCategoryId()) ) &&
 				ofNullable(postRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor()) ) &&
 				ofNullable(postRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription()) ) &&
 				ofNullable(postRequestBody.getSku()).equals(ofNullable(responseBody.getSku()) ) &&
@@ -71,7 +70,7 @@ public class BackendPostTests
 				// Let us also ensure that the POST didn't trip the object's deletion flag:
 				(responseBody.getIsDeleted() == null) || (!responseBody.getIsDeleted());
 
-		}
+	}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
@@ -84,7 +83,7 @@ public class BackendPostTests
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
-														.clientProductId("RANDOM_ID")
+														.clientProductId("#RANDOM_ID")
 														.costInCents(10000L) // 'L for long literal
 														.description("Will eat your face.")
 														.labelColor("7FFFD4")
@@ -93,13 +92,12 @@ public class BackendPostTests
 														.availableOnline(true)
 														.availableElectronically(true) // Whatever that means
 														.availableForPickup(true)
-														.categoryId("ITEMS")
 													.build();
 
 		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
 																	.builder()
 						                                                  .name(request.getName())
-						                                                  .squareItemId("RANDOM_ITEM_ID")
+						                                                  .squareItemId("#RANDOM_ITEM_ID")
 						                                                  .squareItemVariationId("RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(request.getCostInCents())
 						                                                  .isDeleted(false)
@@ -121,7 +119,7 @@ public class BackendPostTests
 		{
 			// Mock
 			when(squareService.postProduct(any(ProductPostRequestBody.class)))
-					.thenReturn(ExpectedSquareServicePostResponses.RESPONSES[i]);
+					.thenReturn(MockedSquareServicePostResponses.RESPONSES[i]);
 
 			// Call backend service
 			final BackendServiceResponseBody response = backendService.postProduct(GoodPostRequests.POST_REQUESTS[i]);

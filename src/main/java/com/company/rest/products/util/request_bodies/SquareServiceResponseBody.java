@@ -1,4 +1,4 @@
-package com.company.rest.products.util.json_objects;
+package com.company.rest.products.util.request_bodies;
 
 import com.company.rest.products.model.SquareService;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,7 +22,6 @@ public class SquareServiceResponseBody implements Serializable
 	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
-	@JsonProperty("category_id")  private String categoryId;
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;
 	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
@@ -59,7 +58,6 @@ public class SquareServiceResponseBody implements Serializable
 							.availableElectronically(item.getAvailableElectronically())
 							.availableForPickup(item.getAvailableForPickup())
 							.availableOnline(item.getAvailableOnline())
-							.categoryId(item.getCategoryId())
 							.labelColor(item.getLabelColor())
 
 

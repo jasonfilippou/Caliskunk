@@ -9,7 +9,6 @@ import com.squareup.square.models.UpsertCatalogObjectResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @Component
 public class ExampleCalls
@@ -28,33 +27,43 @@ public class ExampleCalls
 
 		final CatalogItem bodyObjectItemData = new CatalogItem
 				.Builder()
-				    .name("Cocoa")
-				    .description("Hot chocolate")
-				    .abbreviation("Ch")
-				    .labelColor("A52A2A")
-				    .availableOnline(true)
-                .build();
+				.name("Culeothesis Necrosis")
+				.description("Will eat your face.")
+				.productType("REGULAR")
+				.abbreviation("Cul")
+				.labelColor("7FFFD4")
+				.availableOnline(true)
+				.availableElectronically(true)
+				.availableForPickup(true)
+				.build();
 		System.out.println("CatalogItem created...");
 
 		final CatalogObject bodyObject = new CatalogObject
-				.Builder("ITEM","#Cocoa")
-                    .isDeleted(false)
-					.itemData(bodyObjectItemData)
-                .build();
+				.Builder("ITEM", "#RANDOM_ID")
+				.itemData(bodyObjectItemData)
+				.build();
 		System.out.println("CatalogObject wrapper of CatalogItem created...");
 
-		final UpsertCatalogObjectRequest body = new UpsertCatalogObjectRequest.Builder(UUID.randomUUID().toString(), bodyObject).build();
+		final UpsertCatalogObjectRequest request = new UpsertCatalogObjectRequest.Builder(UUID.randomUUID().toString(), bodyObject).build();
 
 		System.out.println("UpsertCatalogObjectRequest created... performing query:");
+
 		try
 		{
-			final UpsertCatalogObjectResponse response = catalogApi.upsertCatalogObjectAsync(body).get();
+			final UpsertCatalogObjectResponse response = catalogApi.upsertCatalogObjectAsync(request).get();
 			System.out.println("We received a response: " + response);
 		}
-		catch (InterruptedException | ExecutionException e)
+		catch (Throwable e)
 		{
-			System.out.println("During the query, we received a " + e.getClass().getName() +
-			                   " with message: " + e.getMessage());
+			System.out.println("Caught a " + e.getClass().getSimpleName() + " with message: " + e.getMessage() + ".");
 		}
+//		catalogApi.upsertCatalogObjectAsync(request).thenAccept(response -> System.out.println("We received a response: " + response))
+//		          .exceptionally(exception -> {
+//                                        System.out.println("An exception occurred: " + exception.getClass().getName()
+//                                                     + " with message: " + exception.getMessage());
+//                                        return null;
+//		                                        }
+//                                );
+//	}
 	}
 }

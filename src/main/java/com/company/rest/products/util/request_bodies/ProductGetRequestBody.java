@@ -1,4 +1,4 @@
-package com.company.rest.products.util.json_objects;
+package com.company.rest.products.util.request_bodies;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -8,15 +8,14 @@ import lombok.NonNull;
 
 import java.io.Serializable;
 
-@Builder(access = AccessLevel.PUBLIC)
+@Builder(access = AccessLevel.PUBLIC)   // To allow access to base class fields from a `Builder` instance.
 @Data
-public class ProductPostRequestBody implements Serializable
+public class ProductGetRequestBody implements Serializable
 {
-	@JsonProperty("name")  @NonNull 	private String name;
+	@JsonProperty @NonNull	private String id;
+	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
-	@JsonProperty("cost")  @NonNull private Long costInCents;
-	@JsonProperty("product_id") @NonNull private String clientProductId;
-	@JsonProperty("category_id")  private String categoryId;
+	@JsonProperty("cost_in_cents")  @NonNull private Long costInCents;
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;
 	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
