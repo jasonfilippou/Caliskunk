@@ -52,7 +52,7 @@ public class SquarePostTests
 	{
 		return	response.getName().equals(request.getName()) &&
 		        response.getCostInCents().equals(request.getCostInCents()) &&
-		       
+
 		       	ofNullable(request.getAvailableElectronically()).equals(ofNullable(response.getAvailableElectronically())) &&
 				ofNullable(request.getAvailableForPickup()).equals(ofNullable(response.getAvailableForPickup())) &&
 				ofNullable(request.getAvailableOnline()).equals(ofNullable(response.getAvailableOnline())) &&
@@ -103,7 +103,6 @@ public class SquarePostTests
 
     private UpsertCatalogObjectResponse buildItemResponseOutOfRequest(UpsertCatalogObjectRequest request)
     {
-
     	final CatalogItem item = Optional.of(request.getObject().getItemData())
 	                                     .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItem"));
     	final CatalogObject itemWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, "RANDOM_ITEM_ID")

@@ -120,7 +120,7 @@ public class BackendGetTests
 																	.builder()
 						                                                  .name(request.getName())
 						                                                  .squareItemId("#RANDOM_ITEM_ID")
-						                                                  .squareItemVariationId("RANDOM_ITEM_VAR_ID")
+						                                                  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(request.getCostInCents())
 						                                                  .isDeleted(false)
 		                                                             .build();
@@ -136,7 +136,7 @@ public class BackendGetTests
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(request);
 
-		// Optionally, run the following test, which actually subsumes the last one! //
+		// Optionally, run the following test, which actually subsumes the last one, but is slower.
 		// assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 
 		//////////////
@@ -144,10 +144,11 @@ public class BackendGetTests
 		//////////////
 
 		// Both the square service _and_ the repository call need to be mocked.
-		when(squareService.getProduct(postResponse.getSquareItemId(), postResponse.getSquareItemVariationId()))
-																					.thenReturn(preparedResponse);
+		when(squareService.getProduct(postResponse.getSquareItemId(),
+		                              postResponse.getSquareItemVariationId())).thenReturn(preparedResponse);
 		when(repository.findByClientProductId(request.getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
+		// Now, make the call and test it.
 		final BackendServiceResponseBody getResponse = backendService.getProduct(request.getClientProductId());
 		assertTrue("Request did not match response", responseMatchesGetRequest(new ProductGetRequestBody
 				                                                                            (request.getClientProductId()),
@@ -160,6 +161,7 @@ public class BackendGetTests
 		/////////////////////////////////////////////////////////////////////////
 		/////// Use already prepared request and mocked response bodies /////////
 		/////////////////////////////////////////////////////////////////////////
+
 		final int numRequests = GoodPostRequests.REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
@@ -176,15 +178,14 @@ public class BackendGetTests
 			final BackendServiceResponseBody postResponse = backendService.postProduct(GoodPostRequests.REQUESTS[i]);
 
 			// Optionally, assess POST response (which actually subsumes the GET response that follows)
-			// assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			// responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], postResponse));
+			// assertTrue("Mismatch in response #" + i + " (0-indexed).", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], postResponse));
 
 			////////////////////////////////////////////
 			// GET request based on the previous POST //
 			////////////////////////////////////////////
 
 			// Mock the square GET call
-//			when(squareService.getProduct(postResponse.getSquareItemId(), postResponse.getSquareItemVariationId()))
+			// when(squareService.getProduct(postResponse.getSquareItemId(), postResponse.getSquareItemVariationId()))
 			when(squareService.getProduct(any(String.class), any(String.class))).thenReturn(MockedSquareServiceGetResponses.RESPONSES[i]);
 			// And the repo call
 			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProduct(MockedSquareServiceGetResponses.RESPONSES[i],

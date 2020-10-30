@@ -44,7 +44,6 @@ public class SquareServiceResponseBody implements Serializable
 
 		return SquareServiceResponseBody
 						.builder()
-
 							// Data contained in the CatalogObject instance
 							.squareItemId(itemObject.getId())
 							.updatedAt(itemObject.getUpdatedAt())

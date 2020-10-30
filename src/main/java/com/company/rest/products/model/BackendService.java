@@ -85,16 +85,16 @@ public class BackendService
 
 	/**
 	 * Send a GET request for a specific product.
-	 * @param id The product's unique ID.
+	 * @param clientProductId The product's unique ID assigned by the client.
 	 * @return A {@link ProductPostRequestBody} instance with the entire client-facing product data.
 	 */
-	public BackendServiceResponseBody getProduct(String id) throws BackendServiceException
+	public BackendServiceResponseBody getProduct(String clientProductId) throws BackendServiceException
 	{
 		// Cheap check first; if the product doesn't exist, why go to Square API with the request?
-		final Optional<LiteProduct> cached = localRepo.findByClientProductId(id);
+		final Optional<LiteProduct> cached = localRepo.findByClientProductId(clientProductId);
 		if(cached.isEmpty())
 		{
-			final ProductNotFoundException exc = new ProductNotFoundException(id);
+			final ProductNotFoundException exc = new ProductNotFoundException(clientProductId);
             logException(exc, this.getClass().getName() + "::getProduct");
             throw new BackendServiceException(exc, HttpStatus.NOT_FOUND);
 		}
@@ -105,8 +105,8 @@ public class BackendService
 				final String squareItemId = cached.get().getSquareItemId();
 				final String squareItemVariationId = cached.get().getSquareItemVariationId();
 				final String productType = cached.get().getProductType();
-				final SquareServiceResponseBody response = squareService.getProduct(squareItemId, squareItemVariationId);
-				return BackendServiceResponseBody.buildBackendResponseBody(response, id, productType);
+				final SquareServiceResponseBody response = squareService.getProduct(squareItemId,  squareItemVariationId);
+				return BackendServiceResponseBody.buildBackendResponseBody(response, clientProductId, productType);
 			}
 			catch(SquareServiceException exc)
 			{
@@ -117,7 +117,7 @@ public class BackendService
 	}
 
 	/**
-	 * Serve a GET ALL request
+	 * Serve a GET ALL request.
 	 * @return A {@link BackendServiceResponseBody} instance.
 	 */
 	public List<BackendServiceResponseBody> getAllProducts(Integer page, Integer itemsInPage, String sortBy)

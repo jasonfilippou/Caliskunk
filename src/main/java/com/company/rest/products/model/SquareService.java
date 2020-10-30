@@ -205,15 +205,14 @@ public class SquareService
 	 * @return A {@link ProductPostRequestBody} instance with the entire client-facing product data.
 	 * @throws SquareServiceException if Square sends an Exception.
 	 */
-	public SquareServiceResponseBody getProduct(@NonNull final String squareItemId, @NonNull final String squareItemVarId)
-																				throws SquareServiceException
+	public SquareServiceResponseBody getProduct(@NonNull final String squareItemId,
+	                                            @NonNull final String squareItemVarId) throws SquareServiceException
 	{
 		final Boolean INCLUDE_RELATED_OBJECTS = true;     // We will make use of the additional info returned later.
 		final BatchRetrieveCatalogObjectsRequest request =
-					new BatchRetrieveCatalogObjectsRequest
-						.Builder(Arrays.asList(squareItemId, squareItemVarId))
-							.includeRelatedObjects(INCLUDE_RELATED_OBJECTS)
-						.build();
+					new BatchRetrieveCatalogObjectsRequest.Builder(Arrays.asList(squareItemId, squareItemVarId))
+															.includeRelatedObjects(INCLUDE_RELATED_OBJECTS)
+														   .build();
 		try
 		{
 			final BatchRetrieveCatalogObjectsResponse response = catalogWrapper.batchRetrieveObjects(request);
@@ -232,7 +231,8 @@ public class SquareService
 	{
 
 		assertAndIfNotLogAndThrow(response.getObjects().size() == 2 &&
-		                          response.getErrors().isEmpty() &&
+		                          ((response.getErrors() == null) || response.getErrors().isEmpty()) &&
+		                          (response.getObjects() != null) &&
 		                          (response.getObjects()
 	                                   .stream()
 	                                   .allMatch(catalogObject ->
@@ -245,7 +245,6 @@ public class SquareService
 		                          ),"Bad batch retrieval response received: " + response);
 	}
 
-//
 	private CatalogObject[] fetchItemAndVar(final List<CatalogObject> objects)
 	{
 		final CatalogObject[] retVal = new CatalogObject[2];
