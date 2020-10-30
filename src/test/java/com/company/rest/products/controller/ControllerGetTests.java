@@ -1,10 +1,15 @@
 package com.company.rest.products.controller;
 
 import com.company.rest.products.model.BackendService;
-import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
+import com.company.rest.products.model.backend.BackendGetTests;
+import com.company.rest.products.model.backend.BackendPostTests;
+import com.company.rest.products.sample_requests.get.GoodGetRequests;
+import com.company.rest.products.sample_requests.get.MockedBackendServiceGetResponses;
 import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
 import lombok.NonNull;
@@ -24,9 +29,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+/**
+ * GET request tests for Controller.
+ *
+ * This unit test suite is actually subsumed by {@link BackendPostTests}.
+ *
+ * @see ControllerPostTests
+ * @see BackendGetTests
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ControllerPostTests
+public class ControllerGetTests
 {
 
 	/* *********************************************************************************************************** */
@@ -39,6 +52,30 @@ public class ControllerPostTests
 	@Mock
 	private BackendService backendService;     // The class that will be mocked
 
+
+	private boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
+	                                           @NonNull ProductResponseBody responseBody)
+	{
+		return	getRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+	}
+
+	private void checkEntityStatus(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
+	{
+		assertEquals(responseEntity.getStatusCode(), status);
+	}
+
+
+	private ProductResponseBody checkEntityStatusAndGetResponse(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
+	{
+		checkEntityStatus(responseEntity, status);
+		return getResponseData(responseEntity);
+	}
+
+
+	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
+	{
+		return (ProductResponseBody) Objects.requireNonNull(responseEntity.getBody()).getData();
+	}
 
 	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
@@ -64,41 +101,46 @@ public class ControllerPostTests
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
-	private ProductResponseBody checkAndGet(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-		return getResponseData(responseEntity);
-	}
-
-
-	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		return (ProductResponseBody) Objects.requireNonNull(responseEntity.getBody()).getData();
-	}
-
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
 	/* *********************************************************************************************************** */
 
 	@Test
-	public void testOnePost()
+	public void testOneGet()
 	{
+		// Do a POST first, so that we can retrieve it afterwards.
+		final String productId = "#TEST_ITEM_FOR_GET_ID";
+		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
+		final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+
+		// Now do the corresponding GET, and ensure it works. Mock the backend call.
+		final ProductGetRequestBody request = new ProductGetRequestBody(productId);
+		when(backendService.getProduct(productId)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
+
+		final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(productId);
+		final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(getResponseEntity, HttpStatus.OK);
+		assertTrue("Request did not match response", responseMatchesGetRequest(request, getResponse));
+	}
+
+	private ResponseEntity<ResponseMessage> makeAPost(final String clientProductId)
+	{
+		// Make post request
 		final ProductPostRequestBody request = ProductPostRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
-														.productType("Flower")
-														.clientProductId("#RANDOM_ID")
-														.costInCents(10000L) // 'L for long literal
-														.description("Will eat your face.")
+														.name("Pengolin's Revenge")
+														.productType("Vaporizer")
+														.clientProductId(clientProductId)
+														.costInCents(13000L) // 'L for long literal
+														.description("We're done.")
 														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(true)
-														.availableElectronically(true) // Whatever that means
-														.availableForPickup(true)
+														.availableElectronically(true)
+														.availableForPickup(false)
 													.build();
-
-		final BackendServiceResponseBody preparedResponse = BackendServiceResponseBody
+		// Define mocked answer
+		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
 														.builder()
 	                                                        .name(request.getName())
 	                                                        .clientProductId(request.getClientProductId())
@@ -116,31 +158,52 @@ public class ControllerPostTests
 															.labelColor(request.getLabelColor())
 															.presentAtAllLocations(true)
                                                           .build();
+		// Mock the call to the backend service
+		when(backendService.postProduct(request)).thenReturn(mockedResponse);
 
-		when(backendService.postProduct(request)).thenReturn(preparedResponse);
-
-		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
-		final ProductResponseBody response = checkAndGet(responseEntity);
-		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
+		// Make the call to the controller
+		return controller.postProduct(request);
 	}
 
 	@Test
-	public void testManyPosts()
+	public void testManyGets()
 	{
+
 		final int numRequests = GoodPostRequests.REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
-			// Mock
+			////////////////////////////////
+			// First we POST the resource://
+			////////////////////////////////
+
+			// Mock the backend POST call.
 			when(backendService.postProduct(GoodPostRequests.REQUESTS[i]))
 				.thenReturn(MockedBackendServicePostResponses.RESPONSES[i]);
 
 			// Call controller
-			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
-			final ProductResponseBody response = checkAndGet(responseEntity);
+			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
+			final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+
+			// Optionally, check the POST response (ostensibly there's no need since there's already a POST test suite).
+//			assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i],
+//			                                                                        postResponse));
+
+			///////////////////////////////////
+			// And now we check the GET call.//
+			///////////////////////////////////
+
+			// Mock the backend GET call.
+			when(backendService.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId()))
+						.thenReturn(MockedBackendServiceGetResponses.RESPONSES[i]);    // You will still be getting the data from POST!
+
+			// Call controller
+			final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId());
+			final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], response));
+			           responseMatchesGetRequest(GoodGetRequests.REQUESTS[i], getResponse));
+
 		}
 	}
 

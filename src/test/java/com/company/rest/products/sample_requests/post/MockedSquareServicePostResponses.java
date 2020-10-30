@@ -9,11 +9,11 @@ public class MockedSquareServicePostResponses
 
 	private static SquareServiceResponseBody[] buildMockedResponses()
 	{
-		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
+		final int numRequests = GoodPostRequests.REQUESTS.length;
 		SquareServiceResponseBody[] retVal = new SquareServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
-			retVal[i] = mockedResponse(GoodPostRequests.POST_REQUESTS[i]);
+			retVal[i] = mockedResponse(GoodPostRequests.REQUESTS[i]);
 		}
 		return retVal;
 	}

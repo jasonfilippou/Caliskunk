@@ -39,7 +39,7 @@ public class LiteProduct
 	{
 		if(!PRODUCT_TYPES.contains(productType))
 		{
-			InvalidProductTypeException exc = new InvalidProductTypeException(productType);
+			final InvalidProductTypeException exc = new InvalidProductTypeException(productType);
 			logException(exc, this.getClass().getName() + "::LiteProduct");
 			throw new InvalidProductTypeException(productType);
 		}
@@ -50,6 +50,7 @@ public class LiteProduct
 			this.squareItemId = squareItemId;
 			this.squareItemVariationId = squareItemVariationId;
 			this.costInCents = costInCents;
+			this.productType=productType;
 		}
 	}
 

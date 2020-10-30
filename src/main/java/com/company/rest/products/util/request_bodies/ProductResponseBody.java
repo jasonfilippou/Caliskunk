@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.List;
 @Data
 @Builder(access = AccessLevel.PUBLIC)
-//@AllArgsConstructor
 public class ProductResponseBody implements Serializable
 {
 	// For now this class is almost identical to BackendServiceResponseBody, in order for us
@@ -17,7 +16,6 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost_in_cents")  @NonNull private Long costInCents;
-	@JsonProperty("category_id")  private String categoryId;
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;
 	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
@@ -29,7 +27,7 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("is_deleted") private Boolean isDeleted;
 	@JsonProperty("present_at_all_locations") private Boolean presentAtAllLocations;
 	@JsonProperty("tax_ids") private List<String> taxIDs;
-	@JsonProperty("updatedAt") private String updatedAt;
+	@JsonProperty("updated_at") private String updatedAt;
 
 	public static ProductResponseBody fromBackendResponseBody(final BackendServiceResponseBody backendResponse)
 	{
@@ -40,7 +38,6 @@ public class ProductResponseBody implements Serializable
 					.name(backendResponse.getName())
 					.productType(backendResponse.getProductType())
 					.costInCents(backendResponse.getCostInCents())
-					.categoryId(backendResponse.getCategoryId())
 					.description(backendResponse.getDescription())
 					.isDeleted(backendResponse.getIsDeleted())
 					.availableOnline(backendResponse.getAvailableOnline())

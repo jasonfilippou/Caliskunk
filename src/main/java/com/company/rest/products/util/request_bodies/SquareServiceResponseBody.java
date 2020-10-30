@@ -33,7 +33,7 @@ public class SquareServiceResponseBody implements Serializable
 	@JsonProperty("is_deleted") private Boolean isDeleted;              // Boolean flag implementing soft deletion.
 	@JsonProperty("present_at_all_locations") private Boolean presentAtAllLocations;
 	@JsonProperty("tax_ids") private List<String> taxIDs;
-	@JsonProperty("updatedAt") private String updatedAt;
+	@JsonProperty("updated_at") private String updatedAt;
 
 
 	public static SquareServiceResponseBody fromSquareData(@NonNull final CatalogObject itemObject,
@@ -62,7 +62,7 @@ public class SquareServiceResponseBody implements Serializable
 
 
 							// Data pulled from CatalogItemVariation instance
-							.squareItemVariationId(itemVarObject.getId())
+							.squareItemVariationId(itemVarObject.getId())   // This one from the CatalogObject wrapper
 							.costInCents(variation.getPriceMoney().getAmount())
 							.sku(variation.getSku())
 							.upc(variation.getUpc())

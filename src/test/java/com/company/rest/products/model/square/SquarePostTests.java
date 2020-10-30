@@ -151,15 +151,15 @@ public class SquarePostTests
 	@Test
 	public void testManyPosts()
 	{
-		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
+		final int numRequests = GoodPostRequests.REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Call backend service
-			final SquareServiceResponseBody response = squareService.postProduct(GoodPostRequests.POST_REQUESTS[i]);
+			final SquareServiceResponseBody response = squareService.postProduct(GoodPostRequests.REQUESTS[i]);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + ".",
-			           responseMatchesRequest(response, GoodPostRequests.POST_REQUESTS[i]));
+			           responseMatchesRequest(response, GoodPostRequests.REQUESTS[i]));
 		}
 	}
 

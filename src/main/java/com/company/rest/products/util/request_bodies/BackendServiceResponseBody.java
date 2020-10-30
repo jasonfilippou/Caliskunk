@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -27,7 +26,6 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
-	@JsonProperty("category_id")  private String categoryId;
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;
 	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
@@ -39,11 +37,11 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("is_deleted") private Boolean isDeleted;
 	@JsonProperty("present_at_all_locations") private Boolean presentAtAllLocations;
 	@JsonProperty("tax_ids") private List<String> taxIDs;
-	@JsonProperty("updatedAt") private String updatedAt;
+	@JsonProperty("updated_at") private String updatedAt;
 
-	public static BackendServiceResponseBody buildBackendResponseBody(final SquareServiceResponseBody squareResponse,
-	                                                                  final String clientProductId,
-	                                                                  final String productType)
+	public static BackendServiceResponseBody buildBackendResponseBody(@NonNull final SquareServiceResponseBody squareResponse,
+	                                                                  @NonNull final String clientProductId,
+	                                                                  @NonNull final String productType)
 	{
 		return builder()
 					.clientProductId(clientProductId)
@@ -68,7 +66,7 @@ public class BackendServiceResponseBody implements Serializable
 	}
 
 	// The following is useful for getAll()
-	public static BackendServiceResponseBody fromLiteProduct(LiteProduct product)
+	public static BackendServiceResponseBody fromLiteProduct(@NonNull final LiteProduct product)
 	{
 		// Right now all it does is copy data over, but this can change in the future.
 		return builder()
@@ -79,5 +77,38 @@ public class BackendServiceResponseBody implements Serializable
 					.squareItemVariationId(product.getSquareItemVariationId())
 					.productType(product.getProductType())
 				.build();
+	}
+
+	/**
+	 * A method useful for mocked tests, where we want the backend service to return data based on a
+	 * request that has already been served.
+	 *
+	 * @see ControllerGetTests
+	 */
+	// The following is useful for mocked tests, where we want the backend service
+	// to return data based on a response that has already been received.
+	public static BackendServiceResponseBody fromProductResponseBody(@NonNull final ProductResponseBody response)
+	{
+		return BackendServiceResponseBody.builder()
+		                                    .clientProductId(response.getClientProductId())
+		                                    .availableElectronically(response.getAvailableElectronically())
+		                                    .availableForPickup(response.getAvailableForPickup())
+		                                    .availableOnline(response.getAvailableOnline())
+		                                    .name(response.getName())
+		                                    .costInCents(response.getCostInCents())
+		                                    .description(response.getDescription())
+		                                    .isDeleted(response.getIsDeleted())
+		                                    .labelColor(response.getLabelColor())
+		                                    .presentAtAllLocations(response.getPresentAtAllLocations())
+		                                    .productType(response.getProductType())
+		                                    .sku(response.getSku())
+		                                    .upc(response.getUpc())
+		                                    .taxIDs(response.getTaxIDs())
+		                                    // The following are alright, since this is a class used only in mocks anyhow
+		                                    .squareItemId("#RANDOM_SQUARE_ITEM_ID")
+		                                    .squareItemVariationId("RANDOM_SQUARE_ITEM_VAR_ID")
+		                                    .updatedAt(response.getUpdatedAt())
+		                                    .version(response.getVersion())
+		                                 .build();
 	}
 }

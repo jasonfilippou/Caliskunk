@@ -8,7 +8,7 @@ import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 public class GoodPostRequests
 {
 
-	public static final ProductPostRequestBody[] POST_REQUESTS =
+	public static final ProductPostRequestBody[] REQUESTS =
 	{
 
 			/* ********************************************************************** */

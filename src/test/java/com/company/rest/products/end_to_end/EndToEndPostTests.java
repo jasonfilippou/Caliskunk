@@ -98,15 +98,15 @@ public class EndToEndPostTests
 	@Test
 	public void testManyPosts()
 	{
-		final int numRequests = GoodPostRequests.POST_REQUESTS.length;
+		final int numRequests = GoodPostRequests.REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Call controller
-			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.POST_REQUESTS[i]);
+			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
 			final ProductResponseBody response = getAndCheckResponse(responseEntity);
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesPostRequest(GoodPostRequests.POST_REQUESTS[i], response));
+			           responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], response));
 		}
 	}
 

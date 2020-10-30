@@ -201,17 +201,17 @@ public class SquareService
 	/**
 	 * Send a GET request for a specific product.
 	 * @param squareItemId The relevant {@link CatalogItem}'s unique ID on Square.
-	 * @param itemVarId The relevant {@link CatalogItemVariation}'s unique ID on Square.
+	 * @param squareItemVarId The relevant {@link CatalogItemVariation}'s unique ID on Square.
 	 * @return A {@link ProductPostRequestBody} instance with the entire client-facing product data.
 	 * @throws SquareServiceException if Square sends an Exception.
 	 */
-	public SquareServiceResponseBody getProduct(@NonNull final String squareItemId, @NonNull final String itemVarId)
+	public SquareServiceResponseBody getProduct(@NonNull final String squareItemId, @NonNull final String squareItemVarId)
 																				throws SquareServiceException
 	{
 		final Boolean INCLUDE_RELATED_OBJECTS = true;     // We will make use of the additional info returned later.
 		final BatchRetrieveCatalogObjectsRequest request =
 					new BatchRetrieveCatalogObjectsRequest
-						.Builder(Arrays.asList(squareItemId, itemVarId))
+						.Builder(Arrays.asList(squareItemId, squareItemVarId))
 							.includeRelatedObjects(INCLUDE_RELATED_OBJECTS)
 						.build();
 		try
@@ -230,12 +230,14 @@ public class SquareService
 
 	private  void validateBatchRetrievalResponse(final BatchRetrieveCatalogObjectsResponse response)
 	{
-		//  TODO: see if you can instead look for non-null pointers for object.getItemData()
-		//      or object.getItemVariationData(). It's a bit more efficient than comparing strings.
+
 		assertAndIfNotLogAndThrow(response.getObjects().size() == 2 &&
+		                          response.getErrors().isEmpty() &&
 		                          (response.getObjects()
 	                                   .stream()
 	                                   .allMatch(catalogObject ->
+	                                   //  TODO: see if you can instead look for non-null pointers for object.getItemData()
+                                       //      TODO: or object.getItemVariationData(). It's more efficient than comparing strings.
 		                                             catalogObject.getType().equals(CODE_FOR_CATALOG_ITEMS)
                                                                 ||
 		                                             catalogObject.getType().equals(CODE_FOR_CATALOG_ITEM_VARIATIONS)
