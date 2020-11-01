@@ -120,13 +120,11 @@ public class BackendService
 	 * Serve a GET ALL request.
 	 * @return A {@link BackendServiceResponseBody} instance.
 	 */
-	public List<BackendServiceResponseBody> getAllProducts(Integer page, Integer itemsInPage, String sortBy)
+	public List<BackendServiceResponseBody> getAllProducts(final Integer page, final Integer itemsInPage, final String sortBy)
 	{
-		// Paginated and sorted output whether it is on Square
-		// or the cache.
+		// Paginated and sorted output whether it is on Square or the cache.
 		try
 		{
-			// TODO: Maybe we can have the user somehow offer us the field to sort on.
 			return localRepo.findAll(PageRequest.of(page, itemsInPage, Sort.by(sortBy).ascending()))
 			                .stream().parallel()
 			                .map(BackendServiceResponseBody::fromLiteProduct)

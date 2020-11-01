@@ -3,6 +3,7 @@ package com.company.rest.products.end_to_end;
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.sample_requests.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
+import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
 import lombok.NonNull;
@@ -22,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class EndToEndPostTests
+public class EndToEndGetTests
 {
 
 	/* *********************************************************************************************************** */
@@ -56,12 +57,17 @@ public class EndToEndPostTests
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
+	private boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody postRequestBody,
+	                                           @NonNull ProductResponseBody responseBody)
+	{
+		return	postRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+	}
+
 	private ProductResponseBody getAndCheckResponse(final ResponseEntity<ResponseMessage> responseEntity)
 	{
 		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
 		return getResponseData(responseEntity);
 	}
-
 
 	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
 	{
@@ -77,22 +83,22 @@ public class EndToEndPostTests
 	{
 		final ProductPostRequestBody request = ProductPostRequestBody
 													.builder()
-														.name("Ramses V")
-														.productType("topical")
+														.name("Culeothesis Necrosis")
+														.productType("Flower")
 														.clientProductId("#RANDOM_ID")
 														.costInCents(10000L) // 'L for long literal
-														.description("Will challenge his father for the throne")
-														.labelColor("7FAAAD4")
+														.description("Will eat your face.")
+														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
-														.availableOnline(false)
-														.availableElectronically(false) // Whatever that means
+														.availableOnline(true)
+														.availableElectronically(true) // Whatever that means
 														.availableForPickup(true)
 													.build();
 
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
-		final ProductResponseBody response = getAndCheckResponse(responseEntity);
-		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
+		final ProductResponseBody postResponse = getAndCheckResponse(responseEntity);
+		assertTrue("Request did not match response", responseMatchesPostRequest(request, postResponse));
 	}
 
 	@Test
