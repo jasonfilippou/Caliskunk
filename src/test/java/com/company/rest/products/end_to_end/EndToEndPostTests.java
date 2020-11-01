@@ -77,16 +77,16 @@ public class EndToEndPostTests
 	{
 		final ProductPostRequestBody request = ProductPostRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
-														.productType("Flower")
+														.name("Ramses V")
+														.productType("topical")
 														.clientProductId("#RANDOM_ID")
 														.costInCents(10000L) // 'L for long literal
-														.description("Will eat your face.")
-														.labelColor("7FFFD4")
+														.description("Will challenge his father for the throne")
+														.labelColor("7FAAAD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true) // Whatever that means
+														.availableOnline(false)
+														.availableElectronically(false) // Whatever that means
 														.availableForPickup(true)
 													.build();
 

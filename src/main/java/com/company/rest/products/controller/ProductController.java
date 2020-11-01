@@ -143,7 +143,7 @@ public class ProductController
 		}
 		catch (BackendServiceException e)
 		{
-			logException(e, this.getClass().getEnclosingMethod().getName());
+			logException(e, "::getProduct");
 			return failure(e, e.getStatus());
 		}
 	}
@@ -177,8 +177,20 @@ public class ProductController
 	/* *************************************************************************************** */
 
 	@DeleteMapping("/product/{id}")
-	public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id)
+	public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable("id") String id)
 	{
-		throw new UnimplementedMethodPlaceholder();
+
+		try
+		{
+			final BackendServiceResponseBody backendResponse = backendService.deleteProduct(id);
+			final ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
+			return success("Successfully got product with ID " + id + ".",
+			               productResponse);
+		}
+		catch (BackendServiceException e)
+		{
+			logException(e, "::deleteProduct");
+			return failure(e, e.getStatus());
+		}
 	}
 }

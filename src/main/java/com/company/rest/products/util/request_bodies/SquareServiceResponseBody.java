@@ -20,8 +20,8 @@ public class SquareServiceResponseBody implements Serializable
 {
 	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
 	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
-	@JsonProperty("name")  @NonNull	private String name;
-	@JsonProperty("cost")  @NonNull private Long costInCents;
+	@JsonProperty("name")  private String name;
+	@JsonProperty("cost")   private Long costInCents;
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;
 	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
