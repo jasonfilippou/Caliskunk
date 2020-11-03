@@ -1,9 +1,11 @@
 package com.company.rest.products.end_to_end;
 
 import com.company.rest.products.controller.ProductController;
+
 import com.company.rest.products.model.backend.BackendGetTests;
 import com.company.rest.products.model.backend.BackendPostTests;
 import com.company.rest.products.sample_requests.get.GoodGetRequests;
+
 import com.company.rest.products.sample_requests.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
@@ -21,6 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static com.company.rest.products.util.TestUtil.checkEntityStatusAndGetResponse;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
+
 
 /**
  * GET request tests for Controller.
@@ -67,6 +70,7 @@ public class EndToEndGetTests
 				// Let us also ensure that the POST didn't trip the object's deletion flag:
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
+
 
 
 	private boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,

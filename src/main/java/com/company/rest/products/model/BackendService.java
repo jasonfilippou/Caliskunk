@@ -123,6 +123,7 @@ public class BackendService
 	 * Serve a GET ALL request.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
+
 	public List<BackendServiceResponseBody> getAllProducts(@NonNull final Integer page, @NonNull final Integer itemsInPage,
 	                                                       @NonNull final String sortBy)
 	{
