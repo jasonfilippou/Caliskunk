@@ -6,9 +6,11 @@ import com.company.rest.products.model.liteproduct.LiteProductRepository;
 import com.company.rest.products.util.exceptions.*;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpdateRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.CatalogItem;
 import com.squareup.square.models.CatalogItemVariation;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -53,6 +55,7 @@ public class BackendService
 	 * @see LiteProduct
 	 * @see LiteProductRepository
 	 * @throws BackendServiceException if the resource is already there.
+	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
 	public BackendServiceResponseBody postProduct(ProductPostRequestBody request) throws BackendServiceException
 	{
@@ -86,7 +89,7 @@ public class BackendService
 	/**
 	 * Send a GET request for a specific product.
 	 * @param clientProductId The product's unique ID assigned by the client.
-	 * @return A {@link ProductPostRequestBody} instance with the entire client-facing product data.
+	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
 	public BackendServiceResponseBody getProduct(String clientProductId) throws BackendServiceException
 	{
@@ -100,13 +103,13 @@ public class BackendService
 		}
 		else
 		{
+			final String squareItemId = cached.get().getSquareItemId();
+			final String squareItemVariationId = cached.get().getSquareItemVariationId();
+			final String productType = cached.get().getProductType();
 			try
 			{
-				final String squareItemId = cached.get().getSquareItemId();
-				final String squareItemVariationId = cached.get().getSquareItemVariationId();
-				final String productType = cached.get().getProductType();
-				final SquareServiceResponseBody response = squareService.getProduct(squareItemId,  squareItemVariationId);
-				return BackendServiceResponseBody.buildBackendResponseBody(response, clientProductId, productType);
+				final SquareServiceResponseBody squareServiceResponse = squareService.getProduct(squareItemId,  squareItemVariationId);
+				return BackendServiceResponseBody.buildBackendResponseBody(squareServiceResponse, clientProductId, productType);
 			}
 			catch(SquareServiceException exc)
 			{
@@ -118,9 +121,11 @@ public class BackendService
 
 	/**
 	 * Serve a GET ALL request.
-	 * @return A {@link BackendServiceResponseBody} instance.
+	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
-	public List<BackendServiceResponseBody> getAllProducts(final Integer page, final Integer itemsInPage, final String sortBy)
+
+	public List<BackendServiceResponseBody> getAllProducts(@NonNull final Integer page, @NonNull final Integer itemsInPage,
+	                                                       @NonNull final String sortBy)
 	{
 		// Paginated and sorted output whether it is on Square or the cache.
 		try
@@ -140,29 +145,59 @@ public class BackendService
 
 	/**
 	 * Send a PUT request for a specific product.
-	 * @param id The product's unique id, provided by the request.
-	 * @param request The request body.
+	 * @param clientProductId The product's unique id, provided by the request.
+	 * @param newProductRequest The request body.
+	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
-	public BackendServiceResponseBody putProduct(String id, ProductPostRequestBody request)
+	public BackendServiceResponseBody putProduct(@NonNull String clientProductId, @NonNull ProductPostRequestBody newProductRequest)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
 
 	/**
 	 * Send a PATCH request for a specific product.
-	 * @param id The product's unique id.
+	 * @param clientProductId The product's unique id.
+	 * @param patchProductRequest The fields to update.
+	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
-	public BackendServiceResponseBody patchProduct(String id, ProductPostRequestBody request)
+	public BackendServiceResponseBody patchProduct(@NonNull String clientProductId, @NonNull ProductUpdateRequestBody patchProductRequest)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
 
 	/**
 	 * Send a DELETE request for a specific product.
-	 * @param id The product's unique id.
+	 * @param clientProductId The product's unique id provided by the client.
+	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
-	public BackendServiceResponseBody deleteProduct(String id, ProductPostRequestBody newProduct)
+	public BackendServiceResponseBody deleteProduct(@NonNull String clientProductId)
 	{
-		throw new UnimplementedMethodPlaceholder();
+
+		final Optional<LiteProduct> cached = localRepo.findByClientProductId(clientProductId);
+		if(cached.isEmpty())
+		{
+			final ProductNotFoundException exc = new ProductNotFoundException(clientProductId);
+            logException(exc, this.getClass().getName() + "::deleteProduct");
+            throw new BackendServiceException(exc, HttpStatus.NOT_FOUND);
+		}
+		else
+		{
+			final String squareItemId = cached.get().getSquareItemId();
+			// On Square, deletions are cascading, which means that all item variations of the item
+			// that is deleted will also be deleted. Consequently, we do not need the item variation information.
+			//	final String squareItemVarId = cached.get().getSquareItemVariationId();
+			final String productType = cached.get().getProductType();
+			try
+			{
+				final SquareServiceResponseBody squareServiceResponse = squareService.deleteProduct(squareItemId);
+				localRepo.deleteByClientProductId(clientProductId); // delete(cached) will probably be slower
+				return BackendServiceResponseBody.buildBackendResponseBody(squareServiceResponse, clientProductId, productType);
+			}
+			catch(SquareServiceException exc)
+			{
+				logException(exc, this.getClass().getName() + "::deleteProduct");
+				throw new BackendServiceException(exc, exc.getStatus());
+			}
+		}
 	}
 }

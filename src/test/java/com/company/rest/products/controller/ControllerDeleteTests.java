@@ -1,20 +1,19 @@
-package com.company.rest.products.end_to_end;
+package com.company.rest.products.controller;
 
-import com.company.rest.products.controller.ProductController;
-
+import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.backend.BackendGetTests;
 import com.company.rest.products.model.backend.BackendPostTests;
 import com.company.rest.products.sample_requests.get.GoodGetRequests;
-
+import com.company.rest.products.sample_requests.get.MockedBackendServiceGetResponses;
 import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
-import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
-import com.company.rest.products.util.request_bodies.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.*;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,28 +24,37 @@ import java.util.Objects;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
+import static org.mockito.Mockito.when;
 
 /**
  * GET request tests for Controller.
  *
  * This unit test suite is actually subsumed by {@link BackendPostTests}.
  *
- * @see com.company.rest.products.controller.ControllerGetTests
- * @see com.company.rest.products.model.square.SquareGetTests
+ * @see ControllerPostTests
  * @see BackendGetTests
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class EndToEndGetTests
+public class ControllerDeleteTests
 {
 
 	/* *********************************************************************************************************** */
 	/* ************************************ Fields and utilities ************************************************** */
 	/* *********************************************************************************************************** */
 
-	@Autowired
-	private ProductController controller;
+	@InjectMocks
+	private ProductController controller; // The class we are testing
+
+	@Mock
+	private BackendService backendService;     // The class that will be mocked
+
+
+	private boolean responseMatchesDeleteRequest(final ProductDeleteRequestBody delRequestBody,
+	                                             final ProductResponseBody responseBody)
+	{
+		return	delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+	}
 
 	private void checkEntityStatus(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
 	{
@@ -90,33 +98,25 @@ public class EndToEndGetTests
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
-
-
-	private boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
-	                                           @NonNull ProductResponseBody responseBody)
-	{
-		return	getRequestBody.getClientProductId().equals(responseBody.getClientProductId());
-	}
-
-
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
 	/* *********************************************************************************************************** */
 
 	@Test
-	public void testOneGet()
+	public void testOneDel()
 	{
 		// Do a POST first, so that we can retrieve it afterwards.
 		final String productId = "#TEST_ITEM_FOR_GET_ID";
 		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
 		final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
 
-		// Now do the corresponding GET..
-		final ProductGetRequestBody request = new ProductGetRequestBody(productId);
+		// Now do the corresponding GET, and ensure it works. Mock the backend call.
+		final ProductDeleteRequestBody request = new ProductDeleteRequestBody(productId);
+		when(backendService.getProduct(productId)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
 
-		final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(productId);
+		final ResponseEntity<ResponseMessage> getResponseEntity = controller.deleteProduct(productId);
 		final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(getResponseEntity, HttpStatus.OK);
-		assertTrue("Request did not match response", responseMatchesGetRequest(request, getResponse));
+		assertTrue("Request did not match response", responseMatchesDeleteRequest(request, getResponse));
 	}
 
 	private ResponseEntity<ResponseMessage> makeAPost(final String clientProductId)
@@ -136,13 +136,34 @@ public class EndToEndGetTests
 														.availableElectronically(true)
 														.availableForPickup(false)
 													.build();
+		// Define mocked answer
+		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
+														.builder()
+	                                                        .name(request.getName())
+	                                                        .clientProductId(request.getClientProductId())
+															.squareItemId("#RANDOM_SQUARE_ITEM_ID")
+	                                                        .squareItemVariationId("#RANDOM_SQUARE_ITEM_VAR_ID")
+	                                                        .productType(request.getProductType())
+	                                                        .costInCents(request.getCostInCents())
+	                                                        .availableElectronically(request.getAvailableElectronically())
+															.availableForPickup(request.getAvailableForPickup())
+															.availableOnline(request.getAvailableOnline())
+															.isDeleted(false)
+															.sku(request.getSku())
+															.upc(request.getUpc())
+															.description(request.getDescription())
+															.labelColor(request.getLabelColor())
+															.presentAtAllLocations(true)
+                                                          .build();
+		// Mock the call to the backend service
+		when(backendService.deleteProduct(request.getClientProductId())).thenReturn(mockedResponse);
 
 		// Make the call to the controller
 		return controller.postProduct(request);
 	}
 
 	@Test
-	public void testManyGets()
+	public void testManyDels()
 	{
 
 		final int numRequests = GoodPostRequests.REQUESTS.length;
@@ -152,6 +173,9 @@ public class EndToEndGetTests
 			// First we POST the resource://
 			////////////////////////////////
 
+			// Mock the backend POST call.
+			when(backendService.postProduct(GoodPostRequests.REQUESTS[i]))
+				.thenReturn(MockedBackendServicePostResponses.RESPONSES[i]);
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
@@ -165,13 +189,17 @@ public class EndToEndGetTests
 			// And now we check the GET call.//
 			///////////////////////////////////
 
+			// Mock the backend GET call.
+			when(backendService.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId()))
+						.thenReturn(MockedBackendServiceGetResponses.RESPONSES[i]);    // You will still be getting the data from POST!
+
 			// Call controller
 			final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId());
 			final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesGetRequest(GoodGetRequests.REQUESTS[i], getResponse));
+			           responseMatchesDeleteRequest(GoodGetRequests.REQUESTS[i], getResponse));
 
 		}
 	}

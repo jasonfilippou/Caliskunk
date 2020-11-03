@@ -47,7 +47,7 @@ public class SquareService
 	 * Constructor takes an autowired {@link CatalogWrapper} instance  as a parameter.
 	 */
 	@Autowired
-	public SquareService(final CatalogWrapper catalogWrapper)
+	public SquareService(@NonNull final CatalogWrapper catalogWrapper)
 	{
 		this.catalogWrapper = catalogWrapper;
 	}
@@ -62,29 +62,26 @@ public class SquareService
 	 */
 	public SquareServiceResponseBody postProduct(@NonNull final ProductPostRequestBody request) throws SquareServiceException
 	{
-
 		//  Create a CatalogItem and a CatalogItemVariation registered to that item.
 		//	For now, we have a 1-1 correspondence between them; every newly inserted
 		//	product will consist of a CatalogItem and a CatalogItemVariation registered to it.
-
 		final UpsertCatalogObjectResponse itemResponse;
 		final UpsertCatalogObjectResponse itemVariationResponse;
-
 		try
 		{
 			itemResponse = sendCatalogItemUpsertRequest(request);
 			itemVariationResponse = sendCatalogItemVariationUpsertRequest(request, itemResponse.getCatalogObject().getId());
 		}
-		catch (Throwable t)
+		catch (InterruptedException | ExecutionException e)
 		{
-			logException(t, this.getClass().getName() + "::postProduct");
-			throw new SquareServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
+			logException(e, this.getClass().getName() + "::postProduct");
+            throw new SquareServiceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return combine(itemResponse, itemVariationResponse);
 	}
 
-	private SquareServiceResponseBody combine(@NonNull UpsertCatalogObjectResponse itemResponse,
-	                                          @NonNull UpsertCatalogObjectResponse itemVariationResponse)
+	private SquareServiceResponseBody combine(final UpsertCatalogObjectResponse itemResponse,
+	                                          final UpsertCatalogObjectResponse itemVariationResponse)
 	{
 		final CatalogObject itemObject = itemResponse.getCatalogObject();
 		final CatalogObject itemVarObject = itemVariationResponse.getCatalogObject();
@@ -120,7 +117,7 @@ public class SquareService
 
 	/* ****************************** CatalogItem upsert request helpers  ****************************** */
 
-	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(@NonNull final ProductPostRequestBody request)
+	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(final ProductPostRequestBody request)
 																		throws  ExecutionException, InterruptedException
 	{
 		final UpsertCatalogObjectRequest catalogItemUpsertRequest =  createCatalogItemUpsertRequest(request);
@@ -130,20 +127,20 @@ public class SquareService
 	}
 
 
-	private  UpsertCatalogObjectRequest createCatalogItemUpsertRequest(@NonNull final ProductPostRequestBody request)
+	private  UpsertCatalogObjectRequest createCatalogItemUpsertRequest(final ProductPostRequestBody request)
 	{
 		return new UpsertCatalogObjectRequest(UUID.randomUUID().toString(),
 		                                      createObjectFieldForCatalogItemUpsertRequest(request));
 	}
 
-	private  CatalogObject createObjectFieldForCatalogItemUpsertRequest(@NonNull final ProductPostRequestBody request)
+	private  CatalogObject createObjectFieldForCatalogItemUpsertRequest(final ProductPostRequestBody request)
 	{
 		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, request.getClientProductId())
 									.itemData(createCatalogItem(request))
 								.build();
 	}
 
-	private CatalogItem createCatalogItem(@NonNull final ProductPostRequestBody request)
+	private CatalogItem createCatalogItem(final ProductPostRequestBody request)
 	{
 		return new CatalogItem
 				.Builder()
@@ -202,8 +199,8 @@ public class SquareService
 	 * Send a GET request for a specific product.
 	 * @param squareItemId The relevant {@link CatalogItem}'s unique ID on Square.
 	 * @param squareItemVarId The relevant {@link CatalogItemVariation}'s unique ID on Square.
-	 * @return A {@link ProductPostRequestBody} instance with the entire client-facing product data.
 	 * @throws SquareServiceException if Square sends an Exception.
+	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
 	public SquareServiceResponseBody getProduct(@NonNull final String squareItemId,
 	                                            @NonNull final String squareItemVarId) throws SquareServiceException
@@ -222,7 +219,7 @@ public class SquareService
 		}
 		catch (Throwable t)
 		{
-			logException(t, this.getClass().getEnclosingMethod().getName());
+			logException(t, "::getProduct()");
 			throw new SquareServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -274,8 +271,9 @@ public class SquareService
 	 * @param id The product's unique id, provided by the request.
 	 * @param request The request body.
 	 * @throws SquareServiceException if Square sends an Exception.
+	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
-	public SquareServiceResponseBody putProduct(String id, ProductPostRequestBody request) throws SquareServiceException
+	public SquareServiceResponseBody putProduct(@NonNull final String id, @NonNull final ProductPostRequestBody request) throws SquareServiceException
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
@@ -284,19 +282,48 @@ public class SquareService
 	 * Send a PATCH request for a specific product.
 	 * @param id The product's unique id.
 	 * @throws SquareServiceException if Square sends an Exception.
+	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
-	public SquareServiceResponseBody patchProduct(String id, ProductPostRequestBody request) throws SquareServiceException
+	public SquareServiceResponseBody patchProduct(@NonNull final String id, @NonNull final ProductPostRequestBody request) throws SquareServiceException
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
 
 	/**
 	 * Send a DELETE request for a specific product.
-	 * @param id The product's unique id.
-	 * @throws SquareServiceException if Square sends an Exception.
+	 * @param squareItemId The unique Item ID generated by Square.
+	 * @throws SquareServiceException if Square sends an Exception of some kind.
+	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
-	public SquareServiceResponseBody deleteProduct(String id) throws SquareServiceException
+	public SquareServiceResponseBody deleteProduct(@NonNull final String squareItemId)	throws SquareServiceException
 	{
-		throw new UnimplementedMethodPlaceholder();
+		// Just as a reminder, deletions on Square are cascading, so that deletion of a CatalogItem
+		// will also yield the deletion of all of its CatalogItemVariations. Therefore, we don't need information
+		// about the variation ID as an arg.
+		try {
+			final DeleteCatalogObjectResponse response = catalogWrapper.deleteCatalogObject(squareItemId);
+			validateDeletionResponse(response);
+			return SquareServiceResponseBody.builder()
+			                                    .squareItemId(squareItemId)
+			                                    .squareItemVariationId(response.getDeletedObjectIds().get(1))
+			                                    .isDeleted(true)
+			                                    .availableElectronically(false)
+			                                    .availableForPickup(false)
+			                                    .availableOnline(false)
+			                                    .presentAtAllLocations(false)
+			                                    .updatedAt(response.getDeletedAt())
+			                                .build();
+		}
+		catch (Throwable t)
+		{
+			logException(t, this.getClass().getName() + "::deleteProduct");
+			throw new SquareServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private void validateDeletionResponse(final DeleteCatalogObjectResponse response)
+	{
+		assert response.getDeletedObjectIds() != null && response.getDeletedObjectIds().size() == 2
+				&& ( (response.getErrors() == null) || (response.getErrors().size() == 0));
 	}
 }
