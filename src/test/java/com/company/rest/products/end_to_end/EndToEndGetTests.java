@@ -18,10 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Objects;
-
+import static com.company.rest.products.util.TestUtil.checkEntityStatusAndGetResponse;
 import static java.util.Optional.ofNullable;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -45,23 +43,6 @@ public class EndToEndGetTests
 	@Autowired
 	private ProductController controller;
 
-	private void checkEntityStatus(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
-	{
-		assertEquals(responseEntity.getStatusCode(), status);
-	}
-
-
-	private ProductResponseBody checkEntityStatusAndGetResponse(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
-	{
-		checkEntityStatus(responseEntity, status);
-		return getResponseData(responseEntity);
-	}
-
-
-	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		return (ProductResponseBody) Objects.requireNonNull(responseEntity.getBody()).getData();
-	}
 
 	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
@@ -153,9 +134,8 @@ public class EndToEndGetTests
 			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
 			final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
 
-			// Optionally, check the POST response (ostensibly there's no need since there's already a POST test suite).
-//			assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i],
-//			                                                                        postResponse));
+			//Optionally, check the POST response (ostensibly there's no need since there's already a POST test suite).
+			// assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i],  postResponse));
 
 			///////////////////////////////////
 			// And now we check the GET call.//

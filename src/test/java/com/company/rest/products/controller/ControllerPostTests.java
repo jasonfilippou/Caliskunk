@@ -1,8 +1,8 @@
 package com.company.rest.products.controller;
 
 import com.company.rest.products.model.BackendService;
-import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
 import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
@@ -13,14 +13,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Objects;
-
+import static com.company.rest.products.util.TestUtil.checkAndGet;
 import static java.util.Optional.ofNullable;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -64,17 +61,6 @@ public class ControllerPostTests
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
-	private ProductResponseBody checkAndGet(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-		return getResponseData(responseEntity);
-	}
-
-
-	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		return (ProductResponseBody) Objects.requireNonNull(responseEntity.getBody()).getData();
-	}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */

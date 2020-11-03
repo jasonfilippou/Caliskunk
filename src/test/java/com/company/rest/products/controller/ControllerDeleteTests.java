@@ -3,12 +3,16 @@ package com.company.rest.products.controller;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.backend.BackendGetTests;
 import com.company.rest.products.model.backend.BackendPostTests;
+import com.company.rest.products.sample_requests.delete.GoodDeleteRequests;
 import com.company.rest.products.sample_requests.get.GoodGetRequests;
 import com.company.rest.products.sample_requests.get.MockedBackendServiceGetResponses;
 import com.company.rest.products.sample_requests.post.GoodPostRequests;
 import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
-import com.company.rest.products.util.request_bodies.*;
+import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
+import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductResponseBody;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,10 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Objects;
-
+import static com.company.rest.products.util.TestUtil.checkEntityStatusAndGetResponse;
 import static java.util.Optional.ofNullable;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -56,23 +58,7 @@ public class ControllerDeleteTests
 		return	delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 	}
 
-	private void checkEntityStatus(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
-	{
-		assertEquals(responseEntity.getStatusCode(), status);
-	}
 
-
-	private ProductResponseBody checkEntityStatusAndGetResponse(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
-	{
-		checkEntityStatus(responseEntity, status);
-		return getResponseData(responseEntity);
-	}
-
-
-	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		return (ProductResponseBody) Objects.requireNonNull(responseEntity.getBody()).getData();
-	}
 
 	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
@@ -110,12 +96,12 @@ public class ControllerDeleteTests
 		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
 		final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
 
-		// Now do the corresponding GET, and ensure it works. Mock the backend call.
+		// Now do the corresponding DELETE, and ensure it works. Mock the backend DELETE call.
 		final ProductDeleteRequestBody request = new ProductDeleteRequestBody(productId);
-		when(backendService.getProduct(productId)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
+		when(backendService.deleteProduct(productId)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
 
-		final ResponseEntity<ResponseMessage> getResponseEntity = controller.deleteProduct(productId);
-		final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(getResponseEntity, HttpStatus.OK);
+		final ResponseEntity<ResponseMessage> delResponseEntity = controller.deleteProduct(productId);
+		final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(delResponseEntity, HttpStatus.OK);
 		assertTrue("Request did not match response", responseMatchesDeleteRequest(request, getResponse));
 	}
 
@@ -199,7 +185,7 @@ public class ControllerDeleteTests
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesDeleteRequest(GoodGetRequests.REQUESTS[i], getResponse));
+			           responseMatchesDeleteRequest(GoodDeleteRequests.REQUESTS[i], getResponse));
 
 		}
 	}

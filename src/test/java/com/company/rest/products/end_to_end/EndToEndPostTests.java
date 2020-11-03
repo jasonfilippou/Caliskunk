@@ -10,14 +10,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Objects;
-
+import static com.company.rest.products.util.TestUtil.getAndCheckResponse;
 import static java.util.Optional.ofNullable;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
@@ -56,17 +53,8 @@ public class EndToEndPostTests
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
-	private ProductResponseBody getAndCheckResponse(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
-		return getResponseData(responseEntity);
-	}
 
 
-	private ProductResponseBody getResponseData(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		return (ProductResponseBody) Objects.requireNonNull(responseEntity.getBody()).getData();
-	}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
