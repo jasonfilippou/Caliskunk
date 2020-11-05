@@ -27,7 +27,7 @@ public class TestUtil
 	}
 
 
-	public static ProductResponseBody checkEntityStatusAndGetResponse(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
+	public static ProductResponseBody checkEntityStatusAndFetchResponse(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
 	{
 		checkEntityStatus(responseEntity, status);
 		return getResponseData(responseEntity);

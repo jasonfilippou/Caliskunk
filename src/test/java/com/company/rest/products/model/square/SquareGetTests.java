@@ -3,7 +3,7 @@ package com.company.rest.products.model.square;
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
@@ -69,7 +69,7 @@ public class SquareGetTests
 		return	response.getSquareItemId().equals(squareIdAssignedOnPost);
 	}
 
-    private UpsertCatalogObjectResponse buildItemResponseOutOfUpsertRequest(UpsertCatalogObjectRequest request)
+    private UpsertCatalogObjectResponse buildItemResponseOutOfUpsertRequest(final UpsertCatalogObjectRequest request)
     {
     	final CatalogItem item = Optional.of(request.getObject().getItemData())
 	                                     .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItem"));
@@ -126,7 +126,8 @@ public class SquareGetTests
         // Response for a Batch Retrieve (GET, GET ALL) request
         when(catalogWrapper.batchRetrieveObjects(any(BatchRetrieveCatalogObjectsRequest.class)))
             .then(
-		        invocation -> {
+		        invocation ->
+		        {
 		            final BatchRetrieveCatalogObjectsRequest request = invocation.getArgument(0);
 		            return buildResponseOutOfRetrieveRequest(request);
 		        }

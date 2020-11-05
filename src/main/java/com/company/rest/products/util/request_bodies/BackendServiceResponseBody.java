@@ -82,11 +82,7 @@ public class BackendServiceResponseBody implements Serializable
 	/**
 	 * A method useful for mocked tests, where we want the backend service to return data based on a
 	 * request that has already been served.
-	 *
-	 * @see ControllerGetTests
 	 */
-	// The following is useful for mocked tests, where we want the backend service
-	// to return data based on a response that has already been received.
 	public static BackendServiceResponseBody fromProductResponseBody(@NonNull final ProductResponseBody response)
 	{
 		return BackendServiceResponseBody.builder()

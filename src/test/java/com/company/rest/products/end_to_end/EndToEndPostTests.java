@@ -1,7 +1,7 @@
 package com.company.rest.products.end_to_end;
 
 import com.company.rest.products.controller.ProductController;
-import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;

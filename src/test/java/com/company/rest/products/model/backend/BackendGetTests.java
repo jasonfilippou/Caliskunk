@@ -6,14 +6,11 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.sample_requests.get.GoodGetRequests;
-import com.company.rest.products.sample_requests.get.MockedSquareServiceGetResponses;
-import com.company.rest.products.sample_requests.post.GoodPostRequests;
-import com.company.rest.products.sample_requests.post.MockedSquareServicePostResponses;
-import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
-import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
-import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
+import com.company.rest.products.requests_responses.get.GoodGetRequests;
+import com.company.rest.products.requests_responses.get.MockedSquareServiceGetResponses;
+import com.company.rest.products.requests_responses.post.GoodPostRequests;
+import com.company.rest.products.requests_responses.post.MockedSquareServicePostResponses;
+import com.company.rest.products.util.request_bodies.*;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,8 +128,8 @@ public class BackendGetTests
 		/////////////////////////////////////////////////////////////////////////
 
 		when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn(preparedResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProduct(preparedResponse, request.getClientProductId(),
-		                                                                   request.getProductType());
+		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse, request.getClientProductId(),
+		                                                                                     request.getProductType());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(request);
 
@@ -188,9 +185,9 @@ public class BackendGetTests
 			// when(squareService.getProduct(postResponse.getSquareItemId(), postResponse.getSquareItemVariationId()))
 			when(squareService.getProduct(any(String.class), any(String.class))).thenReturn(MockedSquareServiceGetResponses.RESPONSES[i]);
 			// And the repo call
-			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProduct(MockedSquareServiceGetResponses.RESPONSES[i],
-			                                                                   GoodPostRequests.REQUESTS[i].getClientProductId(),
-		                                                                        GoodPostRequests.REQUESTS[i].getProductType());
+			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MockedSquareServiceGetResponses.RESPONSES[i],
+			                                                                                     GoodPostRequests.REQUESTS[i].getClientProductId(),
+			                                                                                     GoodPostRequests.REQUESTS[i].getProductType());
 			when(repository.findByClientProductId(GoodPostRequests.REQUESTS[i].getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
 			// Perform and check the GET

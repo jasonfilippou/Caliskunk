@@ -1,4 +1,4 @@
-package com.company.rest.products.sample_requests.get;
+package com.company.rest.products.requests_responses.get;
 
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 

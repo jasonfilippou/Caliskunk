@@ -74,7 +74,7 @@ public class BackendService
 			try
 			{
 				final SquareServiceResponseBody response = squareService.postProduct(request);
-				localRepo.save(LiteProduct. buildLiteProduct(response, request.getClientProductId(), request.getProductType()));
+				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response, request.getClientProductId(), request.getProductType()));
 				return BackendServiceResponseBody.buildBackendResponseBody(response, request.getClientProductId(),
 				                                                           request.getProductType());
 			}

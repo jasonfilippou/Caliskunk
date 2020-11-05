@@ -4,9 +4,9 @@ import com.company.rest.products.controller.ProductController;
 
 import com.company.rest.products.model.backend.BackendGetTests;
 import com.company.rest.products.model.backend.BackendPostTests;
-import com.company.rest.products.sample_requests.get.GoodGetRequests;
+import com.company.rest.products.requests_responses.get.GoodGetRequests;
 
-import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
@@ -20,7 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static com.company.rest.products.util.TestUtil.checkEntityStatusAndGetResponse;
+import static com.company.rest.products.util.TestUtil.checkEntityStatusAndFetchResponse;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
 
@@ -90,13 +90,13 @@ public class EndToEndGetTests
 		// Do a POST first, so that we can retrieve it afterwards.
 		final String productId = "#TEST_ITEM_FOR_GET_ID";
 		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
-		final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
 
 		// Now do the corresponding GET..
 		final ProductGetRequestBody request = new ProductGetRequestBody(productId);
 
 		final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(productId);
-		final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(getResponseEntity, HttpStatus.OK);
+		final ProductResponseBody getResponse = checkEntityStatusAndFetchResponse(getResponseEntity, HttpStatus.OK);
 		assertTrue("Request did not match response", responseMatchesGetRequest(request, getResponse));
 	}
 
@@ -136,7 +136,7 @@ public class EndToEndGetTests
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
-			final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+			final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
 
 			//Optionally, check the POST response (ostensibly there's no need since there's already a POST test suite).
 			// assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i],  postResponse));
@@ -147,7 +147,7 @@ public class EndToEndGetTests
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId());
-			final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+			final ProductResponseBody getResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",

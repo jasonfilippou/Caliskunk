@@ -1,13 +1,11 @@
 package com.company.rest.products.controller;
 
 import com.company.rest.products.model.BackendService;
-import com.company.rest.products.model.backend.BackendGetTests;
-import com.company.rest.products.model.backend.BackendPostTests;
-import com.company.rest.products.sample_requests.delete.GoodDeleteRequests;
-import com.company.rest.products.sample_requests.get.GoodGetRequests;
-import com.company.rest.products.sample_requests.get.MockedBackendServiceGetResponses;
-import com.company.rest.products.sample_requests.post.GoodPostRequests;
-import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
+import com.company.rest.products.model.backend.BackendDeleteTests;
+import com.company.rest.products.requests_responses.delete.GoodDeleteRequests;
+import com.company.rest.products.requests_responses.delete.MockedBackendServiceDeleteResponses;
+import com.company.rest.products.requests_responses.post.GoodPostRequests;
+import com.company.rest.products.requests_responses.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
@@ -23,18 +21,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static com.company.rest.products.util.TestUtil.checkEntityStatusAndGetResponse;
+import static com.company.rest.products.util.TestUtil.checkEntityStatusAndFetchResponse;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
- * GET request tests for Controller.
- *
- * This unit test suite is actually subsumed by {@link BackendPostTests}.
+ * Mocked DELETE request tests for {@link ProductController}.
  *
  * @see ControllerPostTests
- * @see BackendGetTests
+ * @see ControllerGetTests
+ * @see BackendDeleteTests
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -92,17 +89,16 @@ public class ControllerDeleteTests
 	public void testOneDel()
 	{
 		// Do a POST first, so that we can retrieve it afterwards.
-		final String productId = "#TEST_ITEM_FOR_GET_ID";
+		final String productId = "#TEST_ITEM_FOR_DEL_ID";
 		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
-		final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
 
 		// Now do the corresponding DELETE, and ensure it works. Mock the backend DELETE call.
-		final ProductDeleteRequestBody request = new ProductDeleteRequestBody(productId);
+		final ProductDeleteRequestBody deleteRequest = new ProductDeleteRequestBody(productId);
 		when(backendService.deleteProduct(productId)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
-
 		final ResponseEntity<ResponseMessage> delResponseEntity = controller.deleteProduct(productId);
-		final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(delResponseEntity, HttpStatus.OK);
-		assertTrue("Request did not match response", responseMatchesDeleteRequest(request, getResponse));
+		final ProductResponseBody delResponseBody = checkEntityStatusAndFetchResponse(delResponseEntity, HttpStatus.OK);
+		assertTrue("Request did not match response", responseMatchesDeleteRequest(deleteRequest, delResponseBody));
 	}
 
 	private ResponseEntity<ResponseMessage> makeAPost(final String clientProductId)
@@ -142,7 +138,7 @@ public class ControllerDeleteTests
 															.presentAtAllLocations(true)
                                                           .build();
 		// Mock the call to the backend service
-		when(backendService.deleteProduct(request.getClientProductId())).thenReturn(mockedResponse);
+		when(backendService.postProduct(request)).thenReturn(mockedResponse);
 
 		// Make the call to the controller
 		return controller.postProduct(request);
@@ -151,8 +147,13 @@ public class ControllerDeleteTests
 	@Test
 	public void testManyDels()
 	{
+		//////////////////////////////////////////////////////////////
+		//  Use already prepared request and mocked response bodies //
+		//////////////////////////////////////////////////////////////
+		assert GoodDeleteRequests.REQUESTS.length == GoodPostRequests.REQUESTS.length :
+								"Mismatch between #resources to be posteed and #resources to be deleted.";
 
-		final int numRequests = GoodPostRequests.REQUESTS.length;
+		final int numRequests = GoodDeleteRequests.REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			////////////////////////////////
@@ -161,31 +162,30 @@ public class ControllerDeleteTests
 
 			// Mock the backend POST call.
 			when(backendService.postProduct(GoodPostRequests.REQUESTS[i]))
-				.thenReturn(MockedBackendServicePostResponses.RESPONSES[i]);
+											.thenReturn(MockedBackendServicePostResponses.RESPONSES[i]);
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
-			final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
 
 			// Optionally, check the POST response (ostensibly there's no need since there's already a POST test suite).
-//			assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i],
-//			                                                                        postResponse));
+			// final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+			// assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], postResponse));
 
-			///////////////////////////////////
-			// And now we check the GET call.//
-			///////////////////////////////////
+			////////////////////////////////////
+			// And now we check the DEL call. //
+			////////////////////////////////////
 
-			// Mock the backend GET call.
-			when(backendService.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId()))
-						.thenReturn(MockedBackendServiceGetResponses.RESPONSES[i]);    // You will still be getting the data from POST!
+			// Mock the backend DEL call.
+			when(backendService.deleteProduct(GoodDeleteRequests.REQUESTS[i].getClientProductId()))
+						.thenReturn(MockedBackendServiceDeleteResponses.RESPONSES[i]);    // You will still be getting the data from POST!
 
 			// Call controller
-			final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId());
-			final ProductResponseBody getResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
+			final ResponseEntity<ResponseMessage> delResponseEntity = controller.deleteProduct(GoodDeleteRequests.REQUESTS[i].getClientProductId());
+			final ProductResponseBody delResponse = checkEntityStatusAndFetchResponse(delResponseEntity, HttpStatus.OK);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesDeleteRequest(GoodDeleteRequests.REQUESTS[i], getResponse));
+			           responseMatchesDeleteRequest(GoodDeleteRequests.REQUESTS[i], delResponse));
 
 		}
 	}

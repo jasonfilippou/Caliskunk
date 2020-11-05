@@ -5,8 +5,8 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.sample_requests.post.MockedSquareServicePostResponses;
-import com.company.rest.products.sample_requests.post.GoodPostRequests;
+import com.company.rest.products.requests_responses.post.MockedSquareServicePostResponses;
+import com.company.rest.products.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
@@ -104,8 +104,8 @@ public class BackendPostTests
 		                                                             .build();
 
 		when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn(preparedResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProduct(preparedResponse, request.getClientProductId(),
-		                                                                   request.getProductType());
+		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse, request.getClientProductId(),
+		                                                                                     request.getProductType());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody response = backendService.postProduct(request);
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));

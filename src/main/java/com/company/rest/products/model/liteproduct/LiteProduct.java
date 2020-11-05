@@ -56,8 +56,8 @@ public class LiteProduct
 
 	/* Some static methods to create LiteProducts on the fly from various layer responses. */
 
-	public static LiteProduct buildLiteProduct(@NonNull final SquareServiceResponseBody response, @NonNull final String clientProductId,
-	                                           @NonNull final String productType)
+	public static LiteProduct buildLiteProductFromSquareResponse(@NonNull final SquareServiceResponseBody response, @NonNull final String clientProductId,
+	                                                             @NonNull final String productType)
 	{
 			return LiteProduct.builder()
 			                    .clientProductId(clientProductId)

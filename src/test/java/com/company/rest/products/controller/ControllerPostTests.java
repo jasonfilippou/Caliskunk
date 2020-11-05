@@ -1,8 +1,8 @@
 package com.company.rest.products.controller;
 
 import com.company.rest.products.model.BackendService;
-import com.company.rest.products.sample_requests.post.GoodPostRequests;
-import com.company.rest.products.sample_requests.post.MockedBackendServicePostResponses;
+import com.company.rest.products.requests_responses.post.GoodPostRequests;
+import com.company.rest.products.requests_responses.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;

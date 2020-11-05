@@ -300,9 +300,10 @@ public class SquareService
 		// Just as a reminder, deletions on Square are cascading, so that deletion of a CatalogItem
 		// will also yield the deletion of all of its CatalogItemVariations. Therefore, we don't need information
 		// about the variation ID as an arg.
-		try {
+		try
+		{
 			final DeleteCatalogObjectResponse response = catalogWrapper.deleteCatalogObject(squareItemId);
-			validateDeletionResponse(response);
+			validateDeletionResponse(response, squareItemId);
 			return SquareServiceResponseBody.builder()
 			                                    .squareItemId(squareItemId)
 			                                    .squareItemVariationId(response.getDeletedObjectIds().get(1))
@@ -321,9 +322,10 @@ public class SquareService
 		}
 	}
 
-	private void validateDeletionResponse(final DeleteCatalogObjectResponse response)
+	private void validateDeletionResponse(final DeleteCatalogObjectResponse response, final String expectedDeletedItemId)
 	{
-		assert response.getDeletedObjectIds() != null && response.getDeletedObjectIds().size() == 2
-				&& ( (response.getErrors() == null) || (response.getErrors().size() == 0));
+		assert (response.getDeletedObjectIds() != null && response.getDeletedObjectIds().size() == 2)  && response.getDeletedObjectIds().get(0).equals(expectedDeletedItemId) // Appropriate response
+													       &&
+		       ( (response.getErrors() == null) || (response.getErrors().size() == 0)); // No errors
 	}
 }

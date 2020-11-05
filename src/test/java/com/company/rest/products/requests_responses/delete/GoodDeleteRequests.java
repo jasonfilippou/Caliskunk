@@ -1,4 +1,4 @@
-package com.company.rest.products.sample_requests.delete;
+package com.company.rest.products.requests_responses.delete;
 
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 

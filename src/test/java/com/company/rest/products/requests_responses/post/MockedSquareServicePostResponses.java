@@ -1,4 +1,4 @@
-package com.company.rest.products.sample_requests.post;
+package com.company.rest.products.requests_responses.post;
 
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
