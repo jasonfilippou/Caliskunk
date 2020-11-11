@@ -6,6 +6,14 @@ import lombok.*;
 import java.io.Serializable;
 
 
+/**
+ * A JSON GET request.
+ *
+ * @see ProductPostRequestBody
+ * @see ProductDeleteRequestBody
+ * @see ProductUpdateRequestBody
+ * @see ProductResponseBody
+ */
 @Builder(access = AccessLevel.PUBLIC)
 @Data
 @AllArgsConstructor

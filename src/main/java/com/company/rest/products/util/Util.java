@@ -32,4 +32,9 @@ public class Util
 		log.error("Method " + methodName + " received an instance of " + thrown.getClass().getName() +
 		          ", with message: " + thrown.getMessage() + ".");
 	}
+
+	public static String ensureFirstCharIs(@NonNull String s, final char c)
+	{
+		return (s.length() > 1 && s.charAt(0) == c) ? s : (c + s);
+	}
 }

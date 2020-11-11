@@ -5,6 +5,15 @@ import lombok.*;
 
 import java.io.Serializable;
 
+/**
+ * A JSON DELETE request.
+ *
+ * @see ProductPostRequestBody
+ * @see ProductGetRequestBody
+ * @see ProductUpdateRequestBody
+ * @see ProductResponseBody
+ *
+ */
 @Builder(access = AccessLevel.PUBLIC)
 @Data
 @AllArgsConstructor

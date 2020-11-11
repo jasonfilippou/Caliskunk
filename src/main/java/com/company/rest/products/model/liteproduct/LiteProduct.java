@@ -2,6 +2,7 @@ package com.company.rest.products.model.liteproduct;
 
 import com.company.rest.products.util.exceptions.InvalidProductTypeException;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
+import com.company.rest.products.util.Util;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -9,8 +10,6 @@ import javax.persistence.Id;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import static com.company.rest.products.util.Util.logException;
 
 @Data
 @Entity
@@ -40,7 +39,7 @@ public class LiteProduct
 		if(!PRODUCT_TYPES.contains(productType))
 		{
 			final InvalidProductTypeException exc = new InvalidProductTypeException(productType);
-			logException(exc, this.getClass().getName() + "::LiteProduct");
+			Util.logException(exc, this.getClass().getName() + "::LiteProduct");
 			throw new InvalidProductTypeException(productType);
 		}
 		else

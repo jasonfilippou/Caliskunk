@@ -3,8 +3,8 @@ package com.company.rest.products.model;
 import com.company.rest.products.util.exceptions.SquareServiceException;
 import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
 import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpdateRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
-import com.squareup.square.api.CatalogApi;
 import com.squareup.square.models.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -16,17 +16,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.company.rest.products.util.Util.*;
 
 /**
- * Square service class. Makes calls to {@link CatalogApi} and returns results to {@link BackendService} callers.
+ * Square service class. Uses {@link CatalogWrapper}'s calls to interact with Square API and returns response
+ * to {@link BackendService}.
  *
  * @see BackendService
- * @see CatalogApi
- * @see CatalogItem
- * @see CatalogItemVariation
+ * @see CatalogWrapper
+ * @see SquareServiceException
+ * @see SquareServiceResponseBody
  */
 @Slf4j
 @Component
@@ -37,14 +37,13 @@ public class SquareService
 	public static final String CODE_FOR_CATALOG_ITEMS = "ITEM";
 	public static final String CODE_FOR_CATALOG_ITEM_VARIATIONS = "ITEM_VARIATION";
 	public static final Integer ABBRV_CHARS = 3;
-	public static final Integer SECONDS_TO_WAIT = 10;
-	public static final TimeUnit TIME_UNIT_USED = TimeUnit.SECONDS;
 	public static final String DEFAULT_SQUARE_CATALOG_ITEM_TYPE = "REGULAR";
 
 	private final CatalogWrapper catalogWrapper;
 
 	/**
 	 * Constructor takes an autowired {@link CatalogWrapper} instance  as a parameter.
+	 * @param catalogWrapper A - usually {@code @Autowired} - {@link CatalogWrapper} instance.
 	 */
 	@Autowired
 	public SquareService(@NonNull final CatalogWrapper catalogWrapper)
@@ -58,7 +57,9 @@ public class SquareService
 	 * that the entity does <i>not</i> already exist in the repo by checking cached instances.
 	 *
 	 * @param request A {@link ProductPostRequestBody} instance containing details of the request.
+	 *
 	 * @throws SquareServiceException if any Exception is sent to us by Square.
+	 * @return A serialized response containing the information of this layer.
 	 */
 	public SquareServiceResponseBody postProduct(@NonNull final ProductPostRequestBody request) throws SquareServiceException
 	{
@@ -77,11 +78,11 @@ public class SquareService
 			logException(e, this.getClass().getName() + "::postProduct");
             throw new SquareServiceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return combine(itemResponse, itemVariationResponse);
+		return combineResponses(itemResponse, itemVariationResponse);
 	}
 
-	private SquareServiceResponseBody combine(final UpsertCatalogObjectResponse itemResponse,
-	                                          final UpsertCatalogObjectResponse itemVariationResponse)
+	private SquareServiceResponseBody combineResponses(final UpsertCatalogObjectResponse itemResponse,
+	                                                   final UpsertCatalogObjectResponse itemVariationResponse)
 	{
 		final CatalogObject itemObject = itemResponse.getCatalogObject();
 		final CatalogObject itemVarObject = itemVariationResponse.getCatalogObject();
@@ -115,7 +116,9 @@ public class SquareService
 		                                .build();
 	}
 
+	/* ************************************************************************************************* */
 	/* ****************************** CatalogItem upsert request helpers  ****************************** */
+	/* ************************************************************************************************* */
 
 	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(final ProductPostRequestBody request)
 																		throws  ExecutionException, InterruptedException
@@ -135,7 +138,7 @@ public class SquareService
 
 	private  CatalogObject createObjectFieldForCatalogItemUpsertRequest(final ProductPostRequestBody request)
 	{
-		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, request.getClientProductId())
+		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, ensureFirstCharIs(request.getClientProductId(), '#'))
 									.itemData(createCatalogItem(request))
 								.build();
 	}
@@ -157,7 +160,9 @@ public class SquareService
 
 
 
-	/* ************************* CatalogItemVariation upsert request helpers  ****************************** */
+	/* ************************************************************************************************* */
+	/* ************************* CatalogItemVariation upsert request helpers  ************************** */
+	/* ************************************************************************************************* */
 
 	private  UpsertCatalogObjectResponse sendCatalogItemVariationUpsertRequest(final ProductPostRequestBody request, String id)
 															throws ExecutionException, InterruptedException
@@ -200,6 +205,8 @@ public class SquareService
 	 * @param squareItemId The relevant {@link CatalogItem}'s unique ID on Square.
 	 * @param squareItemVarId The relevant {@link CatalogItemVariation}'s unique ID on Square.
 	 * @throws SquareServiceException if Square sends an Exception.
+	 * @see BackendService#getProduct(String)
+	 * @see CatalogWrapper#batchRetrieveObjects(BatchRetrieveCatalogObjectsRequest)
 	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
 	public SquareServiceResponseBody getProduct(@NonNull final String squareItemId,
@@ -271,6 +278,8 @@ public class SquareService
 	 * @param id The product's unique id, provided by the request.
 	 * @param request The request body.
 	 * @throws SquareServiceException if Square sends an Exception.
+	 * @see BackendService#putProduct(String, ProductPostRequestBody)
+	 * @see CatalogWrapper#upsertObject(UpsertCatalogObjectRequest)
 	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
 	public SquareServiceResponseBody putProduct(@NonNull final String id, @NonNull final ProductPostRequestBody request) throws SquareServiceException
@@ -281,7 +290,10 @@ public class SquareService
 	/**
 	 * Send a PATCH request for a specific product.
 	 * @param id The product's unique id.
+	 * @param request The JSON request that contains the information we want to patch the product with.
 	 * @throws SquareServiceException if Square sends an Exception.
+	 * @see BackendService#patchProduct(String, ProductUpdateRequestBody)
+	 * @see CatalogWrapper#upsertObject(UpsertCatalogObjectRequest)
 	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
 	public SquareServiceResponseBody patchProduct(@NonNull final String id, @NonNull final ProductPostRequestBody request) throws SquareServiceException
@@ -293,6 +305,8 @@ public class SquareService
 	 * Send a DELETE request for a specific product.
 	 * @param squareItemId The unique Item ID generated by Square.
 	 * @throws SquareServiceException if Square sends an Exception of some kind.
+	 * @see BackendService#deleteProduct(String)
+	 * @see CatalogWrapper#deleteCatalogObject(String)
 	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */
 	public SquareServiceResponseBody deleteProduct(@NonNull final String squareItemId)	throws SquareServiceException
@@ -324,8 +338,8 @@ public class SquareService
 
 	private void validateDeletionResponse(final DeleteCatalogObjectResponse response, final String expectedDeletedItemId)
 	{
-		assert (response.getDeletedObjectIds() != null && response.getDeletedObjectIds().size() == 2)  && response.getDeletedObjectIds().get(0).equals(expectedDeletedItemId) // Appropriate response
+		assert (response.getDeletedObjectIds() != null && response.getDeletedObjectIds().size() == 2)  && response.getDeletedObjectIds().contains(expectedDeletedItemId) // Appropriate response
 													       &&
-		       ( (response.getErrors() == null) || (response.getErrors().size() == 0)); // No errors
+               ((response.getErrors() == null) || (response.getErrors().size() == 0)); // No errors
 	}
 }

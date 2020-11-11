@@ -6,8 +6,13 @@ import lombok.*;
 import java.io.Serializable;
 
 /**
- * This class is essentially a {@link ProductPostRequestBody} without any non-null assertions on fields.
+ * A JSON UPDATE (PUT / PATCH) request. This class is essentially a {@link ProductPostRequestBody} without any non-null
+ * assertions on fields.
+ *
  * @see ProductPostRequestBody
+ * @see ProductGetRequestBody
+ * @see ProductDeleteRequestBody
+ * @see ProductResponseBody
  */
 @Builder(access = AccessLevel.PUBLIC)
 @Data

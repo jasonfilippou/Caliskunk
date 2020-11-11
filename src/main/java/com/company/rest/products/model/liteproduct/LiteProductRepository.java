@@ -1,7 +1,9 @@
 package com.company.rest.products.model.liteproduct;
 
+import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -12,11 +14,12 @@ import java.util.Optional;
 @Component
 public interface LiteProductRepository extends JpaRepository<LiteProduct, Long>
 {
-	Optional<LiteProduct> findByProductName(String name);
+	Optional<LiteProduct> findByProductName(@NonNull String name);
 
-	Optional<LiteProduct> findBySquareItemId(String id);
+	Optional<LiteProduct> findBySquareItemId(@NonNull String id);
 
-	Optional<LiteProduct> findByClientProductId(String id);
+	Optional<LiteProduct> findByClientProductId(@NonNull String id);
 
-	void deleteByClientProductId(String id);
+	@Transactional // Annotation added after advice found here: https://stackoverflow.com/questions/32269192/spring-no-entitymanager-with-actual-transaction-available-for-current-thread
+	void deleteByClientProductId(@NonNull String id);
 }

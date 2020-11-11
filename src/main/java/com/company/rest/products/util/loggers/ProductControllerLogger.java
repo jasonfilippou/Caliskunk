@@ -9,12 +9,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+/**
+ * A logger for {@link com.company.rest.products.controller.ProductController}. Uses AOP features to
+ * ensure that appropriate logging with Sl4j.
+ *
+ * @see lombok.extern.slf4j.XSlf4j
+ */
 @Component
 @Aspect
 @Slf4j
 public class ProductControllerLogger
 {
-	enum LOC
+	private enum LOC
 	{
 		BEGIN, END
 	}

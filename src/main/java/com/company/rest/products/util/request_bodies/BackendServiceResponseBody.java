@@ -1,17 +1,22 @@
 package com.company.rest.products.util.request_bodies;
 
+import com.company.rest.products.model.BackendService;
+import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
+
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * A class simulating a response payload to the client.
- * @see ProductPostRequestBody
+ * A response that {@link BackendService} provides {@link com.company.rest.products.controller.ProductController}.
+ * @see SquareServiceResponseBody
+ * @see ProductResponseBody
+ * @see BackendService
  */
 @Data
 @Builder(access = AccessLevel.PUBLIC)
@@ -39,6 +44,16 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("tax_ids") private List<String> taxIDs;
 	@JsonProperty("updated_at") private String updatedAt;
 
+	/**
+	 * Create a response to feed to {@link com.company.rest.products.controller.ProductController} based on information
+	 * mined from both {@link SquareService} <b>and</b> {@link com.company.rest.products.controller.ProductController}.
+	 *
+	 * @param squareResponse The response provided by {@link SquareService} after we called it.
+	 * @param clientProductId The unique product ID provided by the Client (<b>not</b> the Square {@link com.squareup.square.models.CatalogObject} id!)
+	 * @param productType The product type provided by the client.
+	 *
+	 * @return An instance of {@link BackendServiceResponseBody} that contains information about the run of {@link BackendService}.
+	 */
 	public static BackendServiceResponseBody buildBackendResponseBody(@NonNull final SquareServiceResponseBody squareResponse,
 	                                                                  @NonNull final String clientProductId,
 	                                                                  @NonNull final String productType)
@@ -65,7 +80,12 @@ public class BackendServiceResponseBody implements Serializable
 				.build();
 	}
 
-	// The following is useful for getAll()
+	/**
+	 * Use a {@link LiteProduct} instance to populate data to feed to {@link com.company.rest.products.controller.ProductController}.
+	 * @param product The {@link LiteProduct} that we will use to build our response from.
+	 * @return An instance of {@link BackendServiceResponseBody} which contains the data about what happened in the current
+	 * 	               run of {@link BackendService}.
+	 */
 	public static BackendServiceResponseBody fromLiteProduct(@NonNull final LiteProduct product)
 	{
 		// Right now all it does is copy data over, but this can change in the future.
@@ -82,6 +102,12 @@ public class BackendServiceResponseBody implements Serializable
 	/**
 	 * A method useful for mocked tests, where we want the backend service to return data based on a
 	 * request that has already been served.
+	 *
+	 * @param response The {@link ProductResponseBody} that contains information that will allow us to provide
+	 *                  information about what happened in the {@link BackendService} run.
+	 *
+	 * @return An instance of {@link BackendServiceResponseBody} which contains the data about what happened in the current
+	 * 	               run of {@link BackendService}.
 	 */
 	public static BackendServiceResponseBody fromProductResponseBody(@NonNull final ProductResponseBody response)
 	{

@@ -1,5 +1,6 @@
 package com.company.rest.products.util.request_bodies;
 
+import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.squareup.square.models.CatalogItem;
@@ -11,8 +12,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * A projection of the response objects returned by Square on the fields that <i>might</i> interest our application.
+ * Information about the run of the {@link SquareService} routine that was called.
+ *
  * @see SquareService
+ * @see com.company.rest.products.model.BackendService
+ * @see BackendServiceResponseBody
+ * @see ProductResponseBody
  */
 @Data
 @Builder(access = AccessLevel.PUBLIC)
@@ -36,11 +41,18 @@ public class SquareServiceResponseBody implements Serializable
 	@JsonProperty("updated_at") private String updatedAt;
 
 
+	/**
+	 * Populate data to feed to {@link BackendService} based on information mined by the Square API.
+	 *
+	 * @param itemObject The {@link CatalogObject} that wraps a {@link CatalogItem}, sent to us by Square.
+	 * @param itemVarObject The {@link CatalogObject} that wraps a {@link CatalogItemVariation}, sent to us by Square.
+	 * @return An instance of {@link SquareServiceResponseBody} which describes the information related to the current call.
+	 */
 	public static SquareServiceResponseBody fromSquareData(@NonNull final CatalogObject itemObject,
 	                                                       @NonNull final CatalogObject itemVarObject)
 	{
-		@NonNull final CatalogItem item = itemObject.getItemData();
-		@NonNull final CatalogItemVariation variation = itemVarObject.getItemVariationData();
+		final CatalogItem item = itemObject.getItemData();
+		final CatalogItemVariation variation = itemVarObject.getItemVariationData();
 
 		return SquareServiceResponseBody
 						.builder()
