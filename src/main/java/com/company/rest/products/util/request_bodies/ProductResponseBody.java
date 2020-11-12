@@ -13,9 +13,9 @@ import java.util.List;
  * returns it.
  *
  * @see ProductGetRequestBody
- * @see ProductPostRequestBody
+ * @see ProductUpsertRequestBody
  * @see ProductDeleteRequestBody
- * @see ProductUpdateRequestBody
+ * @see ProductUpsertRequestBody
  */
 @Data
 @Builder(access = AccessLevel.PUBLIC)

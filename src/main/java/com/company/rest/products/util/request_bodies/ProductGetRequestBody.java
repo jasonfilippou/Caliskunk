@@ -9,9 +9,9 @@ import java.io.Serializable;
 /**
  * A JSON GET request.
  *
- * @see ProductPostRequestBody
+ * @see ProductUpsertRequestBody
  * @see ProductDeleteRequestBody
- * @see ProductUpdateRequestBody
+ * @see ProductUpsertRequestBody
  * @see ProductResponseBody
  */
 @Builder(access = AccessLevel.PUBLIC)

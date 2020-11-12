@@ -20,15 +20,16 @@ import java.util.Arrays;
 @Slf4j
 public class ProductControllerLogger
 {
+	/* Fields and Utilities */
 	private enum LOC
 	{
 		BEGIN, END
 	}
 
-	/* Utilities */
-	private String msg(String method, LOC pointInMethod, JoinPoint jp)
+
+	private String msg(final String method, final LOC pointInMethod, final JoinPoint jp)
 	{
-		String args = Arrays.toString(jp.getArgs());
+		final String args = Arrays.toString(jp.getArgs());
 
 		return ((pointInMethod == LOC.BEGIN) ? "Serving" : "Served") + " a " + method + " request via a call to " +
 		       jp.getSignature().getDeclaringTypeName() + "." + jp.getSignature().getName() + "(" +
@@ -37,65 +38,65 @@ public class ProductControllerLogger
 
 	/* GET */
 	@Before("execution(* com.company.rest.products.controller.ProductController.get*(..))")
-	public void beforeGetRequests(JoinPoint jp)
+	public void beforeGetRequests(final JoinPoint jp)
 	{
 		log.info(msg("GET", LOC.BEGIN, jp));
 	}
 
 	@After("execution(* com.company.rest.products.controller.ProductController.get*(..))")
-	public void afterGetRequests(JoinPoint jp)
+	public void afterGetRequests(final JoinPoint jp)
 	{
 		log.info(msg("GET", LOC.END, jp));
 	}
 
 	/* POST */
 	@Before("execution(* com.company.rest.products.controller.ProductController.post*(..))")
-	public void beforePostRequests(JoinPoint jp)
+	public void beforePostRequests(final JoinPoint jp)
 	{
 		log.info(msg("POST", LOC.BEGIN, jp));
 	}
 
 	@After("execution(* com.company.rest.products.controller.ProductController.post*(..))")
-	public void afterPostRequests(JoinPoint jp)
+	public void afterPostRequests(final JoinPoint jp)
 	{
 		log.info(msg("POST", LOC.END, jp));
 	}
 
 	/* PUT */
 	@Before("execution(* com.company.rest.products.controller.ProductController.put*(..))")
-	public void beforePutRequests(JoinPoint jp)
+	public void beforePutRequests(final JoinPoint jp)
 	{
 		log.info(msg("PUT", LOC.BEGIN, jp));
 	}
 
 	@After("execution(* com.company.rest.products.controller.ProductController.put*(..))")
-	public void afterPutRequests(JoinPoint jp)
+	public void afterPutRequests(final JoinPoint jp)
 	{
 		log.info(msg("PUT", LOC.END, jp));
 	}
 
 	/* PATCH */
 	@Before("execution(* com.company.rest.products.controller.ProductController.patch*(..))")
-	public void beforePatchRequests(JoinPoint jp)
+	public void beforePatchRequests(final JoinPoint jp)
 	{
 		log.info(msg("PATCH", LOC.BEGIN, jp));
 	}
 
 	@After("execution(* com.company.rest.products.controller.ProductController.put*(..))")
-	public void afterPatchRequests(JoinPoint jp)
+	public void afterPatchRequests(final JoinPoint jp)
 	{
 		log.info(msg("PATCH", LOC.END, jp));
 	}
 
 	/* DELETE */
 	@Before("execution(* com.company.rest.products.controller.ProductController.delete*(..))")
-	public void beforeDeleteRequests(JoinPoint jp)
+	public void beforeDeleteRequests(final JoinPoint jp)
 	{
 		log.info(msg("DELETE", LOC.BEGIN, jp));
 	}
 
 	@After("execution(* com.company.rest.products.controller.ProductController.delete*(..))")
-	public void afterDeleteRequests(JoinPoint jp)
+	public void afterDeleteRequests(final JoinPoint jp)
 	{
 		log.info(msg("DELETE", LOC.END, jp));
 	}

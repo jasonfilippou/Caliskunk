@@ -8,18 +8,19 @@ import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.test.requests_responses.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static com.company.rest.products.test.util.TestUtil.checkHttpOkAndGet;
+import static com.company.rest.products.test.util.TestUtil.checkEntityStatusAndFetchResponse;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -47,7 +48,7 @@ public class ControllerPostTests
 	private BackendService backendService;     // The class that will be mocked
 
 
-	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
+	private boolean responseMatchesPostRequest(@NonNull ProductUpsertRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
 	{
 		return
@@ -79,7 +80,7 @@ public class ControllerPostTests
 	@Test
 	public void testOnePost()
 	{
-		final ProductPostRequestBody request = ProductPostRequestBody
+		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
@@ -116,7 +117,7 @@ public class ControllerPostTests
 		when(backendService.postProduct(request)).thenReturn(preparedResponse);
 
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
-		final ProductResponseBody response = checkHttpOkAndGet(responseEntity);
+		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 	}
 
@@ -132,7 +133,7 @@ public class ControllerPostTests
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
-			final ProductResponseBody response = checkHttpOkAndGet(responseEntity);
+			final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",

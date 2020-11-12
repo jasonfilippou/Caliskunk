@@ -4,8 +4,8 @@ import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import lombok.NonNull;
 import org.junit.After;
 import org.junit.Before;
@@ -13,10 +13,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static com.company.rest.products.test.util.TestUtil.*;
+import static com.company.rest.products.test.util.TestUtil.checkEntityStatusAndFetchResponse;
+import static com.company.rest.products.test.util.TestUtil.flushRepo;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
 
@@ -41,7 +43,7 @@ public class EndToEndPostTests
 	@Autowired
 	private LiteProductRepository repository;
 
-	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
+	private boolean responseMatchesPostRequest(@NonNull ProductUpsertRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
 	{
 		return
@@ -84,7 +86,7 @@ public class EndToEndPostTests
 	@Test
 	public void testOnePost()
 	{
-		final ProductPostRequestBody request = ProductPostRequestBody
+		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Ramses V")
 														.productType("topical")
@@ -99,7 +101,7 @@ public class EndToEndPostTests
 														.availableForPickup(true)
 													.build();
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
-		final ProductResponseBody response = checkHttpOkAndGet(responseEntity);
+		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
 	}
 
@@ -111,7 +113,7 @@ public class EndToEndPostTests
 		{
 			// Call controller
 			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
-			final ProductResponseBody response = checkHttpOkAndGet(responseEntity);
+			final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
 			           responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], response));

@@ -30,7 +30,7 @@ public class Util
 	public static void logException(Throwable thrown, String methodName)
 	{
 		log.error("Method " + methodName + " received an instance of " + thrown.getClass().getName() +
-		          ", with message: " + thrown.getMessage() + ".");
+		          ", with message: " + thrown.getMessage());
 	}
 
 	public static String ensureFirstCharIs(@NonNull String s, final char c)

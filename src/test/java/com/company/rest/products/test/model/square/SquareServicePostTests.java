@@ -4,7 +4,7 @@ import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
 import lombok.NonNull;
@@ -54,7 +54,7 @@ public class SquareServicePostTests
 	private CatalogWrapper catalogWrapper;     // Class that will be mocked
 
 	private boolean responseMatchesRequest(@NonNull SquareServiceResponseBody response,
-	                                       @NonNull ProductPostRequestBody request)
+	                                       @NonNull ProductUpsertRequestBody request)
 	{
 		return	response.getName().equals(request.getName()) &&
 		        response.getCostInCents().equals(request.getCostInCents()) &&
@@ -134,7 +134,7 @@ public class SquareServicePostTests
 	@Test
 	public void testOnePost()
 	{
-		final ProductPostRequestBody request = ProductPostRequestBody
+		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
@@ -163,8 +163,7 @@ public class SquareServicePostTests
 			final SquareServiceResponseBody response = squareService.postProduct(GoodPostRequests.REQUESTS[i]);
 
 			// Assess response
-			assertTrue("Mismatch in response #" + i + ".",
-			           responseMatchesRequest(response, GoodPostRequests.REQUESTS[i]));
+			assertTrue("Mismatch in response #" + i, responseMatchesRequest(response, GoodPostRequests.REQUESTS[i]));
 		}
 	}
 

@@ -2,7 +2,7 @@ package com.company.rest.products.test.requests_responses.post;
 
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 
 /**
@@ -31,7 +31,7 @@ public class MockedSquareServicePostResponses
 		return retVal;
 	}
 
-	private static SquareServiceResponseBody mockedResponse(ProductPostRequestBody request)
+	private static SquareServiceResponseBody mockedResponse(ProductUpsertRequestBody request)
 	{
 		return SquareServiceResponseBody.builder()
 		                            .name(request.getName())

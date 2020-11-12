@@ -11,7 +11,7 @@ public class SquareServiceException extends RuntimeException
 	public SquareServiceException(Throwable t, HttpStatus status)
 	{
 		super("An exception in the Square service layer occurred: " + t.getClass().getName()
-		      + " with message: " + t.getMessage() + ".");
+		      + " with message: " + t.getMessage());
 		this.status = status;
 	}
 }

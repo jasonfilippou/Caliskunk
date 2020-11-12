@@ -3,12 +3,8 @@ package com.company.rest.products.model;
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.util.Util;
 import com.company.rest.products.util.exceptions.*;
-import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
-import com.company.rest.products.util.request_bodies.ProductUpdateRequestBody;
-import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
+import com.company.rest.products.util.request_bodies.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.company.rest.products.util.Util.logException;
 
 /**
  * Service class for {@link ProductController}. Manages queries to our {@link LiteProductRepository} database
@@ -47,7 +45,7 @@ public class BackendService
 	 * @param squareService A reference to our {@link SquareService} instance. Usually {@code @Autowired}.
 	 */
 	@Autowired
-	public BackendService(LiteProductRepository localRepo, SquareService squareService)
+	public BackendService(final LiteProductRepository localRepo, final SquareService squareService)
 	{
 		this.localRepo = localRepo;
 		this.squareService = squareService;
@@ -58,23 +56,24 @@ public class BackendService
 	 * Handles a POST request to Square's API. After the call to the API is made, ensures that a cached version
 	 * of the product is maintained in our local DB before returning response to {@link ProductController}.
 	 *
-	 * @param request A {@link ProductPostRequestBody} instance containing details of the request.
+	 * @param request A {@link ProductUpsertRequestBody} instance containing details of the request.
 	 * @see LiteProduct
 	 * @see LiteProductRepository
-	 * @see ProductController#postProduct(ProductPostRequestBody) 
-	 * @see SquareService#postProduct(ProductPostRequestBody)
-	 * @throws BackendServiceException if the resource is already there.
+	 * @see ProductController#postProduct(ProductUpsertRequestBody)
+	 * @see SquareService#postProduct(ProductUpsertRequestBody)
+	 * @throws ResourceAlreadyCreatedException if the resource is already there.
+	 * @throws BackendServiceException if {@link SquareService} throws a {@link SquareServiceException} to us.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 */
-	public BackendServiceResponseBody postProduct(ProductPostRequestBody request) throws BackendServiceException
+	public BackendServiceResponseBody postProduct(final ProductUpsertRequestBody request) throws BackendServiceException, ResourceAlreadyCreatedException
 	{
 		// First, make a local check to ensure that there's no name clash for
 		// the product uploaded. This is one of the advantages of having a cache.
 		if(localRepo.findByProductName(request.getName()).isPresent())
 		{
-			final ResourceAlreadyCreatedException exc = new ResourceAlreadyCreatedException();
-            Util.logException(exc, this.getClass().getName() + "::postProduct");
-            throw new BackendServiceException(exc, HttpStatus.CONFLICT);
+			final ProductNotFoundException exc = new ProductNotFoundException(request.getClientProductId());
+            logException(exc, this.getClass().getName() + "::deleteProduct");
+            throw exc;
 		}
 		else
 		{
@@ -89,7 +88,7 @@ public class BackendService
 			}
 			catch(SquareServiceException exc)
 			{
-				Util.logException(exc, this.getClass().getName() + "::postProduct");
+				logException(exc, this.getClass().getName() + "::postProduct");
                 throw new BackendServiceException(exc, exc.getStatus());
 			}
 		}
@@ -103,18 +102,20 @@ public class BackendService
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @throws BackendServiceException if an instance of {@link SquareServiceException} is caught
 	 *                              during the runtime of  {@link SquareService#getProduct(String, String)}
+   	 * @throws ProductNotFoundException if the resource is not available.
 	 * @see SquareService#getProduct(String, String)
 	 * @see ProductController#getProduct(String)
 	 */
-	public BackendServiceResponseBody getProduct(String clientProductId) throws BackendServiceException
+	public BackendServiceResponseBody getProduct(final String clientProductId) throws BackendServiceException, ProductNotFoundException
 	{
 		// Cheap check first; if the product doesn't exist, why go to Square API with the request?
 		final Optional<LiteProduct> cached = localRepo.findByClientProductId(clientProductId);
 		if(cached.isEmpty())
 		{
+
 			final ProductNotFoundException exc = new ProductNotFoundException(clientProductId);
-            Util.logException(exc, this.getClass().getName() + "::getProduct");
-            throw new BackendServiceException(exc, HttpStatus.NOT_FOUND);
+            logException(exc, this.getClass().getName() + "::getProduct");
+            throw exc;
 		}
 		else
 		{
@@ -128,7 +129,7 @@ public class BackendService
 			}
 			catch(SquareServiceException exc)
 			{
-				Util.logException(exc, this.getClass().getName() + "::getProduct");
+				logException(exc, this.getClass().getName() + "::getProduct");
 				throw new BackendServiceException(exc, exc.getStatus());
 			}
 		}
@@ -143,6 +144,7 @@ public class BackendService
 	 * @param pageIdx the current index of the page in the paginated response.
 	 * @param itemsInPage the number of items in the current page.
 	 * @param sortBy the field of {@link LiteProduct} which we will use for sorting the products.
+	 * @throws BackendServiceException if {@link SquareService} throws a {@link SquareServiceException}.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @see ProductController#getAll(Integer, Integer, String)
 	 * @see LiteProductRepository#findAll()
@@ -155,6 +157,17 @@ public class BackendService
 		// Paginated and sorted output whether it is on Square or the cache.
 		try
 		{
+			/* The way Chris usually does his pagination is by using something like this
+
+				public Page<Employee> findByDept(String deptName, Pageable pageable);
+
+				In our JPARepository type.
+
+				Pageable pageable = PageRequest.of(0, 3, Sort.by("salary")); is one of the calls that he makes
+
+				// Check the resource: https://www.logicbig.com/tutorials/spring-framework/spring-data/pagination-returning-page.html
+
+			 */
 			return localRepo.findAll(PageRequest.of(pageIdx, itemsInPage, Sort.by(sortBy).ascending()))
 			                .stream().parallel()
 			                .map(BackendServiceResponseBody::fromLiteProduct)
@@ -162,7 +175,7 @@ public class BackendService
 		}
 		catch(Throwable t)
 		{
-			Util.logException(t, this.getClass().getName() + "::getAllProducts");
+			logException(t, this.getClass().getName() + "::getAllProducts");
             throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -171,25 +184,40 @@ public class BackendService
 	/**
 	 * Send a PUT request for a specific product.
 	 * @param clientProductId The product's unique id, provided by the request.
-	 * @param newProductRequest The request body.
+	 * @param request The request body.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
-	 * @see ProductController#putProduct(ProductPostRequestBody, String)
-	 * @see SquareService#putProduct(String, ProductPostRequestBody)
+	 * @see ProductController#putProduct(ProductUpsertRequestBody, String)
+	 * @see SquareService#putProduct(String, ProductUpsertRequestBody)
 	 */
-	public BackendServiceResponseBody putProduct(@NonNull String clientProductId, @NonNull ProductPostRequestBody newProductRequest)
+	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody request, @NonNull final String clientProductId)
+													throws ProductNotFoundException, BackendServiceException
 	{
-		throw new UnimplementedMethodPlaceholder();
+		// First, ensure that the product is already POSTed, otherwise client done messed up and they need to POST.
+		final Optional<LiteProduct> cachedProduct = localRepo.findByClientProductId(clientProductId);
+		if(cachedProduct.isEmpty())
+		{
+			final ProductNotFoundException exc = new ProductNotFoundException(clientProductId);
+            logException(exc, this.getClass().getName() + "::deleteProduct");
+            throw exc;
+		}
+		else
+		{
+			final SquareServiceResponseBody response = squareService.putProduct(clientProductId, request);
+			localRepo.deleteByClientProductId(clientProductId); // Since we PUT, we have to replace entirely.
+			localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response, clientProductId, request.getProductType()));
+			return BackendServiceResponseBody.buildBackendResponseBody(response, clientProductId, request.getProductType());
+		}
 	}
 
 	/**
 	 * Send a PATCH request for a specific product.
 	 * @param clientProductId The product's unique id.
-	 * @param patchProductRequest The fields to update.
+	 * @param request The fields to update.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
-	 * @see ProductController#patchProduct(ProductPostRequestBody, String)
-	 * @see SquareService#patchProduct(String, ProductPostRequestBody)
+	 * @see ProductController#patchProduct(ProductUpsertRequestBody, String)
+	 * @see SquareService#patchProduct(ProductUpsertRequestBody, String)
 	 */
-	public BackendServiceResponseBody patchProduct(@NonNull String clientProductId, @NonNull ProductUpdateRequestBody patchProductRequest)
+	public BackendServiceResponseBody patchProduct(@NonNull final ProductUpsertRequestBody request, @NonNull final String clientProductId)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
@@ -201,14 +229,14 @@ public class BackendService
 	 * @see ProductController#deleteProduct(String)
 	 * @see SquareService#deleteProduct(String)
 	 */
-	public BackendServiceResponseBody deleteProduct(@NonNull String clientProductId)
+	public BackendServiceResponseBody deleteProduct(@NonNull final String clientProductId) throws BackendServiceException, ProductNotFoundException
 	{
 		final Optional<LiteProduct> cached = localRepo.findByClientProductId(clientProductId);
 		if(cached.isEmpty())
 		{
 			final ProductNotFoundException exc = new ProductNotFoundException(clientProductId);
-            Util.logException(exc, this.getClass().getName() + "::deleteProduct");
-            throw new BackendServiceException(exc, HttpStatus.NOT_FOUND);
+            logException(exc, this.getClass().getName() + "::deleteProduct");
+            throw exc;
 		}
 		else
 		{
@@ -227,7 +255,7 @@ public class BackendService
 			}
 			catch(SquareServiceException exc)
 			{
-				Util.logException(exc, this.getClass().getName() + "::deleteProduct");
+				logException(exc, this.getClass().getName() + "::deleteProduct");
 				throw new BackendServiceException(exc, exc.getStatus());
 			}
 		}

@@ -11,7 +11,7 @@ public class BackendServiceException extends RuntimeException
 	public BackendServiceException(Throwable t, HttpStatus status)
 	{
 		super("An exception in the backend service layer occurred: " +
-		      t.getClass().getName() + " with message: " + t.getMessage() + ".");
+		      t.getClass().getName() + " with message: " + t.getMessage());
 		this.status = status;
 	}
 }

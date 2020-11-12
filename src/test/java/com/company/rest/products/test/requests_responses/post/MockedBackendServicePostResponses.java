@@ -3,7 +3,7 @@ package com.company.rest.products.test.requests_responses.post;
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
 /**
  * A class that contains prepared responses of {@link BackendService} towards
@@ -30,7 +30,7 @@ public class MockedBackendServicePostResponses
 		return retVal;
 	}
 
-	private static BackendServiceResponseBody mockedResponse(ProductPostRequestBody request)
+	private static BackendServiceResponseBody mockedResponse(ProductUpsertRequestBody request)
 	{
 		return BackendServiceResponseBody.builder()
 			                                 .name(request.getName())

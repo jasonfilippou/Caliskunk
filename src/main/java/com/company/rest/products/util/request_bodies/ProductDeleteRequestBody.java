@@ -8,9 +8,9 @@ import java.io.Serializable;
 /**
  * A JSON DELETE request.
  *
- * @see ProductPostRequestBody
+ * @see ProductUpsertRequestBody
  * @see ProductGetRequestBody
- * @see ProductUpdateRequestBody
+ * @see ProductUpsertRequestBody
  * @see ProductResponseBody
  *
  */

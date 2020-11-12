@@ -25,6 +25,8 @@ public class LiteProduct
 	private String productType;
 	private Long costInCents;
 
+	// TODO: Enable (maybe downscaled?) images in the cached product information.
+
 	 // Model the product types as a Hash Set in case we end up with several
 	 // and need fast retrieval. The types are uppercased by convention.
 	public final static Set<String> PRODUCT_TYPES = new HashSet<>
@@ -49,7 +51,7 @@ public class LiteProduct
 			this.squareItemId = squareItemId;
 			this.squareItemVariationId = squareItemVariationId;
 			this.costInCents = costInCents;
-			this.productType=productType;
+			this.productType = productType;
 		}
 	}
 

@@ -36,7 +36,7 @@ public class CatalogWrapper
 	}
 
 	/**
-	 * Sends an upsert (PUT) request to the Square API.
+	 * Sends an upsert (POST, PUT or PATCH) request to the Square API.
 	 * @param request An {@link UpsertCatalogObjectRequest} instance containing the request data.
 	 * @throws ExecutionException if Square throws it to us.
 	 * @throws InterruptedException if Square throws it to us.
@@ -62,7 +62,7 @@ public class CatalogWrapper
 	 * @see UpsertCatalogObjectResponse
 	 * @return An instance of {@link BatchRetrieveCatalogObjectsResponse} which contains the data requested from the Square API.
 	 */
-	public BatchRetrieveCatalogObjectsResponse batchRetrieveObjects(@NonNull final BatchRetrieveCatalogObjectsRequest request)
+	public BatchRetrieveCatalogObjectsResponse retrieveObject(@NonNull final BatchRetrieveCatalogObjectsRequest request)
 																			throws ExecutionException, InterruptedException
 	{
 		return catalog.batchRetrieveCatalogObjectsAsync(request).get();
@@ -83,7 +83,7 @@ public class CatalogWrapper
 	 * @return An instance of {@link DeleteCatalogObjectResponse} which contains the data that the Square API sent us after
 	 *              a successful or unsuccessful deletion.
 	 */
-	public DeleteCatalogObjectResponse deleteCatalogObject(@NonNull final String squareItemID) throws ExecutionException, InterruptedException
+	public DeleteCatalogObjectResponse deleteObject(@NonNull final String squareItemID) throws ExecutionException, InterruptedException
 	{
 		return catalog.deleteCatalogObjectAsync(squareItemID).get();
 	}

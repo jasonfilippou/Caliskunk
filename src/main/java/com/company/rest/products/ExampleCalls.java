@@ -55,7 +55,7 @@ public class ExampleCalls
 		}
 		catch (Throwable e)
 		{
-			System.out.println("Caught a " + e.getClass().getSimpleName() + " with message: " + e.getMessage() + ".");
+			System.out.println("Caught a " + e.getClass().getSimpleName() + " with message: " + e.getMessage());
 		}
 //		catalogApi.upsertCatalogObjectAsync(request).thenAccept(response -> System.out.println("We received a response: " + response))
 //		          .exceptionally(exception -> {

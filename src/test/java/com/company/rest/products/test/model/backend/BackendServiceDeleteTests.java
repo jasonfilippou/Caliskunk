@@ -11,7 +11,7 @@ import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.test.requests_responses.post.MockedSquareServicePostResponses;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import lombok.NonNull;
 import org.junit.After;
@@ -60,7 +60,7 @@ public class BackendServiceDeleteTests
 	@Mock
 	private LiteProductRepository repository;     // Another class that will be mocked
 
-	private boolean responseMatchesPostRequest(@NonNull final ProductPostRequestBody postRequestBody,
+	private boolean responseMatchesPostRequest(@NonNull final ProductUpsertRequestBody postRequestBody,
 	                                           @NonNull final BackendServiceResponseBody responseBody)
 	{
 		return
@@ -113,7 +113,7 @@ public class BackendServiceDeleteTests
 		//////////////////////////////////////////////////////
 		// Prepare request and Square layer response bodies //
 		//////////////////////////////////////////////////////
-		final ProductPostRequestBody postRequest = ProductPostRequestBody
+		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
@@ -142,7 +142,7 @@ public class BackendServiceDeleteTests
 		// with appropriate mocks along the way.                               //
 		/////////////////////////////////////////////////////////////////////////
 
-		when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn(mockedSquaredResponse);
+		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(mockedSquaredResponse);
 		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(mockedSquaredResponse, postRequest.getClientProductId(),
 		                                                                                     postRequest.getProductType());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
@@ -189,7 +189,7 @@ public class BackendServiceDeleteTests
 			////////////////////////
 
 			// Mock square and JPA Repo calls involved in POST
-			when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn
+			when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn
 																			(MockedSquareServicePostResponses.RESPONSES[i]);
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 

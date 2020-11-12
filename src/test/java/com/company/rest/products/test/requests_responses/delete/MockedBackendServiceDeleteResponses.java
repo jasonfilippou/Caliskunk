@@ -4,7 +4,7 @@ import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
 /**
  * A class that contains prepared responses of {@link BackendService} towards
@@ -42,7 +42,7 @@ public class MockedBackendServiceDeleteResponses
 	 * which will have mined the information from the relevant `POST` request. Naturally, in production, this
 	 * information will actually come from Square; this part of the codebase will not even run.
 	 */
-	private static BackendServiceResponseBody mockedResponse(ProductPostRequestBody request)
+	private static BackendServiceResponseBody mockedResponse(ProductUpsertRequestBody request)
 	{
 		return BackendServiceResponseBody.builder()
 			                                 .name(request.getName())

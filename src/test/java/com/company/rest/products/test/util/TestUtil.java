@@ -21,16 +21,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestUtil
 {
-	/**
-	 * Ensure a given {@link ResponseEntity} has status {@code HTTP OK} and return the query data.
-	 * @param responseEntity The response of the {@link com.company.rest.products.controller.ProductController}.
-	 * @return the data contained in {@code responseEntity}.
-	 */
-	public static ProductResponseBody checkHttpOkAndGet(final ResponseEntity<ResponseMessage> responseEntity)
-	{
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		return getResponseData(responseEntity);
-	}
+//	/**
+//	 * Ensure a given {@link ResponseEntity} has status {@code HTTP OK} and return the query data.
+//	 * @param responseEntity The response of the {@link com.company.rest.products.controller.ProductController}.
+//	 * @return the data contained in {@code responseEntity}.
+//	 */
+//	public static ProductResponseBody checkHttpOkAndGet(final ResponseEntity<ResponseMessage> responseEntity)
+//	{
+//		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+//		return getResponseData(responseEntity);
+//	}
 
 	/**
 	 * Ensure that a provided {@link ResponseEntity} has the provided {@link HttpStatus}.

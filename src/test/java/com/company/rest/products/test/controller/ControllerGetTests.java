@@ -11,8 +11,8 @@ import com.company.rest.products.test.requests_responses.post.MockedBackendServi
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +61,7 @@ public class ControllerGetTests
 	}
 
 
-	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
+	private boolean responseMatchesPostRequest(@NonNull ProductUpsertRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
 	{
 		return
@@ -95,21 +95,21 @@ public class ControllerGetTests
 		// Do a POST first, so that we can retrieve it afterwards.
 		final String productId = "#TEST_ITEM_FOR_GET_ID";
 		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
-		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
+		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.CREATED);
 
 		// Now do the corresponding GET, and ensure it works. Mock the backend call.
 		final ProductGetRequestBody request = new ProductGetRequestBody(productId);
 		when(backendService.getProduct(productId)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
 
 		final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(productId);
-		final ProductResponseBody getResponse = checkEntityStatusAndFetchResponse(getResponseEntity, HttpStatus.OK);
+		final ProductResponseBody getResponse = checkEntityStatusAndFetchResponse(getResponseEntity, HttpStatus.FOUND);
 		assertTrue("Request did not match response", responseMatchesGetRequest(request, getResponse));
 	}
 
 	private ResponseEntity<ResponseMessage> makeAPost(final String clientProductId)
 	{
 		// Make post request
-		final ProductPostRequestBody request = ProductPostRequestBody
+		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Pengolin's Revenge")
 														.productType("Vaporizer")
@@ -166,7 +166,7 @@ public class ControllerGetTests
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
-			final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
+			final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.CREATED);
 
 			// Optionally, check the POST response (ostensibly there's no need since there's already a POST test suite).
 //			assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i],
@@ -182,7 +182,7 @@ public class ControllerGetTests
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> getResponseEntity = controller.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId());
-			final ProductResponseBody getResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
+			final ProductResponseBody getResponse = checkEntityStatusAndFetchResponse(getResponseEntity, HttpStatus.FOUND);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",

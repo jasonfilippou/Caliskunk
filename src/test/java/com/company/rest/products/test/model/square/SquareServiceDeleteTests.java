@@ -5,7 +5,7 @@ import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.exceptions.ApiException;
 import com.squareup.square.models.*;
@@ -55,7 +55,7 @@ public class SquareServiceDeleteTests
 	private CatalogWrapper catalogWrapper;     // Class that will be mocked
 
 	private boolean responseMatchesPostRequest(@NonNull SquareServiceResponseBody response,
-	                                           @NonNull ProductPostRequestBody request)
+	                                           @NonNull ProductUpsertRequestBody request)
 	{
 		return	response.getName().equals(request.getName()) &&
 		        response.getCostInCents().equals(request.getCostInCents()) &&
@@ -138,7 +138,7 @@ public class SquareServiceDeleteTests
 	public void testOneDel() throws IOException, ApiException, ExecutionException, InterruptedException
 	{
 		// Prepare request
-		final ProductPostRequestBody postRequest = ProductPostRequestBody
+		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
@@ -158,7 +158,7 @@ public class SquareServiceDeleteTests
 		// assertTrue("Request did not match response", responseMatchesPostRequest(postResponse, request));
 
 		// Mock the CatalogWrapper call...
-		when(catalogWrapper.deleteCatalogObject(postResponse.getSquareItemId())).thenReturn(buildMockedDeleteResponse
+		when(catalogWrapper.deleteObject(postResponse.getSquareItemId())).thenReturn(buildMockedDeleteResponse
 																								(postResponse.getSquareItemId(),
 																                                postResponse.getSquareItemVariationId()));
 		// Make the Square Service DEL call and test it.
@@ -190,7 +190,7 @@ public class SquareServiceDeleteTests
 			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GoodPostRequests.REQUESTS[i]));
 
 			// Mock the CatalogWrapper call...
-			when(catalogWrapper.deleteCatalogObject(postResponse.getSquareItemId())).thenReturn(buildMockedDeleteResponse
+			when(catalogWrapper.deleteObject(postResponse.getSquareItemId())).thenReturn(buildMockedDeleteResponse
 																								(postResponse.getSquareItemId(),
 																                                postResponse.getSquareItemVariationId()));
 			final SquareServiceResponseBody delResponse = squareService.deleteProduct(postResponse.getSquareItemId());

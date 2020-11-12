@@ -9,10 +9,7 @@ import com.company.rest.products.test.requests_responses.delete.MockedBackendSer
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.test.requests_responses.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
-import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
-import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
-import com.company.rest.products.util.request_bodies.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.*;
 import lombok.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +57,7 @@ public class ControllerDeleteTests
 
 
 
-	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
+	private boolean responseMatchesPostRequest(@NonNull ProductUpsertRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
 	{
 		return
@@ -95,7 +92,7 @@ public class ControllerDeleteTests
 		// Do a POST first, so that we can retrieve it afterwards.
 		final String productId = "#TEST_ITEM_FOR_DEL_ID";
 		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
-		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
+		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.CREATED);
 
 		// Now do the corresponding DELETE, and ensure it works. Mock the backend DELETE call.
 		final ProductDeleteRequestBody deleteRequest = new ProductDeleteRequestBody(productId);
@@ -108,7 +105,7 @@ public class ControllerDeleteTests
 	private ResponseEntity<ResponseMessage> makeAPost(final String clientProductId)
 	{
 		// Make post request
-		final ProductPostRequestBody request = ProductPostRequestBody
+		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Pengolin's Revenge")
 														.productType("Vaporizer")

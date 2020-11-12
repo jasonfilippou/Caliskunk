@@ -6,8 +6,8 @@ import com.company.rest.products.test.requests_responses.delete.GoodDeleteReques
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import lombok.NonNull;
 import org.junit.After;
 import org.junit.Before;
@@ -53,7 +53,7 @@ public class EndToEndDeleteTests
 
 
 
-	private boolean responseMatchesPostRequest(@NonNull ProductPostRequestBody postRequestBody,
+	private boolean responseMatchesPostRequest(@NonNull ProductUpsertRequestBody postRequestBody,
 	                                           @NonNull ProductResponseBody responseBody)
 	{
 		return
@@ -99,7 +99,7 @@ public class EndToEndDeleteTests
 		// Do a POST first, so that we can retrieve it afterwards.
 		final String productId = "#TEST_ITEM_FOR_DEL_ID";
 		final ResponseEntity<ResponseMessage> postResponseEntity = makeAPost(productId);
-		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.OK);
+		final ProductResponseBody postResponse = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.CREATED);
 
 		// Now do the corresponding DELETE, and ensure it works. Mock the backend DELETE call.
 		final ProductDeleteRequestBody deleteRequest = new ProductDeleteRequestBody(productId);
@@ -111,7 +111,7 @@ public class EndToEndDeleteTests
 	private ResponseEntity<ResponseMessage> makeAPost(final String clientProductId)
 	{
 		// Make post request
-		final ProductPostRequestBody request = ProductPostRequestBody
+		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Pengolin's Revenge")
 														.productType("Vaporizer")

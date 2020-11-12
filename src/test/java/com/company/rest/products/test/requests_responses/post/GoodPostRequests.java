@@ -1,7 +1,7 @@
 package com.company.rest.products.test.requests_responses.post;
 
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
 
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
 /**
  * Some delete requests that match the items inserted in {@link GoodPostRequests}.
@@ -13,23 +13,23 @@ public class GoodPostRequests
 {
 
 	/**
-	 * An array of prepared {@link ProductPostRequestBody} instances.
+	 * An array of prepared {@link ProductUpsertRequestBody} instances.
 	 */
-	public static final ProductPostRequestBody[] REQUESTS =
+	public static final ProductUpsertRequestBody[] REQUESTS =
 	{
 
 			/* ********************************************************************** */
 			/* **************************** FLOWERS ********************************* */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 										.name("Culeothesis Necrosis 1/8 oz") // Gets internally capitalized
 			                            .clientProductId("#CULNEC-EIGHTH")
 				                        .productType("flower")  //  Gets internally capitalized
 				                        .costInCents(2500L)
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 										.name("Culeothesis Necrosis 1/4 oz")
 			                            .clientProductId("#CULNEC-QUARTER")
 				                        .productType("flower")
@@ -37,14 +37,14 @@ public class GoodPostRequests
 										.labelColor("106B0C") // Dark greenish
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 										.name("Culeothesis Necrosis 1/2 oz")
 			                            .clientProductId("#CULNEC-HALF")
 				                        .productType("flower")
 				                        .costInCents(10000L)
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 										.name("Culeothesis Necrosis 1 oz")
 			                            .clientProductId("#CULNEC-ONE")
 				                        .productType("flower")
@@ -52,7 +52,7 @@ public class GoodPostRequests
 										.labelColor("B9650C")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Culeothesis Necrosis 2 oz")
 			                            .clientProductId("#CULNEC-TWO")
 			                            .productType("flower")
@@ -61,7 +61,7 @@ public class GoodPostRequests
 										.availableForPickup(true)
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Silverback Gorilla 1/8 oz")
 			                            .clientProductId("#SILGOR-EIGHTH")
 			                            .productType("flower")
@@ -72,7 +72,7 @@ public class GoodPostRequests
 										.availableOnline(false)
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Silverback Gorilla 1/4 oz")
 			                            .clientProductId("#SILGOR-QUARTER")
 			                            .productType("flower")
@@ -80,7 +80,7 @@ public class GoodPostRequests
 			                            .labelColor("106B0C")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Silverback Gorilla 1/2 oz")
 			                            .clientProductId("#SILGOR-HALF")
 			                            .productType("flower")
@@ -88,7 +88,7 @@ public class GoodPostRequests
 			                            .labelColor("10670C")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Pernicious Insolence 1/8 oz")
 			                            .clientProductId("#PERN-INC-EIGHTH")
 			                            .productType("flower")
@@ -101,7 +101,7 @@ public class GoodPostRequests
 
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Pernicious Insolence 1/4 oz")
 			                            .clientProductId("#PERN-INC-QUARTER")
 			                            .productType("flower")
@@ -111,7 +111,7 @@ public class GoodPostRequests
 										.description("How did you ever live without this?")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Everest Kush 1/8 oz")
 			                            .clientProductId("#EVKUSH-EIGHTH")
 			                            .productType("flower")
@@ -119,7 +119,7 @@ public class GoodPostRequests
 			                            .labelColor("BB5890")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Everest Kush 1/4 oz")
 			                            .clientProductId("#EVKUSH-QUARTER")
 			                            .productType("flower")
@@ -127,7 +127,7 @@ public class GoodPostRequests
 			                            .labelColor("BBAF78")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Everest Kush 1/2 oz")
 			                            .clientProductId("#EVKUSH-HALF")
 			                            .productType("flower")
@@ -137,14 +137,14 @@ public class GoodPostRequests
 										.upc("1009564232")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Bobby Flay 1/4 oz")
 			                            .clientProductId("#BOBFLAY-QUARTER")
 			                            .productType("flower")
 			                            .costInCents(6500L)
 			                            .labelColor("106DDD")
 									.build(),
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Bobby Flay 1/2 oz")
 			                            .clientProductId("#BOBFLAY-HALF")
 			                            .productType("flower")
@@ -155,14 +155,14 @@ public class GoodPostRequests
 										.availableOnline(true)
 										.availableElectronically(true)
 									.build(),
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Bedouin Daydream 1/8 oz")
 			                            .clientProductId("#BOBFLAY-EIGHTH")
 			                            .productType("flower")
 			                            .costInCents(5000L)
 			                            .labelColor("AA62B2")
 									.build(),
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Bedouin Daydream 1/4 oz")
 			                            .clientProductId("#BOBFLAY-QUARTER")
 			                            .productType("flower")
@@ -176,7 +176,7 @@ public class GoodPostRequests
 									.build(),
 
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Mindy Kohen's Attorney 1/8 oz")
 			                            .clientProductId("#MKA-EIGHTH")
 			                            .productType("flower")
@@ -186,7 +186,7 @@ public class GoodPostRequests
 										.description("It's not Cochran")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Mindy Kohen's Attorney 1/4 oz")
 			                            .clientProductId("#MKA-QUARTER")
 			                            .productType("flower")
@@ -202,7 +202,7 @@ public class GoodPostRequests
 			/* **************************** VAPORIZERS ******************************** */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Midnight Delight 0.5g")
 			                            .clientProductId("#MIDDEL-HALFGRAM")
 			                            .productType("vaporizer")
@@ -211,7 +211,7 @@ public class GoodPostRequests
 
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Midnight Delight 1g")
 			                            .clientProductId("#MIDDEL-ONEGRAM")
 			                            .productType("vaporizer")
@@ -221,7 +221,7 @@ public class GoodPostRequests
 										.description("Now on sale! Perfect for sleep-related issues!")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Deathstar OG 0.5g")
 			                            .clientProductId("#DOG-HALFGRAM")
 			                            .productType("vaporizer")
@@ -230,7 +230,7 @@ public class GoodPostRequests
 										.description("It will knock you out.")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Deathstar OG 1g")
 			                            .clientProductId("#DOG-ONEGRAM")
 			                            .productType("vaporizer")
@@ -239,7 +239,7 @@ public class GoodPostRequests
 										.description("It will knock you out.")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Afternoon Booster 0.3g disposable cart")
 			                            .clientProductId("#AFTBOOST-DISP")
 			                            .productType("vaporizer")
@@ -253,7 +253,7 @@ public class GoodPostRequests
 			/* **************************** TOPICALS ******************************** */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Synergy Kush 120mg")
 			                            .clientProductId("#SYNKUSH")
 			                            .productType("topical")
@@ -261,7 +261,7 @@ public class GoodPostRequests
 			                            .labelColor("51F90A")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Tranquil Northern Wind 100mg")
 			                            .clientProductId("#TRANQUIL")
 			                            .productType("topical")
@@ -269,7 +269,7 @@ public class GoodPostRequests
 			                            .labelColor("10AD14")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("July 200mg")
 			                            .clientProductId("#JULY")
 			                            .productType("topical")
@@ -281,7 +281,7 @@ public class GoodPostRequests
 			/* **************************** EDIBLES ******************************** */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Betty's Eddies 5 x 50mg gummies")
 			                            .clientProductId("#BETTY-50")
 			                            .productType("edible")
@@ -289,7 +289,7 @@ public class GoodPostRequests
 			                            .labelColor("AAF55F")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Betty's Eddies 5 x 25mg gummies")
 			                            .clientProductId("#BETTY-25")
 			                            .productType("edible")
@@ -297,7 +297,7 @@ public class GoodPostRequests
 			                            .labelColor("AAF55F")   // No reason to not have same label color
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Paradise scent 10x10mg chews")
 			                            .clientProductId("#PAR-10")
 			                            .productType("edible")
@@ -306,7 +306,7 @@ public class GoodPostRequests
 										.upc("042100AAA264")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Weed Pasta")
 			                            .clientProductId("#WEEDPASTA")
 			                            .productType("edible")
@@ -318,7 +318,7 @@ public class GoodPostRequests
 			/* **************************** TINCTURES ******************************* */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Mary's Medicinal's 200mg")
 			                            .clientProductId("#MARY-200")
 			                            .productType("tincture")
@@ -327,7 +327,7 @@ public class GoodPostRequests
 
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Dreamy Tincture 100mg")
 			                            .clientProductId("#DREAM-100")
 			                            .productType("tincture")
@@ -338,7 +338,7 @@ public class GoodPostRequests
 										.description("Excellent for daydreamers!")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Dreamy Tincture 200mg")
 			                            .clientProductId("#DREAM-200")
 			                            .productType("tincture")
@@ -346,7 +346,7 @@ public class GoodPostRequests
 										.sku("AAAF7B118")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Cleopatra's Choice 100mg")
 			                            .clientProductId("#C-CHOICE-100")
 			                            .productType("tincture")
@@ -354,7 +354,7 @@ public class GoodPostRequests
 			                            .costInCents(80000L)
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Northern Lights 100mg")
 			                            .clientProductId("#NL-100")
 			                            .productType("tincture")
@@ -367,7 +367,7 @@ public class GoodPostRequests
 			/* **************************** CONCENTRATES ******************************* */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Ghost Shatter 2g")
 			                            .clientProductId("#GHOST-2G")
 			                            .productType("concentrate")
@@ -377,7 +377,7 @@ public class GoodPostRequests
 										.description("Prepare to leave planet Earth.")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("The Black Death 1g")
 			                            .clientProductId("#BLACK-DEATH-1G")
 			                            .productType("concentrate")
@@ -386,14 +386,14 @@ public class GoodPostRequests
 
 										.upc("042100005264")
 									.build(),
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Kemal Ataturk 1g")
 			                            .clientProductId("#KEMAL-1G")
 			                            .productType("concentrate")
 			                            .costInCents(10000L)
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("White Persian 1.5g")
 			                            .clientProductId("#WHITE-PERSIAN-1G")
 			                            .productType("concentrate")
@@ -407,14 +407,14 @@ public class GoodPostRequests
 			/* **************************** PETS ************************************ */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Tailwagger 50ml")
 			                            .clientProductId("#TAILWAGGER-50")
 			                            .productType("pet")
 			                            .costInCents(3000L)
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Tailwagger 100ml")
 			                            .clientProductId("#TAILWAGGER-100")
 			                            .productType("pet")
@@ -423,7 +423,7 @@ public class GoodPostRequests
 										.description("Now on sale!")        // Should be allowed
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Feline Tocker 40ml")
 			                            .clientProductId("#FELINE")
 			                            .productType("pet")
@@ -435,7 +435,7 @@ public class GoodPostRequests
 			/* **************************** PREROLLS ***************************** */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Pineapple Express 1g")
        			                        .clientProductId("#PINEXP-PREROLL")
 			                            .productType("preroll")
@@ -444,7 +444,7 @@ public class GoodPostRequests
 										.description("Will help you take the edge of")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Clandestine Giraffe 1.5g")
 			                            .clientProductId("#CLANDGIR")
 			                            .productType("preroll")
@@ -452,7 +452,7 @@ public class GoodPostRequests
 			                            .labelColor("A52C6A")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Culeothesis Necrosis 1.5g infused")
 			                            .productType("preroll")
 			                            .clientProductId("#CULNEC-PREROLL")
@@ -466,7 +466,7 @@ public class GoodPostRequests
 			/* **************************** ACCESSORIES ***************************** */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("\"Mr Meeseeks\" limited edition bong")
 			                            .clientProductId("#MEESEEKS-BONG")
 			                            .productType("accessory")
@@ -475,7 +475,7 @@ public class GoodPostRequests
 										.description("Ah geez, Rick!")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("\"Responsible Toker\" rolling tray")
 			                            .clientProductId("#RESPTOK-TRAY")
 			                            .productType("accessory")
@@ -486,7 +486,7 @@ public class GoodPostRequests
 			/* **************************** OTHER ****************************** */
 			/* ********************************************************************** */
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("500 points bundle")
 			                            .clientProductId("#PTS-500")
 			                            .productType("other")
@@ -494,7 +494,7 @@ public class GoodPostRequests
 			                            .labelColor("106B0C")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("1,000 points bundle")
 			                            .clientProductId("#PTS-1000")
 			                            .productType("other")
@@ -503,7 +503,7 @@ public class GoodPostRequests
 										.description("Biggest value for money yet!")
 									.build(),
 
-			ProductPostRequestBody.builder()
+			ProductUpsertRequestBody.builder()
 			                            .name("Sativa Seeds, 2oz")
 			                            .clientProductId("#SEEDS-TWOOZ")
 			                            .productType("other")

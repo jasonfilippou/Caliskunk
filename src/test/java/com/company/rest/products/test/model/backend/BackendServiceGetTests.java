@@ -11,7 +11,7 @@ import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.test.requests_responses.post.MockedSquareServicePostResponses;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
-import com.company.rest.products.util.request_bodies.ProductPostRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import lombok.NonNull;
 import org.junit.After;
@@ -62,7 +62,7 @@ public class BackendServiceGetTests
 	@Mock
 	private LiteProductRepository repository;     // Another class that will be mocked
 
-	private boolean responseMatchesPostRequest(@NonNull final ProductPostRequestBody postRequestBody,
+	private boolean responseMatchesPostRequest(@NonNull final ProductUpsertRequestBody postRequestBody,
 	                                           @NonNull final BackendServiceResponseBody responseBody)
 	{
 		return
@@ -116,7 +116,7 @@ public class BackendServiceGetTests
 		// Prepare request and Square layer response bodies //
 		//////////////////////////////////////////////////////
 
-		final ProductPostRequestBody request = ProductPostRequestBody
+		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
@@ -145,7 +145,7 @@ public class BackendServiceGetTests
 		// with appropriate mocks along the way.                               //
 		/////////////////////////////////////////////////////////////////////////
 
-		when(squareService.postProduct(any(ProductPostRequestBody.class))).thenReturn(preparedResponse);
+		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(preparedResponse);
 		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse, request.getClientProductId(),
 		                                                                                     request.getProductType());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
@@ -186,7 +186,7 @@ public class BackendServiceGetTests
 			////////////////////////
 
 			// Mock
-			when(squareService.postProduct(any(ProductPostRequestBody.class)))
+			when(squareService.postProduct(any(ProductUpsertRequestBody.class)))
 					.thenReturn(MockedSquareServicePostResponses.RESPONSES[i]);
 
 			// Call backend service for POST
