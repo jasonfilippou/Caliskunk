@@ -6,7 +6,6 @@ import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
-import lombok.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,9 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static com.company.rest.products.test.util.TestUtil.checkEntityStatusAndFetchResponse;
-import static com.company.rest.products.test.util.TestUtil.flushRepo;
-import static java.util.Optional.ofNullable;
+import static com.company.rest.products.test.util.TestUtil.*;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -42,30 +39,6 @@ public class EndToEndPostTests
 
 	@Autowired
 	private LiteProductRepository repository;
-
-	private boolean responseMatchesPostRequest(@NonNull ProductUpsertRequestBody postRequestBody,
-	                                           @NonNull ProductResponseBody responseBody)
-	{
-		return
-				// Basic data that will always be provided:
-				postRequestBody.getName().equals(responseBody.getName()) &&
-				postRequestBody.getProductType().equals(responseBody.getProductType()) &&
-				postRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
-				postRequestBody.getClientProductId().equals(responseBody.getClientProductId()) &&
-
-				// Subsequent fields that may or may not have been provided, so we
-				// use an Optional to protect ourselves against NPEs:
-				ofNullable(postRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically())) &&
-				ofNullable(postRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup())) &&
-				ofNullable(postRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline())) &&
-				ofNullable(postRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
-				ofNullable(postRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription())) &&
-				ofNullable(postRequestBody.getSku()).equals(ofNullable(responseBody.getSku())) &&
-				ofNullable(postRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc())) &&
-
-				// Let us also ensure that the POST didn't trip the object's deletion flag:
-				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
-	}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
@@ -102,7 +75,7 @@ public class EndToEndPostTests
 													.build();
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
 		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
-		assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
+		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response));
 	}
 
 	@Test
@@ -116,7 +89,7 @@ public class EndToEndPostTests
 			final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], response));
+			           responseMatchesUpsertRequest(GoodPostRequests.REQUESTS[i], response));
 		}
 	}
 

@@ -60,7 +60,7 @@ public class BackendService
 	 * @see LiteProduct
 	 * @see LiteProductRepository
 	 * @see ProductController#postProduct(ProductUpsertRequestBody)
-	 * @see SquareService#postProduct(ProductUpsertRequestBody)
+	 * @see SquareService#upsertProduct(ProductUpsertRequestBody)
 	 * @throws ResourceAlreadyCreatedException if the resource is already there.
 	 * @throws BackendServiceException if {@link SquareService} throws a {@link SquareServiceException} to us.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
@@ -81,7 +81,7 @@ public class BackendService
 			// local DB in order to grab the unique ID that Square provides us with.
 			try
 			{
-				final SquareServiceResponseBody response = squareService.postProduct(request);
+				final SquareServiceResponseBody response = squareService.upsertProduct(request);
 				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response, request.getClientProductId(), request.getProductType()));
 				return BackendServiceResponseBody.buildBackendResponseBody(response, request.getClientProductId(),
 				                                                           request.getProductType());
@@ -183,41 +183,40 @@ public class BackendService
 
 	/**
 	 * Send a PUT request for a specific product.
-	 * @param clientProductId The product's unique id, provided by the request.
 	 * @param request The request body.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
-	 * @see ProductController#putProduct(ProductUpsertRequestBody, String)
-	 * @see SquareService#putProduct(String, ProductUpsertRequestBody)
+	 * @see ProductController#putProduct(ProductUpsertRequestBody)
+	 * @see SquareService#upsertProduct(ProductUpsertRequestBody)
 	 */
-	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody request, @NonNull final String clientProductId)
+	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody request)
 													throws ProductNotFoundException, BackendServiceException
 	{
+		final String id = request.getClientProductId();
 		// First, ensure that the product is already POSTed, otherwise client done messed up and they need to POST.
-		final Optional<LiteProduct> cachedProduct = localRepo.findByClientProductId(clientProductId);
+		final Optional<LiteProduct> cachedProduct = localRepo.findByClientProductId(id);
 		if(cachedProduct.isEmpty())
 		{
-			final ProductNotFoundException exc = new ProductNotFoundException(clientProductId);
+			final ProductNotFoundException exc = new ProductNotFoundException(id);
             logException(exc, this.getClass().getName() + "::deleteProduct");
             throw exc;
 		}
 		else
 		{
-			final SquareServiceResponseBody response = squareService.putProduct(clientProductId, request);
-			localRepo.deleteByClientProductId(clientProductId); // Since we PUT, we have to replace entirely.
-			localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response, clientProductId, request.getProductType()));
-			return BackendServiceResponseBody.buildBackendResponseBody(response, clientProductId, request.getProductType());
+			final SquareServiceResponseBody response = squareService.upsertProduct(request);
+			localRepo.deleteByClientProductId(id); // Since we PUT, we have to replace entirely.
+			localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response, id, request.getProductType()));
+			return BackendServiceResponseBody.buildBackendResponseBody(response, id, request.getProductType());
 		}
 	}
 
 	/**
 	 * Send a PATCH request for a specific product.
-	 * @param clientProductId The product's unique id.
 	 * @param request The fields to update.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @see ProductController#patchProduct(ProductUpsertRequestBody, String)
 	 * @see SquareService#patchProduct(ProductUpsertRequestBody, String)
 	 */
-	public BackendServiceResponseBody patchProduct(@NonNull final ProductUpsertRequestBody request, @NonNull final String clientProductId)
+	public BackendServiceResponseBody patchProduct(@NonNull final ProductUpsertRequestBody request)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}

@@ -149,7 +149,7 @@ public class SquareServicePostTests
 														.availableForPickup(true)
 													.build();
 		// catalog calls already mocked by setUp(); we can just call the method we want to debug.
-		final SquareServiceResponseBody response = squareService.postProduct(request);
+		final SquareServiceResponseBody response = squareService.upsertProduct(request);
 		assertTrue("Request did not match response", responseMatchesRequest(response, request));
 	}
 
@@ -160,7 +160,7 @@ public class SquareServicePostTests
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Call backend service
-			final SquareServiceResponseBody response = squareService.postProduct(GoodPostRequests.REQUESTS[i]);
+			final SquareServiceResponseBody response = squareService.upsertProduct(GoodPostRequests.REQUESTS[i]);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i, responseMatchesRequest(response, GoodPostRequests.REQUESTS[i]));

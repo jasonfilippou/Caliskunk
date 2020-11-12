@@ -59,7 +59,7 @@ public class SquareService
 	 * @throws SquareServiceException if any Exception is sent to us by Square.
 	 * @return A serialized response containing the information of this layer.
 	 */
-	public SquareServiceResponseBody postProduct(@NonNull final ProductUpsertRequestBody request) throws SquareServiceException
+	public SquareServiceResponseBody upsertProduct(@NonNull final ProductUpsertRequestBody request) throws SquareServiceException
 	{
 		//  Create a CatalogItem and a CatalogItemVariation registered to that item.
 		//	For now, we have a 1-1 correspondence between them; every newly inserted
@@ -151,42 +151,11 @@ public class SquareService
 		return retVal;
 	}
 
-
-	/**
-	 * Send a PUT request for a specific product.
-	 * @param id The product's unique id, provided by the request.
-	 * @param request The request body.
-	 * @throws SquareServiceException if Square sends an Exception.
-	 * @see BackendService#putProduct(ProductUpsertRequestBody, String)
-	 * @see CatalogWrapper#upsertObject(UpsertCatalogObjectRequest)
-	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
-	 */
-	public SquareServiceResponseBody putProduct(@NonNull final String id, @NonNull final ProductUpsertRequestBody request) throws SquareServiceException
-	{
-		//  Create a CatalogItem and a CatalogItemVariation registered to that item.
-		//	For now, we have a 1-1 correspondence between them; every newly inserted
-		//	product will consist of a CatalogItem and a CatalogItemVariation registered to it.
-		final UpsertCatalogObjectResponse itemResponse;
-		final UpsertCatalogObjectResponse itemVariationResponse;
-		try
-		{
-			itemResponse = sendCatalogItemUpsertRequest(request);
-			itemVariationResponse = sendCatalogItemVariationUpsertRequest(request, itemResponse.getCatalogObject().getId());
-		}
-		catch (InterruptedException | ExecutionException e)
-		{
-			logException(e, this.getClass().getName() + "::postProduct");
-            throw new SquareServiceException(e, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return combineResponses(itemResponse, itemVariationResponse);
-	}
-
 	/**
 	 * Send a PATCH request for a specific product.
 	 * @param id The product's unique id.
 	 * @param request The JSON request that contains the information we want to patch the product with.
 	 * @throws SquareServiceException if Square sends an Exception.
-	 * @see BackendService#patchProduct(ProductUpsertRequestBody, String)
 	 * @see CatalogWrapper#upsertObject(UpsertCatalogObjectRequest)
 	 * @return A {@link SquareServiceResponseBody} describing the output of this layer.
 	 */

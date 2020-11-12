@@ -219,17 +219,15 @@ public class ProductController
 	/**
 	 * Entry point for a PUT(id) request.
 	 * @param request the new JSON data to replace the product with.
-	 * @param id  the ID of the existing product to replace.
 	 * @return an appropriate JSON response.
-	 * @see BackendService#putProduct(ProductUpsertRequestBody, String)
+	 * @see BackendService#putProduct(ProductUpsertRequestBody)
 	 */
 	@PutMapping("/product/{id}")
-	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductUpsertRequestBody request,
-	                                         @PathVariable("id") String id)
+	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductUpsertRequestBody request)
 	{
 		try
 		{
-			final BackendServiceResponseBody backendResponse = backendService.putProduct(request, id);
+			final BackendServiceResponseBody backendResponse = backendService.putProduct(request);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully updated product!", productResponse, HttpStatus.OK);
 		}
@@ -248,7 +246,7 @@ public class ProductController
 	 * Entry point for a PATCH(id) request.
 	 * @param request the JSON body with the new product data with which we want to update the product.
 	 * @param id the ID of the existing product to rupdate.
-	 * @see BackendService#patchProduct(ProductUpsertRequestBody, String)
+	 * @see BackendService#patchProduct(ProductUpsertRequestBody)
 	 * @return an appropriate JSON response.
 	 */
 	@PatchMapping("/product/{id}")
@@ -257,7 +255,7 @@ public class ProductController
 	{
 		try
 		{
-			final BackendServiceResponseBody backendResponse = backendService.patchProduct(request, id);
+			final BackendServiceResponseBody backendResponse = backendService.patchProduct(request);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully updated product!", productResponse, HttpStatus.OK);
 		}

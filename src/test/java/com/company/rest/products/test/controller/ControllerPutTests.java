@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ControllerPostTests
+public class ControllerPutTests
 {
 
 	/* *********************************************************************************************************** */
@@ -51,7 +51,7 @@ public class ControllerPostTests
 	/* *********************************************************************************************************** */
 
 	@Test
-	public void testOnePost()
+	public void testOnePut()
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
@@ -68,7 +68,7 @@ public class ControllerPostTests
 														.availableForPickup(true)
 													.build();
 
-		final BackendServiceResponseBody preparedResponse = BackendServiceResponseBody
+		final BackendServiceResponseBody preparedPostResponse = BackendServiceResponseBody
 														.builder()
 	                                                        .name(request.getName())
 	                                                        .clientProductId(request.getClientProductId())
@@ -86,14 +86,15 @@ public class ControllerPostTests
 															.labelColor(request.getLabelColor())
 															.presentAtAllLocations(true)
                                                           .build();
-		when(backendService.postProduct(request)).thenReturn(preparedResponse);
+
+		when(backendService.postProduct(request)).thenReturn(preparedPostResponse);
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
 		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response));
 	}
 
 	@Test
-	public void testManyPosts()
+	public void testManyPuts()
 	{
 		final int numRequests = GoodPostRequests.REQUESTS.length;
 		for(int i = 0; i <  numRequests; i++)

@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutionException;
 
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
-import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -53,24 +52,6 @@ public class SquareServiceDeleteTests
 
 	@Mock
 	private CatalogWrapper catalogWrapper;     // Class that will be mocked
-
-	private boolean responseMatchesPostRequest(@NonNull SquareServiceResponseBody response,
-	                                           @NonNull ProductUpsertRequestBody request)
-	{
-		return	response.getName().equals(request.getName()) &&
-		        response.getCostInCents().equals(request.getCostInCents()) &&
-
-		       	ofNullable(request.getAvailableElectronically()).equals(ofNullable(response.getAvailableElectronically())) &&
-				ofNullable(request.getAvailableForPickup()).equals(ofNullable(response.getAvailableForPickup())) &&
-				ofNullable(request.getAvailableOnline()).equals(ofNullable(response.getAvailableOnline())) &&
-				ofNullable(request.getLabelColor()).equals(ofNullable(response.getLabelColor())) &&
-				ofNullable(request.getDescription()).equals(ofNullable(response.getDescription())) &&
-				ofNullable(request.getSku()).equals(ofNullable(response.getSku())) &&
-				ofNullable(request.getUpc()).equals(ofNullable(response.getUpc())) &&
-
-		       // A POST request shouldn't trip a deletion flag.
-		       (response.getIsDeleted() == null || !response.getIsDeleted());
-	}
 
 	private boolean responseMatchesDelRequest(@NonNull SquareServiceResponseBody response,
 	                                          @NonNull String squareIdAssignedOnPost)
@@ -154,7 +135,7 @@ public class SquareServiceDeleteTests
 													.build();
 
 		// Make the POST, and optionally test it, considering that we already have a POST test suite.
-		final SquareServiceResponseBody postResponse = squareService.postProduct(postRequest);
+		final SquareServiceResponseBody postResponse = squareService.upsertProduct(postRequest);
 		// assertTrue("Request did not match response", responseMatchesPostRequest(postResponse, request));
 
 		// Mock the CatalogWrapper call...
@@ -184,7 +165,7 @@ public class SquareServiceDeleteTests
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Make Square Service POST call and retrieve response
-			final SquareServiceResponseBody postResponse = squareService.postProduct(GoodPostRequests.REQUESTS[i]);
+			final SquareServiceResponseBody postResponse = squareService.upsertProduct(GoodPostRequests.REQUESTS[i]);
 
 			// Optionally, assess POST response. Presumably, the POST test suite has covered that already.
 			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GoodPostRequests.REQUESTS[i]));
