@@ -17,7 +17,6 @@ import java.io.Serializable;
 @Builder(access = AccessLevel.PUBLIC)
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class ProductDeleteRequestBody implements Serializable
 {
 	@JsonProperty @NonNull	private String clientProductId;

@@ -1,4 +1,4 @@
-package com.company.rest.products.test.requests_responses.delete;
+package com.company.rest.products.test.controller;
 
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
@@ -10,12 +10,11 @@ import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
  * A class that contains prepared responses of {@link BackendService} towards
  * {@link ProductController}. These responses are useful for mocked unit tests.
  *
- * @see com.company.rest.products.test.requests_responses.get.MockedBackendServiceGetResponses
- * @see com.company.rest.products.test.requests_responses.post.MockedBackendServicePostResponses
- * @see com.company.rest.products.test.controller.ControllerDeleteTests
- *
+ * @see MockedBackendServiceDeleteResponses
+ * @see MockedBackendServicePostResponses
+ * @see com.company.rest.products.test.controller.ControllerGetTests
  */
-public class MockedBackendServiceDeleteResponses
+public class MockedBackendServiceGetResponses
 {
 	/**
 	 * An array of prepared {@link BackendServiceResponseBody} instances.
@@ -35,12 +34,12 @@ public class MockedBackendServiceDeleteResponses
 
 	/*
 	 * Why are we using POST request information in a class whose methods are supposed to process
-	 * DELETE requests? Because the DEL request, which is based on the ID used in the POST, makes a request
-	 * for the full data that was available to us in POST! The DEL request itself only provides an ID,
-	 * but the client expects everything they stored in the POST to be deleted and returned to them.
-	 * Therefore, to appropriately mock the backend service, we need to provide a `BackendServiceResponseBody`
-	 * which will have mined the information from the relevant `POST` request. Naturally, in production, this
-	 * information will actually come from Square; this part of the codebase will not even run.
+	 * GET requests? Because the GET request, which is based on the ID used in the POST, makes a request
+	 * for the full data that was available to us in POST! The GET request itself only provides an ID,
+	 * but the client expects everything they stored in the POST. Therefore, to appropriately mock
+	 * the backend service, we need to provide a `BackendServiceResponseBody` which will have mined
+	 * the information from the relevant `POST` request. Naturally, in production, this information will
+	 * actually come from Square; this part of the codebase will not even run.
 	 */
 	private static BackendServiceResponseBody mockedResponse(ProductUpsertRequestBody request)
 	{
@@ -62,5 +61,10 @@ public class MockedBackendServiceDeleteResponses
 			                                 .upc(request.getUpc())
 		                                 .build();
 	}
+
+	/**
+	 * A more readable alias for {@link #RESPONSES}.
+	 */
+	public static final BackendServiceResponseBody[] MOCKED_BACKEND_GET_RESPONSES = RESPONSES;
 }
 

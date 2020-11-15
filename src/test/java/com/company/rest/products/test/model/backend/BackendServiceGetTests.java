@@ -5,10 +5,6 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.test.requests_responses.get.GoodGetRequests;
-import com.company.rest.products.test.requests_responses.get.MockedSquareServiceGetResponses;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-import com.company.rest.products.test.requests_responses.post.MockedSquareServicePostResponses;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
@@ -27,6 +23,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
+import static com.company.rest.products.test.model.backend.MockedSquareServiceGetResponses.MOCKED_SQUARE_GET_RESPONSES;
+import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
+import static com.company.rest.products.test.requests_responses.get.GoodGetRequests.GOOD_GETS;
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.flushRepo;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,7 +95,7 @@ public class BackendServiceGetTests
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
-														.productType("Flower")
+														.productType("flower")
 														.clientProductId("#RANDOM_ID")
 														.costInCents(10000L) // 'L for long literal
 														.description("Will eat your face.")
@@ -103,13 +103,15 @@ public class BackendServiceGetTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(false)
-														.availableElectronically(false) // Whatever that means
+														.availableElectronically(false)
 														.availableForPickup(false)
 													.build();
 
 		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
 																	.builder()
 						                                                  .name(request.getName())
+																		  .clientProductId(request.getClientProductId())
+																		  .productType(request.getProductType())
 						                                                  .squareItemId("#RANDOM_ITEM_ID")
 						                                                  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(request.getCostInCents())
@@ -121,9 +123,8 @@ public class BackendServiceGetTests
 		// with appropriate mocks along the way.                               //
 		/////////////////////////////////////////////////////////////////////////
 
-		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class))).thenReturn(preparedResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse, request.getClientProductId(),
-		                                                                                     request.getProductType());
+		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(preparedResponse);
+		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(request);
 
@@ -135,12 +136,11 @@ public class BackendServiceGetTests
 		//////////////
 
 		// Both the square service _and_ the repository call need to be mocked.
-		when(squareService.getProduct(postResponse.getSquareItemId(),
-		                              postResponse.getSquareItemVariationId())).thenReturn(preparedResponse);
+		when(squareService.getProduct(any(LiteProduct.class))).thenReturn(preparedResponse);
 		when(repository.findByClientProductId(request.getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
 		// Now, make the call and test it.
-		final BackendServiceResponseBody getResponse = backendService.getProduct(request.getClientProductId());
+		final BackendServiceResponseBody getResponse = backendService.getProduct(new ProductGetRequestBody(request.getClientProductId()));
 		assertTrue("Request did not match response", responseMatchesGetRequest(new ProductGetRequestBody
 				                                                                            (request.getClientProductId()),
 		                                                                                        getResponse));
@@ -153,7 +153,7 @@ public class BackendServiceGetTests
 		/////// Use already prepared request and mocked response bodies /////////
 		/////////////////////////////////////////////////////////////////////////
 
-		final int numRequests = GoodPostRequests.REQUESTS.length;
+		final int numRequests = GOOD_POSTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 
@@ -162,14 +162,14 @@ public class BackendServiceGetTests
 			////////////////////////
 
 			// Mock
-			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class)))
-					.thenReturn(MockedSquareServicePostResponses.RESPONSES[i]);
+			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class)))
+					.thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
 
 			// Call backend service for POST
-			final BackendServiceResponseBody postResponse = backendService.postProduct(GoodPostRequests.REQUESTS[i]);
+			final BackendServiceResponseBody postResponse = backendService.postProduct(GOOD_POSTS[i]);
 
 			// Optionally, assess POST response (which actually subsumes the GET response that follows)
-			// assertTrue("Mismatch in response #" + i + " (0-indexed).", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], postResponse));
+			// assertTrue("Mismatch in response #" + i + " (0-indexed).", responseMatchesPostRequest(GOOD_POSTS[i], postResponse));
 
 			////////////////////////////////////////////
 			// GET request based on the previous POST //
@@ -177,17 +177,15 @@ public class BackendServiceGetTests
 
 			// Mock the square GET call
 			// when(squareService.getProduct(postResponse.getSquareItemId(), postResponse.getSquareItemVariationId()))
-			when(squareService.getProduct(any(String.class), any(String.class))).thenReturn(MockedSquareServiceGetResponses.RESPONSES[i]);
+			when(squareService.getProduct(any(LiteProduct.class))).thenReturn(MOCKED_SQUARE_GET_RESPONSES[i]);
 			// And the repo call
-			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MockedSquareServiceGetResponses.RESPONSES[i],
-			                                                                                     GoodPostRequests.REQUESTS[i].getClientProductId(),
-			                                                                                     GoodPostRequests.REQUESTS[i].getProductType());
-			when(repository.findByClientProductId(GoodPostRequests.REQUESTS[i].getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
+			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_GET_RESPONSES[i]);
+			when(repository.findByClientProductId(GOOD_POSTS[i].getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
 			// Perform and check the GET
-			final BackendServiceResponseBody getResponse = backendService.getProduct(GoodGetRequests.REQUESTS[i].getClientProductId());
+			final BackendServiceResponseBody getResponse = backendService.getProduct(GOOD_GETS[i]);
 			assertTrue("Request did not match response", responseMatchesGetRequest(new ProductGetRequestBody
-				                                                                            (GoodGetRequests.REQUESTS[i].getClientProductId()),
+				                                                                            (GOOD_GETS[i].getClientProductId()),
 		                                                                                        getResponse));
 		}
 	}

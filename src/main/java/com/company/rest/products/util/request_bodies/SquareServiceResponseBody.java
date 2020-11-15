@@ -2,6 +2,7 @@ package com.company.rest.products.util.request_bodies;
 
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
+import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.squareup.square.models.CatalogItem;
 import com.squareup.square.models.CatalogItemVariation;
@@ -23,10 +24,12 @@ import java.util.List;
 @Builder(access = AccessLevel.PUBLIC)
 public class SquareServiceResponseBody implements Serializable
 {
-	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
-	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
+	@JsonProperty("product_client_id") @NonNull private String clientProductId;
 	@JsonProperty("name")  private String name;
 	@JsonProperty("cost")   private Long costInCents;
+	@JsonProperty("product_type") private String productType;
+	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
+	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
 	@JsonProperty("description")  private String description;
 	@JsonProperty("available_online") private Boolean availableOnline;
 	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
@@ -49,13 +52,19 @@ public class SquareServiceResponseBody implements Serializable
 	 * @return An instance of {@link SquareServiceResponseBody} which describes the information related to the current call.
 	 */
 	public static SquareServiceResponseBody fromSquareData(@NonNull final CatalogObject itemObject,
-	                                                       @NonNull final CatalogObject itemVarObject)
+	                                                       @NonNull final CatalogObject itemVarObject,
+	                                                       @NonNull final LiteProduct liteProduct)
 	{
 		final CatalogItem item = itemObject.getItemData();
 		final CatalogItemVariation variation = itemVarObject.getItemVariationData();
 
 		return SquareServiceResponseBody
 						.builder()
+							// Product client ID and type.
+							.clientProductId(liteProduct.getClientProductId())
+							.productType(liteProduct.getProductType())
+
+
 							// Data contained in the CatalogObject instance
 							.squareItemId(itemObject.getId())
 							.updatedAt(itemObject.getUpdatedAt())
@@ -73,7 +82,7 @@ public class SquareServiceResponseBody implements Serializable
 
 
 							// Data pulled from CatalogItemVariation instance
-							.squareItemVariationId(itemVarObject.getId())   // This one from the CatalogObject wrapper
+							.squareItemVariationId(itemVarObject.getId())
 							.costInCents(variation.getPriceMoney().getAmount())
 							.sku(variation.getSku())
 							.upc(variation.getUpc())

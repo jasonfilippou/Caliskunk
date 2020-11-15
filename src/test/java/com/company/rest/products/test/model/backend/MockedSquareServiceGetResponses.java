@@ -1,5 +1,4 @@
-package com.company.rest.products.test.requests_responses.get;
-
+package com.company.rest.products.test.model.backend;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
@@ -10,8 +9,8 @@ import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
  * A class that contains prepared responses of {@link SquareService} towards
  * {@link BackendService}. These responses are useful for mocked unit tests.
  *
- * @see com.company.rest.products.test.requests_responses.post.MockedSquareServicePostResponses
- * @see com.company.rest.products.test.requests_responses.delete.MockedSquareServiceDeleteResponses
+ * @see MockedSquareServicePostResponses
+ * @see MockedSquareServiceDeleteResponses
  * @see com.company.rest.products.test.model.backend.BackendServiceGetTests
  */
 public class MockedSquareServiceGetResponses
@@ -44,8 +43,10 @@ public class MockedSquareServiceGetResponses
 	{
 		return SquareServiceResponseBody.builder()
 			                                 .name(request.getName())
+		                                     .clientProductId(request.getClientProductId())
 			                                 .squareItemId("random_item_id")
 			                                 .squareItemVariationId("random_item_var_id")
+		                                     .productType(request.getProductType())
 			                                 .isDeleted(false)
 			                                 .costInCents(request.getCostInCents())
 			                                 .labelColor(request.getLabelColor())
@@ -58,5 +59,9 @@ public class MockedSquareServiceGetResponses
 			                                 .upc(request.getUpc())
 		                                 .build();
 	}
+	/**
+	 * A more readable alias for {@link #RESPONSES}.
+	 */
+	public static final SquareServiceResponseBody[] MOCKED_SQUARE_GET_RESPONSES = RESPONSES;
 }
 

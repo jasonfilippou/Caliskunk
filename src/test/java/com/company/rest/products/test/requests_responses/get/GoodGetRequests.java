@@ -12,6 +12,7 @@ import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
  */
 public class GoodGetRequests
 {
+
 	/** An array of prepared {@link ProductGetRequestBody} instances. They match the instances in {@link GoodPostRequests}.
 	 */
 	public static final ProductGetRequestBody[] REQUESTS =
@@ -36,7 +37,7 @@ public class GoodGetRequests
 					new ProductGetRequestBody("#BOBFLAY-QUARTER"),
 					new ProductGetRequestBody("#BOBFLAY-HALF"),
 					new ProductGetRequestBody("#BOBFLAY-EIGHTH"),
-					new ProductGetRequestBody("#BOBFLAY-QUARTER"), 
+					new ProductGetRequestBody("#BEDOUIN-QUARTER"),
 					new ProductGetRequestBody("#MKA-EIGHTH"),
 					new ProductGetRequestBody("#MKA-QUARTER"),                    
 					
@@ -117,4 +118,8 @@ public class GoodGetRequests
 					new ProductGetRequestBody("#PTS-1000"),
 					new ProductGetRequestBody("#SEEDS-TWOOZ")
 			};
+	/**
+	 * A more readable alias for {@link #REQUESTS}.
+	 */
+	public static final ProductGetRequestBody[] GOOD_GETS = REQUESTS;
 }

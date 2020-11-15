@@ -25,8 +25,6 @@ public class LiteProduct
 	private String productType;
 	private Long costInCents;
 
-	// TODO: Enable (maybe downscaled?) images in the cached product information.
-
 	 // Model the product types as a Hash Set in case we end up with several
 	 // and need fast retrieval. The types are uppercased by convention.
 	public final static Set<String> PRODUCT_TYPES = new HashSet<>
@@ -34,11 +32,11 @@ public class LiteProduct
 			                "TINCTURE", "PET", "ACCESSORY", "OTHER"));
 
 
-	public LiteProduct(@NonNull final String clientProductId, @NonNull final String squareItemId,
-	                   @NonNull final String squareItemVariationId, @NonNull final String productName,
+	public LiteProduct(@NonNull final String clientProductId, final String squareItemId,
+	                   final String squareItemVariationId, @NonNull final String productName,
 	                   @NonNull final String productType, @NonNull final Long costInCents)
 	{
-		if(!PRODUCT_TYPES.contains(productType))
+		if(!PRODUCT_TYPES.contains(productType.strip().toUpperCase()))
 		{
 			final InvalidProductTypeException exc = new InvalidProductTypeException(productType);
 			Util.logException(exc, this.getClass().getName() + "::LiteProduct");
@@ -47,7 +45,7 @@ public class LiteProduct
 		else
 		{
 			this.clientProductId = clientProductId;
-			this.productName = productName;
+			this.productName = productName.strip().toUpperCase();
 			this.squareItemId = squareItemId;
 			this.squareItemVariationId = squareItemVariationId;
 			this.costInCents = costInCents;
@@ -57,15 +55,14 @@ public class LiteProduct
 
 	/* Some static methods to create LiteProducts on the fly from various layer responses. */
 
-	public static LiteProduct buildLiteProductFromSquareResponse(@NonNull final SquareServiceResponseBody response, @NonNull final String clientProductId,
-	                                                             @NonNull final String productType)
+	public static LiteProduct buildLiteProductFromSquareResponse(@NonNull final SquareServiceResponseBody response)
 	{
 			return LiteProduct.builder()
-			                    .clientProductId(clientProductId)
+			                    .clientProductId(response.getClientProductId())
 								.squareItemId(response.getSquareItemId())
 			                    .squareItemVariationId(response.getSquareItemVariationId())
 								.productName(response.getName().trim().toUpperCase()) // Uppercasing name to make it case-insensitive
-								.productType(productType.trim().toUpperCase()) // Product types uppercased by convention
+								.productType(response.getProductType().trim().toUpperCase()) // Similar approach
 								.costInCents(response.getCostInCents())
                               .build();
 	}

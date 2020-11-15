@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static com.company.rest.products.test.util.TestUtil.*;
+import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -70,12 +71,12 @@ public class EndToEndPostTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(false)
-														.availableElectronically(false) // Whatever that means
+														.availableElectronically(false)
 														.availableForPickup(true)
 													.build();
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
 		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
-		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response));
+		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response, POST));
 	}
 
 	@Test
@@ -89,7 +90,7 @@ public class EndToEndPostTests
 			final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesUpsertRequest(GoodPostRequests.REQUESTS[i], response));
+			           responseMatchesUpsertRequest(GoodPostRequests.REQUESTS[i], response, POST));
 		}
 	}
 

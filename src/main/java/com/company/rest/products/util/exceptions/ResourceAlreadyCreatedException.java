@@ -1,9 +1,9 @@
 package com.company.rest.products.util.exceptions;
-
+import lombok.NonNull;
 public class ResourceAlreadyCreatedException extends RuntimeException
 {
-	public ResourceAlreadyCreatedException()
+	public ResourceAlreadyCreatedException(@NonNull final String id)
 	{
-		super("The resource already exists.");
+		super("Resource with id " + id + " already exists.");
 	}
 }

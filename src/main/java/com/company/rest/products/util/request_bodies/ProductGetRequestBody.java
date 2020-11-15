@@ -17,7 +17,6 @@ import java.io.Serializable;
 @Builder(access = AccessLevel.PUBLIC)
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class ProductGetRequestBody implements Serializable
 {
 	@JsonProperty @NonNull	private String clientProductId;

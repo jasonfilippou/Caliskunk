@@ -49,21 +49,17 @@ public class BackendServiceResponseBody implements Serializable
 	 * mined from both {@link SquareService} <b>and</b> {@link com.company.rest.products.controller.ProductController}.
 	 *
 	 * @param squareResponse The response provided by {@link SquareService} after we called it.
-	 * @param clientProductId The unique product ID provided by the Client (<b>not</b> the Square {@link com.squareup.square.models.CatalogObject} id!)
-	 * @param productType The product type provided by the client.
 	 *
 	 * @return An instance of {@link BackendServiceResponseBody} that contains information about the run of {@link BackendService}.
 	 */
-	public static BackendServiceResponseBody buildBackendResponseBody(@NonNull final SquareServiceResponseBody squareResponse,
-	                                                                  @NonNull final String clientProductId,
-	                                                                  @NonNull final String productType)
+	public static BackendServiceResponseBody buildBackendResponseBody(@NonNull final SquareServiceResponseBody squareResponse)
 	{
 		return builder()
-					.clientProductId(clientProductId)
+					.clientProductId(squareResponse.getClientProductId())
 					.squareItemId(squareResponse.getSquareItemId())
 					.squareItemVariationId(squareResponse.getSquareItemVariationId())
 					.name(squareResponse.getName())
-					.productType(productType)
+					.productType(squareResponse.getProductType())
 					.costInCents(squareResponse.getCostInCents())
 					.description(squareResponse.getDescription())
 					.isDeleted(squareResponse.getIsDeleted())

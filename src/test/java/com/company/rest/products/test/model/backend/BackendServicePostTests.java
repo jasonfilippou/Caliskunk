@@ -5,8 +5,6 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-import com.company.rest.products.test.requests_responses.post.MockedSquareServicePostResponses;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
@@ -22,6 +20,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
+import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static com.company.rest.products.test.util.TestUtil.flushRepo;
 import static com.company.rest.products.test.util.TestUtil.responseMatchesUpsertRequest;
 import static org.junit.Assert.assertTrue;
@@ -88,43 +89,44 @@ public class BackendServicePostTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(true)
-														.availableElectronically(true) // Whatever that means
+														.availableElectronically(true)
 														.availableForPickup(true)
 													.build();
 
 		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
 																	.builder()
 						                                                  .name(request.getName())
+																	      .clientProductId(request.getClientProductId())
+																		  .productType(request.getProductType())
 						                                                  .squareItemId("#RANDOM_ITEM_ID")
 						                                                  .squareItemVariationId("RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(request.getCostInCents())
 						                                                  .isDeleted(false)
 		                                                             .build();
 
-		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class))).thenReturn(preparedResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse, request.getClientProductId(),
-		                                                                                     request.getProductType());
+		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(preparedResponse);
+		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody response = backendService.postProduct(request);
-		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response));
+		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response, POST));
 	}
 
 	@Test
 	public void testManyPosts()
 	{
-		final int numRequests = GoodPostRequests.REQUESTS.length;
+		final int numRequests = GOOD_POSTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Mock
-			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class)))
-					.thenReturn(MockedSquareServicePostResponses.RESPONSES[i]);
+			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class)))
+					.thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
 
 			// Call backend service
-			final BackendServiceResponseBody response = backendService.postProduct(GoodPostRequests.REQUESTS[i]);
+			final BackendServiceResponseBody response = backendService.postProduct(GOOD_POSTS[i]);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesUpsertRequest(GoodPostRequests.REQUESTS[i], response));
+			           responseMatchesUpsertRequest(GOOD_POSTS[i], response, POST));
 		}
 	}
 }

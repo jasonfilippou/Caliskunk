@@ -60,7 +60,7 @@ public class BackendService
 	 * @see LiteProduct
 	 * @see LiteProductRepository
 	 * @see ProductController#postProduct(ProductUpsertRequestBody)
-	 * @see SquareService#upsertProduct(ProductUpsertRequestBody)
+	 * @see SquareService#upsertProduct(ProductUpsertRequestBody, String)
 	 * @throws ResourceAlreadyCreatedException if the resource is already there.
 	 * @throws BackendServiceException if {@link SquareService} throws a {@link SquareServiceException} to us.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
@@ -69,10 +69,11 @@ public class BackendService
 	{
 		// First, make a local check to ensure that there's no name clash for
 		// the product uploaded. This is one of the advantages of having a cache.
-		if(localRepo.findByProductName(request.getName()).isPresent())
+		final String id = request.getClientProductId();
+		if(localRepo.findByClientProductId(id).isPresent())
 		{
-			final ProductNotFoundException exc = new ProductNotFoundException(request.getClientProductId());
-            logException(exc, this.getClass().getName() + "::deleteProduct");
+			final ResourceAlreadyCreatedException exc = new ResourceAlreadyCreatedException(id);
+            logException(exc, this.getClass().getName() + "::postProduct");
             throw exc;
 		}
 		else
@@ -81,10 +82,9 @@ public class BackendService
 			// local DB in order to grab the unique ID that Square provides us with.
 			try
 			{
-				final SquareServiceResponseBody response = squareService.upsertProduct(request);
-				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response, request.getClientProductId(), request.getProductType()));
-				return BackendServiceResponseBody.buildBackendResponseBody(response, request.getClientProductId(),
-				                                                           request.getProductType());
+				final SquareServiceResponseBody response = squareService.upsertProduct(request, id);
+				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response));
+				return BackendServiceResponseBody.buildBackendResponseBody(response);
 			}
 			catch(SquareServiceException exc)
 			{
@@ -98,22 +98,22 @@ public class BackendService
 	 * Sends a GET request for a specific product. Checks against local DB first to avoid a potentially
 	 * costly {@link SquareService} API call.
 	 *
-	 * @param clientProductId The product's unique ID assigned by the client.
+	 * @param getRequest The GET request sent to us by {@link ProductController#deleteProduct(String)}
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @throws BackendServiceException if an instance of {@link SquareServiceException} is caught
-	 *                              during the runtime of  {@link SquareService#getProduct(String, String)}
+	 *                              during the runtime of  {@link SquareService#getProduct(LiteProduct)}
    	 * @throws ProductNotFoundException if the resource is not available.
-	 * @see SquareService#getProduct(String, String)
+	 * @see SquareService#getProduct(LiteProduct)
 	 * @see ProductController#getProduct(String)
 	 */
-	public BackendServiceResponseBody getProduct(final String clientProductId) throws BackendServiceException, ProductNotFoundException
+	public BackendServiceResponseBody getProduct(final ProductGetRequestBody getRequest) throws BackendServiceException, ProductNotFoundException
 	{
 		// Cheap check first; if the product doesn't exist, why go to Square API with the request?
-		final Optional<LiteProduct> cached = localRepo.findByClientProductId(clientProductId);
+		final Optional<LiteProduct> cached = localRepo.findByClientProductId(getRequest.getClientProductId());
 		if(cached.isEmpty())
 		{
 
-			final ProductNotFoundException exc = new ProductNotFoundException(clientProductId);
+			final ProductNotFoundException exc = new ProductNotFoundException(getRequest.getClientProductId());
             logException(exc, this.getClass().getName() + "::getProduct");
             throw exc;
 		}
@@ -124,8 +124,8 @@ public class BackendService
 			final String productType = cached.get().getProductType();
 			try
 			{
-				final SquareServiceResponseBody squareServiceResponse = squareService.getProduct(squareItemId,  squareItemVariationId);
-				return BackendServiceResponseBody.buildBackendResponseBody(squareServiceResponse, clientProductId, productType);
+				final SquareServiceResponseBody squareServiceResponse = squareService.getProduct(cached.get());
+				return BackendServiceResponseBody.buildBackendResponseBody(squareServiceResponse);
 			}
 			catch(SquareServiceException exc)
 			{
@@ -185,13 +185,12 @@ public class BackendService
 	 * Send a PUT request for a specific product.
 	 * @param request The request body.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
-	 * @see ProductController#putProduct(ProductUpsertRequestBody)
-	 * @see SquareService#upsertProduct(ProductUpsertRequestBody)
+	 * @see ProductController#putProduct(ProductUpsertRequestBody, String)
+	 * @see SquareService#upsertProduct(ProductUpsertRequestBody, String)
 	 */
-	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody request)
+	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody request, @NonNull String id)
 													throws ProductNotFoundException, BackendServiceException
 	{
-		final String id = request.getClientProductId();
 		// First, ensure that the product is already POSTed, otherwise client done messed up and they need to POST.
 		final Optional<LiteProduct> cachedProduct = localRepo.findByClientProductId(id);
 		if(cachedProduct.isEmpty())
@@ -202,10 +201,10 @@ public class BackendService
 		}
 		else
 		{
-			final SquareServiceResponseBody response = squareService.upsertProduct(request);
-			localRepo.deleteByClientProductId(id); // Since we PUT, we have to replace entirely.
-			localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response, id, request.getProductType()));
-			return BackendServiceResponseBody.buildBackendResponseBody(response, id, request.getProductType());
+			final SquareServiceResponseBody response = squareService.upsertProduct(request, id);
+			localRepo.deleteByClientProductId(id); // Since we PUT, we have to replace entirely. TODO: would it be faster to execute an HDL-assisted SQL UPDATE query for LiteProductRepository?
+			localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(response));
+			return BackendServiceResponseBody.buildBackendResponseBody(response);
 		}
 	}
 
@@ -216,7 +215,7 @@ public class BackendService
 	 * @see ProductController#patchProduct(ProductUpsertRequestBody, String)
 	 * @see SquareService#patchProduct(ProductUpsertRequestBody, String)
 	 */
-	public BackendServiceResponseBody patchProduct(@NonNull final ProductUpsertRequestBody request)
+	public BackendServiceResponseBody patchProduct(@NonNull final ProductUpsertRequestBody request, @NonNull final String id)
 	{
 		throw new UnimplementedMethodPlaceholder();
 	}
@@ -226,7 +225,7 @@ public class BackendService
 	 * @param clientProductId The product's unique id provided by the client.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @see ProductController#deleteProduct(String)
-	 * @see SquareService#deleteProduct(String)
+	 * @see SquareService#deleteProduct(LiteProduct)
 	 */
 	public BackendServiceResponseBody deleteProduct(@NonNull final String clientProductId) throws BackendServiceException, ProductNotFoundException
 	{
@@ -239,18 +238,14 @@ public class BackendService
 		}
 		else
 		{
-			final String squareItemId = cached.get().getSquareItemId();
 			// On Square, deletions are cascading, which means that all item variations of the item
-			// that is deleted will also be deleted. Consequently, we do not need the item variation information.
-			//	final String squareItemVarId = cached.get().getSquareItemVariationId();
-			final String productType = cached.get().getProductType();
+			// that is deleted will also be deleted. Consequently, we do not need the item variation information,
+			// but only the square item id.
 			try
 			{
-				final SquareServiceResponseBody squareServiceResponse = squareService.deleteProduct(squareItemId);
-				squareServiceResponse.setName(cached.get().getProductName());
-				squareServiceResponse.setCostInCents(cached.get().getCostInCents());
+				final SquareServiceResponseBody squareServiceResponse = squareService.deleteProduct(cached.get());
 				localRepo.deleteByClientProductId(clientProductId); // delete(cached) will probably be slower
-				return BackendServiceResponseBody.buildBackendResponseBody(squareServiceResponse, clientProductId, productType);
+				return BackendServiceResponseBody.buildBackendResponseBody(squareServiceResponse);
 			}
 			catch(SquareServiceException exc)
 			{

@@ -1,10 +1,8 @@
 package com.company.rest.products.test.requests_responses.delete;
-
-import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-
+import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 /**
- * Some delete requests that match the items inserted in {@link GoodPostRequests}.
+ * Some DELETE requests that match the items inserted in {@link GoodPostRequests}.
  *
  * @see com.company.rest.products.test.requests_responses.get.GoodGetRequests
  * @see GoodPostRequests
@@ -36,7 +34,7 @@ public class GoodDeleteRequests
 					new ProductDeleteRequestBody("#BOBFLAY-QUARTER"),
 					new ProductDeleteRequestBody("#BOBFLAY-HALF"),
 					new ProductDeleteRequestBody("#BOBFLAY-EIGHTH"),
-					new ProductDeleteRequestBody("#BOBFLAY-QUARTER"),
+					new ProductDeleteRequestBody("#BEDOUIN-QUARTER"),
 					new ProductDeleteRequestBody("#MKA-EIGHTH"),
 					new ProductDeleteRequestBody("#MKA-QUARTER"),
 
@@ -117,4 +115,9 @@ public class GoodDeleteRequests
 					new ProductDeleteRequestBody("#PTS-1000"),
 					new ProductDeleteRequestBody("#SEEDS-TWOOZ")
 			};
+
+	/**
+	 * A more readable alias for {@link #REQUESTS}.
+	 */
+	public static final ProductDeleteRequestBody[] GOOD_DELETES = REQUESTS;
 }

@@ -7,7 +7,10 @@ import com.company.rest.products.util.exceptions.BackendServiceException;
 import com.company.rest.products.util.exceptions.InconsistentRequestException;
 import com.company.rest.products.util.exceptions.ProductNotFoundException;
 import com.company.rest.products.util.exceptions.ResourceAlreadyCreatedException;
-import com.company.rest.products.util.request_bodies.*;
+import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
+import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
+import com.company.rest.products.util.request_bodies.ProductResponseBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +47,61 @@ public class ProductController
 	}
 
 	/* *************************************************************************************** */
+	/* ********************   UTILITIES FOR INPUT VALIDATION  ******************************** */
+	/* *************************************************************************************** */
+
+	private void validatePostRequest(final ProductUpsertRequestBody postRequest) throws InconsistentRequestException
+	{
+		// Ensure that product ID, name, type, and cost values are appropriate.
+		if (!crucialFieldsOk(postRequest))
+		{
+			throw new InconsistentRequestException("Bad POST request supplied.");
+		}
+	}
+
+	private void validatePutRequest(final ProductUpsertRequestBody putRequest, final String idInURL) throws InconsistentRequestException
+	{
+		if( ! ( nameCostAndProductTypeOk(putRequest) && idNullOrMatches(putRequest, idInURL) ) )
+		{
+			throw new InconsistentRequestException("Bad PUT request supplied.");
+		}
+	}
+
+	private boolean crucialFieldsOk(final ProductUpsertRequestBody upsertRequest)
+	{
+		return idFieldOk(upsertRequest) && nameCostAndProductTypeOk(upsertRequest);
+	}
+
+	private boolean idFieldOk(final ProductUpsertRequestBody upsertRequest)
+	{
+		return upsertRequest.getClientProductId() != null && upsertRequest.getClientProductId().length() >= 1;
+	}
+
+	private boolean nameCostAndProductTypeOk(final ProductUpsertRequestBody upsertRequest)
+	{
+		// Ensure that name, type, and cost values are appropriate.
+		return 	(upsertRequest.getCostInCents() != null && upsertRequest.getCostInCents() > 0L)
+
+	            &&
+
+				(upsertRequest.getProductType() != null && acceptedProductType(upsertRequest.getProductType()))
+
+				&&
+
+				(upsertRequest.getName() != null && upsertRequest.getName().length() > 0);
+	}
+
+	private boolean acceptedProductType(final String productType)
+	{
+		return LiteProduct.PRODUCT_TYPES.contains(productType.trim().toUpperCase());
+	}
+
+	private boolean idNullOrMatches(final ProductUpsertRequestBody putRequest, final String stringInUrl)
+	{
+		return putRequest.getClientProductId() == null || putRequest.getClientProductId().equals(stringInUrl);
+	}
+
+	/* *************************************************************************************** */
 	/* ********************   UTILITIES FOR RESPONDING TO CLIENT ***************************** */
 	/* *************************************************************************************** */
 
@@ -63,7 +121,7 @@ public class ProductController
 		return failure(thrown.getMessage(), httpStatus);
 	}
 
-	private ResponseEntity<ResponseMessage> success(final String message, final Object data, 
+	private ResponseEntity<ResponseMessage> success(final String message, final Object data,
 	                                                final HttpStatus statusToReport)
 	{
 		return response(ResponseMessage.SUCCESS, message, data, statusToReport);
@@ -125,8 +183,7 @@ public class ProductController
 		{
 			validatePostRequest(request);
 			final BackendServiceResponseBody backendResponse = backendService.postProduct(request);
-			final ProductResponseBody productResponse = ProductResponseBody
-															.fromBackendResponseBody(backendResponse);
+			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully posted product!", productResponse, HttpStatus.CREATED);
 		}
 		catch (InconsistentRequestException e)
@@ -144,39 +201,6 @@ public class ProductController
 			logException(exc, this.getClass().getName() + "::postProduct");
 			return failure(exc, exc.getStatus());
 		}
-		
-	}
-
-	private void validatePostRequest(final ProductUpsertRequestBody postRequest) throws InconsistentRequestException
-	{
-		// Ensure that product ID, name, type, and cost values are appropriate.
-		if ( ! (
-
-				( postRequest.getClientProductId() != null && postRequest.getClientProductId().length() > 1 )
-
-				&&
-
-				( postRequest.getCostInCents() != null && postRequest.getCostInCents() > 0L )
-
-				&&
-
-				( postRequest.getProductType() != null && goodProductType(postRequest.getProductType()) )
-
-				&&
-
-				  ( postRequest.getName() != null && postRequest.getName().length() > 0 )
-
-				)
-			)
-			{
-				throw new InconsistentRequestException("Bad post request supplied.");
-			}
-
-	}
-
-	private boolean goodProductType(final String productType)
-	{
-		return LiteProduct.PRODUCT_TYPES.contains(productType.trim().toUpperCase());
 	}
 
 	/* *************************************************************************************** */
@@ -186,7 +210,7 @@ public class ProductController
 	/**
 	 * Entry point for a GET(id) request.
 	 * @param id a non-{@code null} {@link String} representing the ID of the object we want to GET.
-     * @see BackendService#getProduct(String)
+     * @see BackendService#getProduct(ProductGetRequestBody)
 	 * @return an appropriate JSON response.
 	 */
 	@GetMapping("/product/{id}")
@@ -194,7 +218,7 @@ public class ProductController
 	{
 		try
 		{
-			final BackendServiceResponseBody backendResponse = backendService.getProduct(id);
+			final BackendServiceResponseBody backendResponse = backendService.getProduct(new ProductGetRequestBody(id));
 			final ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully got product with ID " + id + ".",  productResponse, HttpStatus.FOUND);
 		}
@@ -210,26 +234,31 @@ public class ProductController
 		}
 	}
 
-
 	/* *************************************************************************************** */
 	/* *************************************** PUT ******************************************* */
 	/* *************************************************************************************** */
-
 
 	/**
 	 * Entry point for a PUT(id) request.
 	 * @param request the new JSON data to replace the product with.
 	 * @return an appropriate JSON response.
-	 * @see BackendService#putProduct(ProductUpsertRequestBody)
+	 * @see BackendService#putProduct(ProductUpsertRequestBody, String)
 	 */
 	@PutMapping("/product/{id}")
-	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductUpsertRequestBody request)
+	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductUpsertRequestBody request,
+	                                                  @PathVariable("id") String id)
 	{
 		try
 		{
-			final BackendServiceResponseBody backendResponse = backendService.putProduct(request);
+			validatePutRequest(request, id);
+			final BackendServiceResponseBody backendResponse = backendService.putProduct(request, id);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully updated product!", productResponse, HttpStatus.OK);
+		}
+		catch(InconsistentRequestException exc)
+		{
+			logException(exc, this.getClass().getName() + "::putProduct");
+			return failure(exc, HttpStatus.BAD_REQUEST);
 		}
 		catch(BackendServiceException exc)
 		{
@@ -246,7 +275,7 @@ public class ProductController
 	 * Entry point for a PATCH(id) request.
 	 * @param request the JSON body with the new product data with which we want to update the product.
 	 * @param id the ID of the existing product to rupdate.
-	 * @see BackendService#patchProduct(ProductUpsertRequestBody)
+	 * @see BackendService#patchProduct(ProductUpsertRequestBody, String)
 	 * @return an appropriate JSON response.
 	 */
 	@PatchMapping("/product/{id}")
@@ -255,7 +284,7 @@ public class ProductController
 	{
 		try
 		{
-			final BackendServiceResponseBody backendResponse = backendService.patchProduct(request);
+			final BackendServiceResponseBody backendResponse = backendService.patchProduct(request, id);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully updated product!", productResponse, HttpStatus.OK);
 		}

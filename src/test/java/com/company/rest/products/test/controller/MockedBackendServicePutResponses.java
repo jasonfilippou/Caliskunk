@@ -1,19 +1,9 @@
-package com.company.rest.products.test.requests_responses.post;
-
-import com.company.rest.products.controller.ProductController;
-import com.company.rest.products.model.BackendService;
+package com.company.rest.products.test.controller;
+import com.company.rest.products.test.requests_responses.put.GoodPutRequests;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
-/**
- * A class that contains prepared responses of {@link BackendService} towards
- * {@link ProductController}. These responses are useful for mocked unit tests.
- *
- * @see com.company.rest.products.test.requests_responses.get.MockedBackendServiceGetResponses
- * @see com.company.rest.products.test.requests_responses.delete.MockedSquareServiceDeleteResponses
- * @see com.company.rest.products.test.controller.ControllerPostTests
- */
-public class MockedBackendServicePostResponses
+public class MockedBackendServicePutResponses
 {
 	/** An array of prepared {@link BackendServiceResponseBody} instances.
 	 */
@@ -21,11 +11,11 @@ public class MockedBackendServicePostResponses
 
 	private static BackendServiceResponseBody[] buildMockedResponses()
 	{
-		final int numRequests = GoodPostRequests.REQUESTS.length;
-		BackendServiceResponseBody[] retVal = new BackendServiceResponseBody[numRequests];
+		final int numRequests = GoodPutRequests.REQUESTS.length;
+		final BackendServiceResponseBody[] retVal = new BackendServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
-			retVal[i] = mockedResponse(GoodPostRequests.REQUESTS[i]);
+			retVal[i] = mockedResponse(GoodPutRequests.REQUESTS[i]);
 		}
 		return retVal;
 	}
@@ -50,5 +40,8 @@ public class MockedBackendServicePostResponses
 			                                 .upc(request.getUpc())
 		                                 .build();
 	}
+	/**
+	 * A more readable alias for {@link #RESPONSES}.
+	 */
+	public static final BackendServiceResponseBody[] MOCKED_BACKEND_PUT_RESPONSES = RESPONSES;
 }
-

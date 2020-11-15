@@ -5,10 +5,6 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests;
-import com.company.rest.products.test.requests_responses.delete.MockedSquareServiceDeleteResponses;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-import com.company.rest.products.test.requests_responses.post.MockedSquareServicePostResponses;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
@@ -27,6 +23,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
+import static com.company.rest.products.test.model.backend.MockedSquareServiceDeleteResponses.MOCKED_SQUARE_DELETE_RESPONSES;
+import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
+import static com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests.GOOD_DELETES;
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.flushRepo;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,13 +99,15 @@ public class BackendServiceDeleteTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(false)
-														.availableElectronically(false) // Whatever that means
+														.availableElectronically(false)
 														.availableForPickup(false)
 													.build();
 
 		final SquareServiceResponseBody mockedSquaredResponse = SquareServiceResponseBody
 																	.builder()
 						                                                  .name(postRequest.getName())
+																		  .clientProductId(postRequest.getClientProductId())
+																		  .productType(postRequest.getProductType())
 						                                                  .squareItemId("#RANDOM_ITEM_ID")
 						                                                  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(postRequest.getCostInCents())
@@ -117,9 +119,8 @@ public class BackendServiceDeleteTests
 		// with appropriate mocks along the way.                               //
 		/////////////////////////////////////////////////////////////////////////
 
-		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class))).thenReturn(mockedSquaredResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(mockedSquaredResponse, postRequest.getClientProductId(),
-		                                                                                     postRequest.getProductType());
+		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(mockedSquaredResponse);
+		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(mockedSquaredResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(postRequest);
 
@@ -131,7 +132,7 @@ public class BackendServiceDeleteTests
 		//////////////
 
 		// Both the square service _and_ the repository calls need to be mocked.
-		when(squareService.deleteProduct(postResponse.getSquareItemId())).thenReturn(mockedSquaredResponse);
+		when(squareService.deleteProduct(any(LiteProduct.class))).thenReturn(mockedSquaredResponse);
 		doNothing().when(repository).deleteByClientProductId(postRequest.getClientProductId());
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
@@ -141,52 +142,51 @@ public class BackendServiceDeleteTests
 		                                                                                                                delResponse));
 	}
 
+
 	@Test
 	public void testManyDels()
 	{
 		//////////////////////////////////////////////////////////////
 		//  Use already prepared request and mocked response bodies //
 		//////////////////////////////////////////////////////////////
-		assert GoodDeleteRequests.REQUESTS.length == GoodPostRequests.REQUESTS.length :
+		assert GOOD_DELETES.length == GOOD_POSTS.length :
 								"Mismatch between #resources to be posteed and #resources to be deleted.";
-		final int numRequests = GoodDeleteRequests.REQUESTS.length;
+		final int numRequests = GOOD_DELETES.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			/////////////////////////////////////////////////////////////////
 			// Prepare LiteProduct to be returned by mocked deletion calls //
 			/////////////////////////////////////////////////////////////////
-			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MockedSquareServiceDeleteResponses.RESPONSES[i],
-			                                                                                     GoodDeleteRequests.REQUESTS[i].getClientProductId(),
-			                                                                                     GoodPostRequests.REQUESTS[i].getProductType());  // Need the POST response for the product type
+			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_DELETE_RESPONSES[i]);  // Need the POST response for the product type
 
 			////////////////////////
 			// POST request first //
 			////////////////////////
 
 			// Mock square and JPA Repo calls involved in POST
-			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class))).thenReturn
-																			(MockedSquareServicePostResponses.RESPONSES[i]);
+			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn
+																			(MOCKED_SQUARE_POST_RESPONSES[i]);
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 
 
 			// Call backend service for POST
-			final BackendServiceResponseBody postResponse = backendService.postProduct(GoodPostRequests.REQUESTS[i]);
+			final BackendServiceResponseBody postResponse = backendService.postProduct(GOOD_POSTS[i]);
 
 			// Optionally, assess POST response. Presumably this has already happened in our POST test suite.
-			// assertTrue("Mismatch in response #" + i + " (0-indexed).", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], postResponse));
+			// assertTrue("Mismatch in response #" + i + " (0-indexed).", responseMatchesPostRequest(GOOD_POSTS[i], postResponse));
 
 			////////////////////////////////////////////
 			// DEL request based on the previous POST //
 			////////////////////////////////////////////
 
 			// Mock the square DEL call and the repo SEARCH and DEL calls.
-			when(squareService.deleteProduct(any(String.class))).thenReturn(MockedSquareServiceDeleteResponses.RESPONSES[i]);
+			when(squareService.deleteProduct(any(LiteProduct.class))).thenReturn(MOCKED_SQUARE_DELETE_RESPONSES[i]);
 			doNothing().when(repository).deleteByClientProductId(any(String.class));
-			when(repository.findByClientProductId(GoodDeleteRequests.REQUESTS[i].getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
+			when(repository.findByClientProductId(GOOD_DELETES[i].getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
 			// Perform and check the backend DEL call.
-			final BackendServiceResponseBody deleteResponse = backendService.deleteProduct(GoodDeleteRequests.REQUESTS[i].getClientProductId());
-			assertTrue("Request did not match response", responseMatchesDelRequest(GoodDeleteRequests.REQUESTS[i], deleteResponse));
+			final BackendServiceResponseBody deleteResponse = backendService.deleteProduct(GOOD_DELETES[i].getClientProductId());
+			assertTrue("Request did not match response", responseMatchesDelRequest(GOOD_DELETES[i], deleteResponse));
 		}
 	}
 }

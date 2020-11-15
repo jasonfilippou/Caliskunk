@@ -16,11 +16,10 @@ import static lombok.AccessLevel.PUBLIC;
  */
 @Data
 @Builder(access = PUBLIC)
-@NoArgsConstructor
 @AllArgsConstructor
 public class ProductUpsertRequestBody implements Serializable
 {
-	@NonNull @JsonProperty("id") protected String clientProductId;
+	@JsonProperty("id") protected String clientProductId; // Not asserted @NonNull, since PUT and PATCH give them separately in URI.
 	@JsonProperty("name")  protected String name;
 	@JsonProperty("product_type") protected String productType;
 	@JsonProperty("cost_in_cents") protected Long costInCents;

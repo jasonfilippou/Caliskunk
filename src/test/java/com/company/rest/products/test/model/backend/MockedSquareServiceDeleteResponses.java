@@ -1,7 +1,7 @@
-package com.company.rest.products.test.requests_responses.delete;
-
+package com.company.rest.products.test.model.backend;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
+import com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
@@ -10,8 +10,8 @@ import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
  * A class that contains prepared responses of {@link SquareService} towards
  * {@link BackendService}. These responses are useful for mocked unit tests of the DELETE verb.
  *
- * @see com.company.rest.products.test.requests_responses.get.MockedSquareServiceGetResponses
- * @see com.company.rest.products.test.requests_responses.post.MockedSquareServicePostResponses
+ * @see MockedSquareServiceGetResponses
+ * @see MockedSquareServicePostResponses
  * @see com.company.rest.products.test.model.backend.BackendServiceDeleteTests
  */
 public class MockedSquareServiceDeleteResponses
@@ -45,6 +45,8 @@ public class MockedSquareServiceDeleteResponses
 	{
 		return SquareServiceResponseBody.builder()
 			                                 .name(request.getName())
+		                                     .clientProductId(request.getClientProductId())
+		                                     .productType(request.getProductType())
 			                                 .squareItemId("random_item_id")
 			                                 .squareItemVariationId("random_item_var_id")
 			                                 .isDeleted(false)
@@ -59,4 +61,9 @@ public class MockedSquareServiceDeleteResponses
 			                                 .upc(request.getUpc())
 		                                 .build();
 	}
+
+	/**
+	 * A more readable alias for {@link #RESPONSES}.
+	 */
+	public static final SquareServiceResponseBody[] MOCKED_SQUARE_DELETE_RESPONSES = RESPONSES;
 }

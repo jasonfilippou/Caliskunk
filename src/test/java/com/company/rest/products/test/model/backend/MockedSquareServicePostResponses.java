@@ -1,7 +1,9 @@
-package com.company.rest.products.test.requests_responses.post;
+package com.company.rest.products.test.model.backend;
 
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
+import com.company.rest.products.test.controller.MockedBackendServiceGetResponses;
+import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 
@@ -9,8 +11,8 @@ import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
  * A class that contains prepared responses of {@link SquareService} towards
  * {@link BackendService}. These responses are useful for mocked unit tests.
  *
- * @see com.company.rest.products.test.requests_responses.get.MockedBackendServiceGetResponses
- * @see com.company.rest.products.test.requests_responses.delete.MockedSquareServiceDeleteResponses
+ * @see MockedBackendServiceGetResponses
+ * @see MockedSquareServiceDeleteResponses
  * @see com.company.rest.products.test.model.backend.BackendServicePostTests
  */
 public class MockedSquareServicePostResponses
@@ -23,7 +25,7 @@ public class MockedSquareServicePostResponses
 	private static SquareServiceResponseBody[] buildMockedResponses()
 	{
 		final int numRequests = GoodPostRequests.REQUESTS.length;
-		SquareServiceResponseBody[] retVal = new SquareServiceResponseBody[numRequests];
+		final SquareServiceResponseBody[] retVal = new SquareServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
 			retVal[i] = mockedResponse(GoodPostRequests.REQUESTS[i]);
@@ -35,6 +37,8 @@ public class MockedSquareServicePostResponses
 	{
 		return SquareServiceResponseBody.builder()
 		                            .name(request.getName())
+	                                .clientProductId(request.getClientProductId())
+	                                .productType(request.getProductType())
 	                                .squareItemId("RANDOM_ITEM_ID")
 		                            .squareItemVariationId("random_var_id")
 		                            .isDeleted(false)
@@ -49,4 +53,9 @@ public class MockedSquareServicePostResponses
 		                            .upc(request.getUpc())
 		                          .build();
 	}
+
+	/**
+	 * A more readable alias for {@link #RESPONSES}.
+	 */
+	public static final SquareServiceResponseBody[] MOCKED_SQUARE_POST_RESPONSES = RESPONSES;
 }

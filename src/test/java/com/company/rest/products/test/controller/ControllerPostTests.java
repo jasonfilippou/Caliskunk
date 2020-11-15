@@ -5,7 +5,6 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.test.model.backend.BackendServiceGetTests;
 import com.company.rest.products.test.model.square.SquareServiceGetTests;
 import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-import com.company.rest.products.test.requests_responses.post.MockedBackendServicePostResponses;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
@@ -19,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static com.company.rest.products.test.util.TestUtil.checkEntityStatusAndFetchResponse;
 import static com.company.rest.products.test.util.TestUtil.responseMatchesUpsertRequest;
 import static org.junit.Assert.assertTrue;
@@ -64,7 +64,7 @@ public class ControllerPostTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(true)
-														.availableElectronically(true) // Whatever that means
+														.availableElectronically(true)
 														.availableForPickup(true)
 													.build();
 
@@ -87,9 +87,9 @@ public class ControllerPostTests
 															.presentAtAllLocations(true)
                                                           .build();
 		when(backendService.postProduct(request)).thenReturn(preparedResponse);
-		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
-		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
-		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response));
+		final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(request);
+		final ProductResponseBody response = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.CREATED);
+		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response, POST));
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class ControllerPostTests
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesUpsertRequest(GoodPostRequests.REQUESTS[i], response));
+			           responseMatchesUpsertRequest(GoodPostRequests.REQUESTS[i], response, POST));
 		}
 	}
 

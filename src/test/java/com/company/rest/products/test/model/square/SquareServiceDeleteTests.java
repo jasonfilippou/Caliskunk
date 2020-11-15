@@ -3,11 +3,9 @@ package com.company.rest.products.test.model.square;
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
+import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
-import com.squareup.square.exceptions.ApiException;
 import com.squareup.square.models.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +19,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
@@ -29,6 +26,8 @@ import java.util.concurrent.ExecutionException;
 
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
+import static com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests.GOOD_DELETES;
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -63,12 +62,8 @@ public class SquareServiceDeleteTests
     public void setUp() throws ExecutionException, InterruptedException
 	{
 
-		// Uncomment the following if you want to mock the CatalogWrapper calls.
-
-		//  I need a way to return different kinds of expected responses depending on the arguments
-		// of the methods that are being mocked. The following trick owed to:
-		// https://stackoverflow.com/questions/22338536/mockito-return-value-based-on-property-of-a-parameter
-        when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
+		// Prepare CatalogWrapper respone for POST (on which subsequent DELETEs are based)
+		 when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
             .then(
 		        invocation -> {
 		            final UpsertCatalogObjectRequest request = invocation.getArgument(0);
@@ -86,6 +81,15 @@ public class SquareServiceDeleteTests
 				                                 request.getObject().getType());
 			        }
 
+		        }
+	        );
+
+	   // Prepare CatalogWrapper response for DELETE
+        when(catalogWrapper.deleteObject(any(String.class)))
+            .then(
+		        invocation ->
+		        {
+		            return buildMockedDeleteResponse(invocation.getArgument(0), "SOME_RANDOM_ITEM_VARIATION_ID"); // Square ID is the only real important argument here
 		        }
 	        );
     }
@@ -116,7 +120,7 @@ public class SquareServiceDeleteTests
 
 
 	@Test
-	public void testOneDel() throws IOException, ApiException, ExecutionException, InterruptedException
+	public void testOneDel()
 	{
 		// Prepare request
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
@@ -130,20 +134,21 @@ public class SquareServiceDeleteTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(false)
-														.availableElectronically(false) // Whatever that means
+														.availableElectronically(false)
 														.availableForPickup(true)
 													.build();
 
 		// Make the POST, and optionally test it, considering that we already have a POST test suite.
-		final SquareServiceResponseBody postResponse = squareService.upsertProduct(postRequest);
+		final SquareServiceResponseBody postResponse = squareService.upsertProduct(postRequest, postRequest.getClientProductId());
 		// assertTrue("Request did not match response", responseMatchesPostRequest(postResponse, request));
 
-		// Mock the CatalogWrapper call...
-		when(catalogWrapper.deleteObject(postResponse.getSquareItemId())).thenReturn(buildMockedDeleteResponse
-																								(postResponse.getSquareItemId(),
-																                                postResponse.getSquareItemVariationId()));
 		// Make the Square Service DEL call and test it.
-		final SquareServiceResponseBody delResponse = squareService.deleteProduct(postResponse.getSquareItemId());
+		final SquareServiceResponseBody delResponse = squareService.deleteProduct(LiteProduct.builder()
+																									.clientProductId(postRequest.getClientProductId())
+		                                                                                            .productName(postRequest.getName())
+		                                                                                            .productType(postRequest.getProductType())
+		                                                                                            .costInCents(postRequest.getCostInCents())
+																								.build());
 		// validateDeletionResponse(delResponse, postResponse.getSquareItemId(), postResponse.getSquareItemVariationId())); // Will be relevant in End-To-End tests.
 		assertTrue("Bad GET response from Square layer", responseMatchesDelRequest(delResponse,
 		                                                                           postResponse.getSquareItemId()));
@@ -161,20 +166,21 @@ public class SquareServiceDeleteTests
 	public void testManyDels() throws ExecutionException, InterruptedException
 	{
 		// Requests already prepared
-		final int numRequests = GoodDeleteRequests.REQUESTS.length;
+		final int numRequests = GOOD_DELETES.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Make Square Service POST call and retrieve response
-			final SquareServiceResponseBody postResponse = squareService.upsertProduct(GoodPostRequests.REQUESTS[i]);
+			final SquareServiceResponseBody postResponse = squareService.upsertProduct(GOOD_POSTS[i], GOOD_POSTS[i].getClientProductId());
 
 			// Optionally, assess POST response. Presumably, the POST test suite has covered that already.
-			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GoodPostRequests.REQUESTS[i]));
+			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GOOD_POSTS[i]));
 
-			// Mock the CatalogWrapper call...
-			when(catalogWrapper.deleteObject(postResponse.getSquareItemId())).thenReturn(buildMockedDeleteResponse
-																								(postResponse.getSquareItemId(),
-																                                postResponse.getSquareItemVariationId()));
-			final SquareServiceResponseBody delResponse = squareService.deleteProduct(postResponse.getSquareItemId());
+			final SquareServiceResponseBody delResponse = squareService.deleteProduct(LiteProduct.builder()
+			                                                                                        .clientProductId(GOOD_DELETES[i].getClientProductId())
+			                                                                                        .productType(GOOD_POSTS[i].getProductType())
+			                                                                                        .productName(GOOD_POSTS[i].getName())
+			                                                                                        .costInCents(GOOD_POSTS[i].getCostInCents())
+			                                                                                     .build()) ;
 			assertTrue("Bad GET response from Square service",
 			           responseMatchesDelRequest(delResponse, postResponse.getSquareItemId()));
 		}

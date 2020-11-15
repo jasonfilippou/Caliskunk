@@ -3,11 +3,11 @@ package com.company.rest.products.test.model.square;
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
+import com.company.rest.products.model.liteproduct.LiteProduct;
+import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +26,8 @@ import java.util.concurrent.ExecutionException;
 
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
+import static com.company.rest.products.test.util.TestUtil.responseMatchesGetRequest;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -50,11 +52,6 @@ public class SquareServiceGetTests
 	@Mock
 	private CatalogWrapper catalogWrapper;     // Class that will be mocked
 
-	private boolean responseMatchesGetRequest(@NonNull SquareServiceResponseBody response,
-	                                           @NonNull String squareIdAssignedOnPost)
-	{
-		return	response.getSquareItemId().equals(squareIdAssignedOnPost);
-	}
 
     private UpsertCatalogObjectResponse buildItemResponseOutOfUpsertRequest(final UpsertCatalogObjectRequest request)
     {
@@ -169,37 +166,31 @@ public class SquareServiceGetTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(false)
-														.availableElectronically(false) // Whatever that means
+														.availableElectronically(false)
 														.availableForPickup(true)
 													.build();
 
-		// Make the POST, and optionally test it. Subsumes subsequent GET test, but is slower.
-		final SquareServiceResponseBody postResponse = squareService.upsertProduct(request);
+		// Make the POST, and optionally assess response (given that we already have a POST testing suite)
+		final SquareServiceResponseBody postResponse = squareService.upsertProduct(request, request.getClientProductId());
 		// assertTrue("Request did not match response", responseMatchesPostRequest(postResponse, request));
 
 		// Make the GET call and test it.
-		final SquareServiceResponseBody getResponse = squareService.getProduct(postResponse.getSquareItemId(),
-		                                                                       postResponse.getSquareItemVariationId());
-		assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(getResponse, 
-	                                                                                            postResponse.getSquareItemId()));
+		final SquareServiceResponseBody getResponse = squareService.getProduct(LiteProduct.buildLiteProductFromSquareResponse(postResponse));
+		assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(new ProductGetRequestBody(request.getClientProductId()), getResponse));
 	}
 
 	@Test
 	public void testManyGets()
 	{
 		// Requests already prepared in GoodPostRequests
-		final int numRequests = GoodPostRequests.REQUESTS.length;
-		for(int i = 0; i <  numRequests; i++)
+		final int numRequests = GOOD_POSTS.length;
+		for (ProductUpsertRequestBody goodPost : GOOD_POSTS)
 		{
 			// Make Square Service POST call and retrieve response
-			final SquareServiceResponseBody postResponse = squareService.upsertProduct(GoodPostRequests.REQUESTS[i]);
-
-			// Optionally, assess response. Subsumes the upcoming GET test, but takes more time.
+			final SquareServiceResponseBody postResponse = squareService.upsertProduct(goodPost, goodPost.getClientProductId());
 			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GoodPostRequests.REQUESTS[i]));
-
-			final SquareServiceResponseBody getResponse = squareService.getProduct(postResponse.getSquareItemId(),
-			                                                                       postResponse.getSquareItemVariationId());
-			assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(getResponse, postResponse.getSquareItemId()));
+			final SquareServiceResponseBody getResponse = squareService.getProduct(LiteProduct.buildLiteProductFromSquareResponse(postResponse));
+			assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(new ProductGetRequestBody(goodPost.getClientProductId()), getResponse));
 		}
 	}
 

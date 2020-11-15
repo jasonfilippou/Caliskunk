@@ -3,7 +3,6 @@ package com.company.rest.products.test.model.square;
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
@@ -24,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -145,25 +145,25 @@ public class SquareServicePostTests
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
 														.availableOnline(true)
-														.availableElectronically(true) // Whatever that means
+														.availableElectronically(true)
 														.availableForPickup(true)
 													.build();
 		// catalog calls already mocked by setUp(); we can just call the method we want to debug.
-		final SquareServiceResponseBody response = squareService.upsertProduct(request);
+		final SquareServiceResponseBody response = squareService.upsertProduct(request, request.getClientProductId());
 		assertTrue("Request did not match response", responseMatchesRequest(response, request));
 	}
 
 	@Test
 	public void testManyPosts()
 	{
-		final int numRequests = GoodPostRequests.REQUESTS.length;
+		final int numRequests = GOOD_POSTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Call backend service
-			final SquareServiceResponseBody response = squareService.upsertProduct(GoodPostRequests.REQUESTS[i]);
+			final SquareServiceResponseBody response = squareService.upsertProduct(GOOD_POSTS[i], GOOD_POSTS[i].getClientProductId());
 
 			// Assess response
-			assertTrue("Mismatch in response #" + i, responseMatchesRequest(response, GoodPostRequests.REQUESTS[i]));
+			assertTrue("Mismatch in response #" + i, responseMatchesRequest(response, GOOD_POSTS[i]));
 		}
 	}
 
