@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Objects;
 
-import static com.company.rest.products.test.util.TestUtil.UpsertType.PUT;
+import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -268,12 +268,11 @@ public class TestUtil
 				upsertRequestBody.getName().equals(responseBody.getName()) &&
 				upsertRequestBody.getProductType().equals(responseBody.getProductType()) &&
 				upsertRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
-				upsertRequestBody.getClientProductId().equals(responseBody.getClientProductId()) &&
 
 				// Subsequent fields that may or may not have been provided:
 				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType) &&
 
-				// Let us also ensure that the POST didn't trip the object's deletion flag:
+				// Let us also ensure that the upsert request didn't trip the object's deletion flag:
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
@@ -296,7 +295,7 @@ public class TestUtil
 				// Subsequent fields that may or may not have been provided:
 				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType) &&
 
-				// Let us also ensure that the POST didn't trip the object's deletion flag:
+				// Let us also ensure that the upsert request didn't trip the object's deletion flag:
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
@@ -318,7 +317,7 @@ public class TestUtil
 				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType) &&
 
 
-				// Let us also ensure that the POST didn't trip the object's deletion flag:
+				// Let us also ensure that the upsert request didn't trip the object's deletion flag:
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
@@ -366,7 +365,7 @@ public class TestUtil
 	private static boolean ensureIdsMatch(final ProductUpsertRequestBody upsertRequestBody, final ProductResponseBody responseBody,
 	                                                                                    final UpsertType upsertType)
 	{
-		if(upsertType == PUT)
+		if(upsertType == POST)
 		{
 			return upsertRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 		}
@@ -379,7 +378,7 @@ public class TestUtil
 	private static boolean ensureIdsMatch(final ProductUpsertRequestBody upsertRequestBody, final BackendServiceResponseBody responseBody,
 	                                                                                    final UpsertType upsertType)
 	{
-		if(upsertType == PUT)
+		if(upsertType == POST)
 		{
 			return upsertRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 		}
@@ -392,7 +391,7 @@ public class TestUtil
 	private static boolean ensureIdsMatch(final ProductUpsertRequestBody upsertRequestBody, final SquareServiceResponseBody responseBody,
 	                                                                                         final UpsertType upsertType)
 	{
-		if(upsertType == PUT)
+		if(upsertType == POST)
 		{
 			return upsertRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 		}
