@@ -188,7 +188,7 @@ public class SquareServiceGetTests
 		{
 			// Make Square Service POST call and retrieve response
 			final SquareServiceResponseBody postResponse = squareService.upsertProduct(goodPost, goodPost.getClientProductId());
-			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GoodPostRequests.REQUESTS[i]));
+			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GOOD_POSTS[i]));
 			final SquareServiceResponseBody getResponse = squareService.getProduct(LiteProduct.buildLiteProductFromSquareResponse(postResponse));
 			assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(new ProductGetRequestBody(goodPost.getClientProductId()), getResponse));
 		}

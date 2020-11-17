@@ -1,12 +1,11 @@
 package com.company.rest.products.test.controller;
-
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.test.model.backend.MockedSquareServiceDeleteResponses;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 /**
  * A class that contains prepared responses of {@link BackendService} towards
  * {@link ProductController}. These responses are useful for mocked unit tests.
@@ -23,16 +22,16 @@ public class MockedBackendServicePostResponses
 
 	private static BackendServiceResponseBody[] buildMockedResponses()
 	{
-		final int numRequests = GoodPostRequests.REQUESTS.length;
+		final int numRequests = GOOD_POSTS.length;
 		final BackendServiceResponseBody[] retVal = new BackendServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
-			retVal[i] = mockedResponse(GoodPostRequests.REQUESTS[i]);
+			retVal[i] = mockedResponse(GOOD_POSTS[i]);
 		}
 		return retVal;
 	}
 
-	private static BackendServiceResponseBody mockedResponse(ProductUpsertRequestBody request)
+	private static BackendServiceResponseBody mockedResponse(final ProductUpsertRequestBody request)
 	{
 		return BackendServiceResponseBody.builder()
 			                                 .name(request.getName())

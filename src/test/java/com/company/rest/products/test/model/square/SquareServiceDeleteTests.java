@@ -4,10 +4,10 @@ import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
+import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +28,7 @@ import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITE
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
 import static com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests.GOOD_DELETES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
+import static com.company.rest.products.test.util.TestUtil.responseMatchesDeleteRequest;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -51,12 +52,6 @@ public class SquareServiceDeleteTests
 
 	@Mock
 	private CatalogWrapper catalogWrapper;     // Class that will be mocked
-
-	private boolean responseMatchesDelRequest(@NonNull SquareServiceResponseBody response,
-	                                          @NonNull String squareIdAssignedOnPost)
-	{
-		return	response.getSquareItemId().equals(squareIdAssignedOnPost);
-	}
 
 	@Before
     public void setUp() throws ExecutionException, InterruptedException
@@ -150,8 +145,8 @@ public class SquareServiceDeleteTests
 		                                                                                            .costInCents(postRequest.getCostInCents())
 																								.build());
 		// validateDeletionResponse(delResponse, postResponse.getSquareItemId(), postResponse.getSquareItemVariationId())); // Will be relevant in End-To-End tests.
-		assertTrue("Bad GET response from Square layer", responseMatchesDelRequest(delResponse,
-		                                                                           postResponse.getSquareItemId()));
+		assertTrue("Bad DEL response from Square layer", responseMatchesDeleteRequest(new ProductDeleteRequestBody(postRequest.getClientProductId()),
+		                                                                           delResponse));
 	}
 
 	private DeleteCatalogObjectResponse buildMockedDeleteResponse(final String squareItemId, final String squareItemVariationId)
@@ -181,8 +176,8 @@ public class SquareServiceDeleteTests
 			                                                                                        .productName(GOOD_POSTS[i].getName())
 			                                                                                        .costInCents(GOOD_POSTS[i].getCostInCents())
 			                                                                                     .build()) ;
-			assertTrue("Bad GET response from Square service",
-			           responseMatchesDelRequest(delResponse, postResponse.getSquareItemId()));
+			assertTrue("Bad DEL response from Square service",
+			           responseMatchesDeleteRequest(GOOD_DELETES[i], delResponse));
 		}
 	}
 

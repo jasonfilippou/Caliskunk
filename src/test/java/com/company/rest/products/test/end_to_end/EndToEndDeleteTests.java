@@ -2,8 +2,6 @@ package com.company.rest.products.test.end_to_end;
 
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
-import com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
@@ -17,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests.GOOD_DELETES;
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
 import static org.junit.Assert.assertTrue;
 
@@ -40,12 +40,6 @@ public class EndToEndDeleteTests
 
 	@Autowired
 	private LiteProductRepository repository;
-
-	private boolean responseMatchesDeleteRequest(final ProductDeleteRequestBody delRequestBody,
-	                                             final ProductResponseBody responseBody)
-	{
-		return	delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
-	}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
@@ -84,10 +78,10 @@ public class EndToEndDeleteTests
 		//////////////////////////////////////////////////////////////
 		//  Use already prepared request and mocked response bodies //
 		//////////////////////////////////////////////////////////////
-		assert GoodDeleteRequests.REQUESTS.length == GoodPostRequests.REQUESTS.length :
+		assert GOOD_DELETES.length == GOOD_POSTS.length :
 								"Mismatch between #resources to be posteed and #resources to be deleted.";
 
-		final int numRequests = GoodDeleteRequests.REQUESTS.length;
+		final int numRequests = GOOD_DELETES.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			////////////////////////////////
@@ -95,23 +89,23 @@ public class EndToEndDeleteTests
 			////////////////////////////////
 
 			// Call controller
-			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
+			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GOOD_POSTS[i]);
 
 			// Optionally, check the POST response (ostensibly there's no need since there's already a POST test suite).
 			// final ProductResponseBody postResponse = checkEntityStatusAndGetResponse(postResponseEntity, HttpStatus.OK);
-			// assertTrue("Request did not match response", responseMatchesPostRequest(GoodPostRequests.REQUESTS[i], postResponse));
+			// assertTrue("Request did not match response", responseMatchesPostRequest(GOOD_POSTS[i], postResponse));
 
 			////////////////////////////////////
 			// And now we check the DEL call. //
 			////////////////////////////////////
 
 			// Call controller
-			final ResponseEntity<ResponseMessage> delResponseEntity = controller.deleteProduct(GoodDeleteRequests.REQUESTS[i].getClientProductId());
+			final ResponseEntity<ResponseMessage> delResponseEntity = controller.deleteProduct(GOOD_DELETES[i].getClientProductId());
 			final ProductResponseBody delResponse = checkEntityStatusAndFetchResponse(delResponseEntity, HttpStatus.OK);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesDeleteRequest(GoodDeleteRequests.REQUESTS[i], delResponse));
+			           responseMatchesDeleteRequest(GOOD_DELETES[i], delResponse));
 		}
 	}
 

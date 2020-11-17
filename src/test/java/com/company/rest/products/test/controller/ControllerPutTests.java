@@ -140,15 +140,12 @@ public class ControllerPutTests
 
 		final ResponseEntity<ResponseMessage> putResponseEntity = controller.putProduct(putRequest, id);
 		final ProductResponseBody putResponse = checkEntityStatusAndFetchResponse(putResponseEntity, HttpStatus.OK);
-		assertTrue("Request did not match response",responseMatchesUpsertRequest(putRequest, putResponse, PUT)
-		                                                            && putResponse.getClientProductId().equals(id));
+		assertTrue("Request did not match response",responseMatchesUpsertRequest(putRequest, putResponse, PUT));
 	}
 
 	@Test
 	public void testManyPuts()
 	{
-		
-
 		// Length assertion
 		assertEquals("Mismatch between lengths of input arrays.", 1,
 		             Stream.of(GOOD_POSTS.length, GOOD_PUTS.length, MOCKED_BACKEND_POST_RESPONSES.length,
@@ -160,7 +157,7 @@ public class ControllerPutTests
 		{
 			// Mock backend layer POST and PUT calls.
 			when(backendService.postProduct(GOOD_POSTS[i])).thenReturn(MOCKED_BACKEND_POST_RESPONSES[i]);
-			when(backendService.putProduct(GOOD_PUTS[i], any(String.class))).thenReturn(MOCKED_BACKEND_PUT_RESPONSES[i]);
+			when(backendService.putProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(MOCKED_BACKEND_PUT_RESPONSES[i]);
 
 			// Send controller a POST, optionally assessing it (we have already covered POST tests).
 			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(GOOD_POSTS[i]);

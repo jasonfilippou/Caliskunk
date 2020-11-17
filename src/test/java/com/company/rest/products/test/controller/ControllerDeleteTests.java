@@ -25,6 +25,7 @@ import static com.company.rest.products.test.util.TestUtil.checkEntityStatusAndF
 import static com.company.rest.products.test.util.TestUtil.makeAPost;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static com.company.rest.products.test.util.TestUtil.*;
 
 /**
  * Mocked DELETE request tests for {@link ProductController}.
@@ -49,12 +50,6 @@ public class ControllerDeleteTests
 	@Mock
 	private BackendService backendService;     // The class that will be mocked
 
-
-	private boolean responseMatchesDeleteRequest(final ProductDeleteRequestBody delRequestBody,
-	                                             final ProductResponseBody responseBody)
-	{
-		return	delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
-	}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */

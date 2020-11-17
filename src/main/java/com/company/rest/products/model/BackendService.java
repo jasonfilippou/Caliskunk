@@ -188,7 +188,7 @@ public class BackendService
 	 * @see ProductController#putProduct(ProductUpsertRequestBody, String)
 	 * @see SquareService#upsertProduct(ProductUpsertRequestBody, String)
 	 */
-	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody request, @NonNull String id)
+	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody request, @NonNull final String id)
 													throws ProductNotFoundException, BackendServiceException
 	{
 		// First, ensure that the product is already POSTed, otherwise client done messed up and they need to POST.

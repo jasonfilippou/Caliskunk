@@ -1,9 +1,9 @@
 package com.company.rest.products.test.controller;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
-import com.company.rest.products.test.requests_responses.put.GoodPutRequests;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
+import static com.company.rest.products.test.requests_responses.put.GoodPutRequests.GOOD_PUTS;
 public class MockedBackendServicePutResponses
 {
 	/** An array of prepared {@link BackendServiceResponseBody} instances.
@@ -12,11 +12,11 @@ public class MockedBackendServicePutResponses
 
 	private static BackendServiceResponseBody[] buildMockedResponses()
 	{
-		final int numRequests = GoodPutRequests.REQUESTS.length;
+		final int numRequests = GOOD_PUTS.length;
 		final BackendServiceResponseBody[] retVal = new BackendServiceResponseBody[numRequests];
 		for(int i = 0; i < numRequests; i++)
 		{
-			retVal[i] = mockedResponse(GoodPutRequests.REQUESTS[i], GoodPostRequests.REQUESTS[i].getClientProductId());
+			retVal[i] = mockedResponse(GOOD_PUTS[i], GOOD_POSTS[i].getClientProductId());
 		}
 		return retVal;
 	}

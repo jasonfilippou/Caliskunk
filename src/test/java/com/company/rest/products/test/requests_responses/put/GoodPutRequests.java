@@ -24,7 +24,7 @@ public class GoodPutRequests
 	{
 
 			/* The string "FORMER" in the comments below is meant to bring home the fact mentioned in the
-			 * JavaDoc comment above: every one of these elements correspond to an element of the GoodPostRequests.Requests
+			 * JavaDoc comment above: every one of these elements correspond to an element of the GOOD_POSTS
 			 * array, where the product type is specified. But since a PUT request might also change the product type,
 			 * we have some products that will change their type, hence the word "FORMER" to really point to the
 			 * fact that it _could_ be the case that the product changes its type in this PUT request.

@@ -4,7 +4,6 @@ import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.test.model.backend.BackendServiceGetTests;
 import com.company.rest.products.test.model.square.SquareServiceGetTests;
-import com.company.rest.products.test.requests_responses.post.GoodPostRequests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductResponseBody;
@@ -18,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static com.company.rest.products.test.util.TestUtil.checkEntityStatusAndFetchResponse;
 import static com.company.rest.products.test.util.TestUtil.responseMatchesUpsertRequest;
@@ -95,20 +95,20 @@ public class ControllerPostTests
 	@Test
 	public void testManyPosts()
 	{
-		final int numRequests = GoodPostRequests.REQUESTS.length;
+		final int numRequests = GOOD_POSTS.length;
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Mock
-			when(backendService.postProduct(GoodPostRequests.REQUESTS[i]))
+			when(backendService.postProduct(GOOD_POSTS[i]))
 				.thenReturn(MockedBackendServicePostResponses.RESPONSES[i]);
 
 			// Call controller
-			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GoodPostRequests.REQUESTS[i]);
+			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GOOD_POSTS[i]);
 			final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesUpsertRequest(GoodPostRequests.REQUESTS[i], response, POST));
+			           responseMatchesUpsertRequest(GOOD_POSTS[i], response, POST));
 		}
 	}
 

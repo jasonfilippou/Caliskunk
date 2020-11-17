@@ -9,7 +9,6 @@ import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
-import lombok.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +27,7 @@ import static com.company.rest.products.test.model.backend.MockedSquareServicePo
 import static com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests.GOOD_DELETES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.flushRepo;
+import static com.company.rest.products.test.util.TestUtil.responseMatchesDeleteRequest;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -58,12 +58,6 @@ public class BackendServiceDeleteTests
 
 	@Mock
 	private LiteProductRepository repository;     // Another class that will be mocked
-
-	private boolean responseMatchesDelRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
-	                                          @NonNull final BackendServiceResponseBody responseBody)
-	{
-		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
-	}
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
@@ -138,7 +132,7 @@ public class BackendServiceDeleteTests
 
 		// Now, make the call and test it.
 		final BackendServiceResponseBody delResponse = backendService.deleteProduct(postRequest.getClientProductId());
-		assertTrue("Request did not match response", responseMatchesDelRequest(new ProductDeleteRequestBody(postRequest.getClientProductId()),
+		assertTrue("Request did not match response", responseMatchesDeleteRequest(new ProductDeleteRequestBody(postRequest.getClientProductId()),
 		                                                                                                                delResponse));
 	}
 
@@ -164,8 +158,7 @@ public class BackendServiceDeleteTests
 			////////////////////////
 
 			// Mock square and JPA Repo calls involved in POST
-			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn
-																			(MOCKED_SQUARE_POST_RESPONSES[i]);
+			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 
 
@@ -186,7 +179,7 @@ public class BackendServiceDeleteTests
 
 			// Perform and check the backend DEL call.
 			final BackendServiceResponseBody deleteResponse = backendService.deleteProduct(GOOD_DELETES[i].getClientProductId());
-			assertTrue("Request did not match response", responseMatchesDelRequest(GOOD_DELETES[i], deleteResponse));
+			assertTrue("Request did not match response", responseMatchesDeleteRequest(GOOD_DELETES[i], deleteResponse));
 		}
 	}
 }

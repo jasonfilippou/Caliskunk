@@ -1,6 +1,7 @@
 package com.company.rest.products.test.util;
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
+import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.*;
@@ -400,6 +401,7 @@ public class TestUtil
 			return upsertRequestBody.getClientProductId() == null;
 		}
 	}
+
 	/**
 	 *  Ensures that the provided {@link ProductGetRequestBody} matches the provided {@link ProductResponseBody}.
 	 *
@@ -417,7 +419,7 @@ public class TestUtil
 	 *  Ensures that the provided {@link ProductGetRequestBody} matches the provided {@link BackendServiceResponseBody}.
 	 *
 	 * @param getRequestBody A GET request provided by the client.
-	 * @param responseBody The {@link ProductController}'s response to the GET request.
+	 * @param responseBody The {@link BackendService}'s response to the GET request.
 	 * @return {@literal true} if GET request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
@@ -427,10 +429,10 @@ public class TestUtil
 	}
 
 	/**
-	 *  Ensures that the provided {@link ProductGetRequestBody} matches the provided {@link SquareServiceResponseBody}.
+	 * Ensures that the provided {@link ProductGetRequestBody} matches the provided {@link SquareServiceResponseBody}.
 	 *
 	 * @param getRequestBody A GET request provided by the client.
-	 * @param responseBody The {@link ProductController}'s response to the GET request.
+	 * @param responseBody The {@link SquareService}'s response to the GET request.
 	 * @return {@literal true} if GET request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
@@ -438,4 +440,44 @@ public class TestUtil
 	{
 		return	getRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 	}
+
+	/**
+	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link BackendServiceResponseBody}.
+	 *
+	 * @param delRequestBody A DEL request provided by the client.
+	 * @param responseBody The {@link ProductController}'s response to the GET request.
+	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
+	 */
+	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
+	                                         @NonNull final ProductResponseBody responseBody)
+	{
+		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+	}
+	/**
+	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link BackendServiceResponseBody}.
+	 *
+	 * @param delRequestBody A DEL request provided by the client.
+	 * @param responseBody The {@link BackendService}'s response to the GET request.
+	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
+	 */
+	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
+	                                          @NonNull final BackendServiceResponseBody responseBody)
+	{
+		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+	}
+
+	/**
+	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link SquareServiceResponseBody}.
+	 *
+	 * @param delRequestBody A DEL request provided by the client.
+	 * @param responseBody The {@link SquareService}'s response to the GET request.
+	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
+	 */
+	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
+	                                         @NonNull final SquareServiceResponseBody responseBody)
+	{
+		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+	}
+
+
 }
