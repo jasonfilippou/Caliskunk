@@ -70,7 +70,7 @@ public class SquareService
 		final UpsertCatalogObjectResponse itemVariationResponse;
 		try
 		{
-			itemResponse = sendCatalogItemUpsertRequest(request);
+			itemResponse = sendCatalogItemUpsertRequest(request, id);
 			itemVariationResponse = sendCatalogItemVariationUpsertRequest(request, itemResponse.getCatalogObject().getId());
 		}
 		catch (InterruptedException | ExecutionException e)
@@ -211,25 +211,25 @@ public class SquareService
 	/* ****************************** CatalogItem upsert request helpers  ****************************** */
 	/* ************************************************************************************************* */
 
-	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(final ProductUpsertRequestBody request)
+	private  UpsertCatalogObjectResponse sendCatalogItemUpsertRequest(final ProductUpsertRequestBody request, final String id)
 																		throws  ExecutionException, InterruptedException
 	{
-		final UpsertCatalogObjectRequest catalogItemUpsertRequest =  createCatalogItemUpsertRequest(request);
+		final UpsertCatalogObjectRequest catalogItemUpsertRequest = createCatalogItemUpsertRequest(request, id);
 		final UpsertCatalogObjectResponse response = catalogWrapper.upsertObject(catalogItemUpsertRequest);
 		log.info("New CatalogItem created on Square, with ID " + response.getCatalogObject().getId());
 		return response;
 	}
 
 
-	private  UpsertCatalogObjectRequest createCatalogItemUpsertRequest(final ProductUpsertRequestBody request)
+	private  UpsertCatalogObjectRequest createCatalogItemUpsertRequest(final ProductUpsertRequestBody request, final String id)
 	{
 		return new UpsertCatalogObjectRequest(UUID.randomUUID().toString(),
-		                                      createObjectFieldForCatalogItemUpsertRequest(request));
+		                                      createObjectFieldForCatalogItemUpsertRequest(request, id));
 	}
 
-	private  CatalogObject createObjectFieldForCatalogItemUpsertRequest(final ProductUpsertRequestBody request)
+	private  CatalogObject createObjectFieldForCatalogItemUpsertRequest(final ProductUpsertRequestBody request, final String id)
 	{
-		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, ensureFirstCharIs(request.getClientProductId(), '#'))
+		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, ensureFirstCharIs(id, '#'))
 									.itemData(createCatalogItem(request))
 								.build();
 	}
@@ -253,7 +253,7 @@ public class SquareService
 	/* ************************* CatalogItemVariation upsert request helpers  ************************** */
 	/* ************************************************************************************************* */
 
-	private  UpsertCatalogObjectResponse sendCatalogItemVariationUpsertRequest(final ProductUpsertRequestBody request, String id)
+	private  UpsertCatalogObjectResponse sendCatalogItemVariationUpsertRequest(final ProductUpsertRequestBody request, final String id)
 															throws ExecutionException, InterruptedException
 	{
 		final UpsertCatalogObjectRequest catalogItemVariationUpsertRequest = createCatalogItemVariationUpsertRequest(request, id);

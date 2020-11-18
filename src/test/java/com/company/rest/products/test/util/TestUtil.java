@@ -3,15 +3,20 @@ import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
+import com.company.rest.products.test.model.backend.BackendServiceDeleteTests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.*;
+import com.squareup.square.models.*;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Objects;
+import java.util.Optional;
 
+import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
+import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
@@ -29,7 +34,7 @@ public class TestUtil
 	/**
 	 * An enum to assist with our testing of specific upsert requests.
 	 */
-	public static enum UpsertType
+	public enum UpsertType
 	{
 		POST, PUT, PATCH
 	}
@@ -291,7 +296,6 @@ public class TestUtil
 				upsertRequestBody.getName().equals(responseBody.getName()) &&
 				upsertRequestBody.getProductType().equals(responseBody.getProductType()) &&
 				upsertRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
-				upsertRequestBody.getClientProductId().equals(responseBody.getClientProductId()) &&
 
 				// Subsequent fields that may or may not have been provided:
 				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType) &&
@@ -449,7 +453,7 @@ public class TestUtil
 	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
-	                                         @NonNull final ProductResponseBody responseBody)
+	                                                   @NonNull final ProductResponseBody responseBody)
 	{
 		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 	}
@@ -461,7 +465,7 @@ public class TestUtil
 	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
-	                                          @NonNull final BackendServiceResponseBody responseBody)
+	                                                   @NonNull final BackendServiceResponseBody responseBody)
 	{
 		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 	}
@@ -474,10 +478,67 @@ public class TestUtil
 	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
-	                                         @NonNull final SquareServiceResponseBody responseBody)
+	                                                   @NonNull final SquareServiceResponseBody responseBody)
 	{
 		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
 	}
 
+	/**
+	 * A method useful for tests, where we want to mock {@link com.company.rest.products.model.CatalogWrapper}'s calls,
+	 * which touch entities for {@link com.squareup.square.api.CatalogApi}. We receive an instance of {@link UpsertCatalogObjectRequest},
+	 * and construct a {@link UpsertCatalogObjectResponse} that represents a successful call to the Square API.
+	 *
+	 * This method is different from {@link #buildItemVariationResponseOutOfRequest(UpsertCatalogObjectRequest)} in that it is used for
+	 * 	 {@link CatalogItem} data instead of {@link CatalogItemVariation} data.
+	 *
+	 * @param request An {@link UpsertCatalogObjectRequest} containing the information given to {@link com.company.rest.products.model.CatalogWrapper}.
+	 *
+	 * @return An instance of {@link UpsertCatalogObjectResponse}, usually appropriately formed based on the argument
+	 * in order to successfully mock a {@link com.company.rest.products.model.CatalogWrapper} call in testing.
+	 *
+	 * @see com.company.rest.products.test.model.backend.BackendServicePutTests
+	 * @see BackendServiceDeleteTests
+	 * @see #buildItemVariationResponseOutOfRequest(UpsertCatalogObjectRequest)
+	 */
+	public static UpsertCatalogObjectResponse buildItemResponseOutOfRequest(@NonNull final UpsertCatalogObjectRequest request)
+	{
+		final CatalogItem item = Optional.of(request.getObject().getItemData())
+		                                 .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItem"));
+		final CatalogObject itemWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, "RANDOM_ITEM_ID")
+				.itemData(item)
+				.build();
+		return new UpsertCatalogObjectResponse.Builder()
+				.catalogObject(itemWrapper)
+				.build();
+	}
+
+	/**
+	 * A method useful for tests, where we want to mock {@link com.company.rest.products.model.CatalogWrapper}'s calls,
+	 * which touch entities for {@link com.squareup.square.api.CatalogApi}. We receive an instance of {@link UpsertCatalogObjectRequest},
+	 * and construct a {@link UpsertCatalogObjectResponse} that represents a successful call to the Square API.
+	 *
+	 * This method is different from {@link #buildItemResponseOutOfRequest(UpsertCatalogObjectRequest)} in that it is used for
+	 * {@link CatalogItemVariation} data instead of {@link CatalogItem} data.
+	 *
+ 	 * @param request An {@link UpsertCatalogObjectRequest} containing the information given to {@link com.company.rest.products.model.CatalogWrapper}.
+	 *
+	 * @return An instance of {@link UpsertCatalogObjectResponse}, usually appropriately formed based on the argument
+	 * in order to successfully mock a {@link com.company.rest.products.model.CatalogWrapper} call in testing.
+	 *
+	 * @see com.company.rest.products.test.model.backend.BackendServicePutTests
+	 * @see BackendServiceDeleteTests
+	 * @see #buildItemResponseOutOfRequest(UpsertCatalogObjectRequest)
+	 */
+	public static UpsertCatalogObjectResponse buildItemVariationResponseOutOfRequest(@NonNull final UpsertCatalogObjectRequest request)
+	{
+		final CatalogItemVariation itemVariation = Optional.of(request.getObject().getItemVariationData())
+		                                                   .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItemVariation"));
+		final CatalogObject itemVariationWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS, "RANDOM_ITEM_VAR_ID")
+				.itemVariationData(itemVariation)
+				.build();
+		return new UpsertCatalogObjectResponse.Builder()
+				.catalogObject(itemVariationWrapper)
+				.build();
+	}
 
 }

@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
+import static com.company.rest.products.model.liteproduct.LiteProduct.buildLiteProductFromSquareResponse;
 import static com.company.rest.products.test.model.backend.MockedSquareServiceDeleteResponses.MOCKED_SQUARE_DELETE_RESPONSES;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePutResponses.MOCKED_SQUARE_PUT_RESPONSES;
@@ -149,7 +150,7 @@ public class BackendServicePutTests
 		///////////
 		// Mocks //
 		///////////
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(mockedSquarePostResponse);
+		final LiteProduct cachedMiniProduct = buildLiteProductFromSquareResponse(mockedSquarePostResponse);
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.empty());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		when(squareService.upsertProduct(postRequest, postRequest.getClientProductId())).thenReturn(mockedSquarePostResponse);
@@ -188,7 +189,7 @@ public class BackendServicePutTests
 			/////////////////////////////////////////////////////////////
 			// Prepare LiteProduct to be returned by some mocked calls //
 			/////////////////////////////////////////////////////////////
-			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_PUT_RESPONSES[i]);
+			final LiteProduct cachedMiniProduct = buildLiteProductFromSquareResponse(MOCKED_SQUARE_PUT_RESPONSES[i]);
 
 			////////////////////////
 			// POST request first //
@@ -208,8 +209,9 @@ public class BackendServicePutTests
 			// PUT request meant to edit previous POST //
 			/////////////////////////////////////////////
 
-			// Mock the Square service upsert call and the repo SAVE and DEL calls.
+			// Mock the Square service upsert call and the repo SEARCH, SAVE and DEL calls.
 			when(squareService.upsertProduct(GOOD_PUTS[i], GOOD_POSTS[i].getClientProductId())).thenReturn(MOCKED_SQUARE_DELETE_RESPONSES[i]);
+			when(repository.findByClientProductId(GOOD_POSTS[i].getClientProductId())).thenReturn(Optional.of(buildLiteProductFromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i])));
 			doNothing().when(repository).deleteByClientProductId(any(String.class));
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 
