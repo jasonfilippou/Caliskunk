@@ -57,14 +57,13 @@ public class ProductController
 		{
 			throw new InconsistentRequestException("Bad POST request supplied.");
 		}
+		postRequest.setName(postRequest.getName().strip().toUpperCase());
 	}
 
 	private void validatePutRequest(final ProductUpsertRequestBody putRequest, final String idInURL) throws InconsistentRequestException
 	{
-		if( ! ( nameCostAndProductTypeOk(putRequest) && idNullOrMatches(putRequest, idInURL) ) )
-		{
-			throw new InconsistentRequestException("Bad PUT request supplied.");
-		}
+		if(putRequest.getName() != null)
+			putRequest.setName(putRequest.getName().strip().toUpperCase());
 	}
 
 	private boolean crucialFieldsOk(final ProductUpsertRequestBody upsertRequest)
@@ -94,11 +93,6 @@ public class ProductController
 	private boolean acceptedProductType(final String productType)
 	{
 		return LiteProduct.PRODUCT_TYPES.contains(productType.trim().toUpperCase());
-	}
-
-	private boolean idNullOrMatches(final ProductUpsertRequestBody putRequest, final String stringInUrl)
-	{
-		return putRequest.getClientProductId() == null || putRequest.getClientProductId().equals(stringInUrl);
 	}
 
 	/* *************************************************************************************** */

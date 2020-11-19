@@ -1,9 +1,10 @@
 package com.company.rest.products.model;
-
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.util.exceptions.SquareServiceException;
 import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
-import com.company.rest.products.util.request_bodies.*;
+import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
+import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
+import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -262,13 +263,13 @@ public class SquareService
 		return response;
 	}
 
-	private  UpsertCatalogObjectRequest createCatalogItemVariationUpsertRequest(final ProductUpsertRequestBody request, String id)
+	private  UpsertCatalogObjectRequest createCatalogItemVariationUpsertRequest(final ProductUpsertRequestBody request, final String id)
 	{
 		return new UpsertCatalogObjectRequest(UUID.randomUUID().toString(),
 		                                      createObjectFieldForItemVariationUpsertRequest(request, id));
 	}
 
-	private  CatalogObject createObjectFieldForItemVariationUpsertRequest(final ProductUpsertRequestBody request, String id)
+	private  CatalogObject createObjectFieldForItemVariationUpsertRequest(final ProductUpsertRequestBody request, final String id)
 	{
 		return new CatalogObject
 				.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS, "#RANDOM_ITEM_VAR_ID")
@@ -276,7 +277,7 @@ public class SquareService
 				.build();
 	}
 
-	private  CatalogItemVariation createCatalogItemVariation(final ProductUpsertRequestBody request, String id)
+	private  CatalogItemVariation createCatalogItemVariation(final ProductUpsertRequestBody request, final String id)
 	{
 		return new CatalogItemVariation
 				.Builder()
@@ -284,9 +285,14 @@ public class SquareService
 					.name(request.getName())
 					.sku(request.getSku())
 					.upc(request.getUpc())
-					.priceMoney(new Money(request.getCostInCents(), CURRENCY))
+					.priceMoney(moneyOrNothing(request))
 					.pricingType(PRICE_MODEL)
 				.build();
+	}
+
+	private Money moneyOrNothing(final ProductUpsertRequestBody request)
+	{
+		return ( request.getCostInCents() != null ) ?  new Money(request.getCostInCents(), CURRENCY) : null;
 	}
 
 	/* **************************************************************************************** */

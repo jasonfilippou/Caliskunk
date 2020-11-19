@@ -326,7 +326,6 @@ public class TestUtil
 				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
 	}
 
-
 	private static boolean optionalFieldsMatch(final ProductUpsertRequestBody upsertRequestBody, final ProductResponseBody responseBody,
 	                                                                                            final UpsertType upsertType)
 	{

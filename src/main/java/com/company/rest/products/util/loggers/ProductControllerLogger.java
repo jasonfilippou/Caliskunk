@@ -82,7 +82,7 @@ public class ProductControllerLogger
 		log.info(msg("PATCH", LOC.BEGIN, jp));
 	}
 
-	@After("execution(* com.company.rest.products.controller.ProductController.put*(..))")
+	@After("execution(* com.company.rest.products.controller.ProductController.patch*(..))")
 	public void afterPatchRequests(final JoinPoint jp)
 	{
 		log.info(msg("PATCH", LOC.END, jp));

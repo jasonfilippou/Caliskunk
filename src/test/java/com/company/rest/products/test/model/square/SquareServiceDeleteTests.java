@@ -87,6 +87,16 @@ public class SquareServiceDeleteTests
 
 						}
 				     );
+
+		// Prepare CatalogWrapper response for DELETE
+		when(catalogWrapper.deleteObject(any(String.class)))
+				.then(
+						invocation ->
+						{
+							return buildMockedDeleteResponse(invocation.getArgument(0), "SOME_RANDOM_ITEM_VARIATION_ID"); // Square ID is the only real important argument here
+						}
+				     );
+
 	}
 
 	@Test
@@ -118,6 +128,8 @@ public class SquareServiceDeleteTests
 		                                                                                     .productName(postRequest.getName())
 		                                                                                     .productType(postRequest.getProductType())
 		                                                                                     .costInCents(postRequest.getCostInCents())
+		                                                                                     .squareItemId("A random Square Item ID")
+		                                                                                     .squareItemVariationId("A random Square Item Variation ID")
 		                                                                                     .build());
 		// validateDeletionResponse(delResponse, postResponse.getSquareItemId(), postResponse.getSquareItemVariationId())); // Will be relevant in End-To-End tests.
 		assertTrue("Bad DEL response from Square layer", responseMatchesDeleteRequest(new ProductDeleteRequestBody(postRequest.getClientProductId()),
@@ -142,6 +154,8 @@ public class SquareServiceDeleteTests
 			                                                                                     .productType(GOOD_POSTS[i].getProductType())
 			                                                                                     .productName(GOOD_POSTS[i].getName())
 			                                                                                     .costInCents(GOOD_POSTS[i].getCostInCents())
+			                                                                                     .squareItemId("A random Square Item ID")
+			                                                                                     .squareItemVariationId("A random Square Item Variation ID")
 			                                                                                     .build()) ;
 			assertTrue("Bad DEL response from Square service",
 			           responseMatchesDeleteRequest(GOOD_DELETES[i], delResponse));
