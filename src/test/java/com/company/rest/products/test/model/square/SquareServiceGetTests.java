@@ -19,8 +19,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -108,52 +106,36 @@ public class SquareServiceGetTests
 	        );
 
         // Response for a Batch Retrieve (GET, GET ALL) request
-        when(catalogWrapper.retrieveObject(any(BatchRetrieveCatalogObjectsRequest.class)))
+        when(catalogWrapper.retrieveObject(any(String.class)))
             .then(
 		        invocation ->
 		        {
-		            final BatchRetrieveCatalogObjectsRequest request = invocation.getArgument(0);
-		            return buildResponseOutOfRetrieveRequest(request);
+		            final String id = invocation.getArgument(0);
+		            return buildResponseOutOfRetrieveRequest(id);
 		        }
 	        );
     }
 
-    private BatchRetrieveCatalogObjectsResponse buildResponseOutOfRetrieveRequest(final BatchRetrieveCatalogObjectsRequest request)
+    private RetrieveCatalogObjectResponse buildResponseOutOfRetrieveRequest(final String id)
     {
-    	return new BatchRetrieveCatalogObjectsResponse.Builder()
-			                                                .objects(buildObjectsForRetrieveResponse(request))
-			                                            .build();
+    	return new RetrieveCatalogObjectResponse.Builder()
+			                                        .object(buildObjectForRetrieveResponse(id))
+			                                        .build();
     }
 
-    private List<CatalogObject> buildObjectsForRetrieveResponse(final BatchRetrieveCatalogObjectsRequest request)
+    private CatalogObject buildObjectForRetrieveResponse(final String id)
     {
-    	// By construction of the list referred to by objectIDs, the first ID
-		// represents the CatalogItem, and the second one the CatalogItemVariation.
-		// The actual contents of the objects do not matter, since this code serves
-		// a mocked call; we don't touch data stored on the Square API.
-		final List<String> objIds = request.getObjectIds();
-		assert objIds.size() == 2 : " Bad retrieve request; object IDs were: " + objIds + ".";
-		final List<CatalogObject> retVal  = new ArrayList<>();
-		retVal.add(new CatalogObject
-							.Builder(CODE_FOR_CATALOG_ITEMS, objIds.get(0))
-								.itemData(new CatalogItem.Builder()
-															.name("RANDOM_ITEM_NAME")
-										                 .build())      // Yo dawg I heard you like builders :(
-							.build());
-		retVal.add(new CatalogObject
-							.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS, objIds.get(1))
-								.itemVariationData(new CatalogItemVariation.Builder()
-								                                                .name("RANDOM_ITEM_VAR_NAME")
-								                                                .priceMoney(new Money(10000L, "USD"))
-								                                            .build())
-							.build());
-		return retVal;
+        return new CatalogObject
+					.Builder(CODE_FOR_CATALOG_ITEMS, id)
+			        .itemData(new CatalogItem.Builder()
+					                  .name("RANDOM_ITEM_NAME")
+								      .build())
+					.build();    // Yo dawg I heard you like builders :(
 	 }
 
 	@Test
 	public void testOneGet()
 	{
-
 		// Prepare request
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()

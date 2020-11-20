@@ -60,18 +60,24 @@ public class ProductController
 		postRequest.setName(postRequest.getName().strip().toUpperCase());
 	}
 
-	private void validatePutRequest(final ProductUpsertRequestBody putRequest, final String idInURL) throws InconsistentRequestException
+	private void validatePutRequest(final ProductUpsertRequestBody putRequest) throws InconsistentRequestException
 	{
-		if(putRequest.getName() != null)
+		if(putRequest.getName() == null || putRequest.getName().length() == 0 || putRequest.getVersion() == null)
+		{
+			throw new InconsistentRequestException("Request had bad name or no version ID.");
+		}
+		else
+		{
 			putRequest.setName(putRequest.getName().strip().toUpperCase());
+		}
 	}
 
 	private boolean crucialFieldsOk(final ProductUpsertRequestBody upsertRequest)
 	{
-		return idFieldOk(upsertRequest) && nameCostAndProductTypeOk(upsertRequest);
+		return idFieldPresent(upsertRequest) && nameCostAndProductTypeOk(upsertRequest);
 	}
 
-	private boolean idFieldOk(final ProductUpsertRequestBody upsertRequest)
+	private boolean idFieldPresent(final ProductUpsertRequestBody upsertRequest)
 	{
 		return upsertRequest.getClientProductId() != null && upsertRequest.getClientProductId().length() >= 1;
 	}
@@ -177,6 +183,7 @@ public class ProductController
 		{
 			validatePostRequest(request);
 			final BackendServiceResponseBody backendResponse = backendService.postProduct(request);
+			validatePostResponse(request, backendResponse);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully posted product!", productResponse, HttpStatus.CREATED);
 		}
@@ -212,7 +219,9 @@ public class ProductController
 	{
 		try
 		{
-			final BackendServiceResponseBody backendResponse = backendService.getProduct(new ProductGetRequestBody(id));
+			ProductGetRequestBody getRequest = new ProductGetRequestBody(id);
+			final BackendServiceResponseBody backendResponse = backendService.getProduct(getRequest);
+			validateGetResponse(getRequest, backendResponse);
 			final ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully got product with ID " + id + ".",  productResponse, HttpStatus.FOUND);
 		}
@@ -236,7 +245,7 @@ public class ProductController
 	 * Entry point for a PUT(id) request.
 	 * @param request the new JSON data to replace the product with.
 	 * @return an appropriate JSON response.
-	 * @see BackendService#putProduct(ProductUpsertRequestBody, String)
+	 * @see BackendService#putProduct(ProductUpsertRequestBody)
 	 */
 	@PutMapping("/product/{id}")
 	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductUpsertRequestBody request,
@@ -244,8 +253,9 @@ public class ProductController
 	{
 		try
 		{
-			validatePutRequest(request, id);
-			final BackendServiceResponseBody backendResponse = backendService.putProduct(request, id);
+			validatePutRequest(request);
+			request.setClientProductId(id);
+			final BackendServiceResponseBody backendResponse = backendService.putProduct(request);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully updated product!", productResponse, HttpStatus.OK);
 		}

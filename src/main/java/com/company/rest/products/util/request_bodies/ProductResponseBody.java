@@ -35,7 +35,7 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("label_color") private String labelColor;
 	@JsonProperty("sku") private String sku;
 	@JsonProperty("upc") private String upc;
-	@JsonProperty("version") private Long version;
+	@JsonProperty("version") private Long version;          // Needed for PUT queries.
 	@JsonProperty("is_deleted") private Boolean isDeleted;
 	@JsonProperty("present_at_all_locations") private Boolean presentAtAllLocations;
 	@JsonProperty("tax_ids") private List<String> taxIDs;

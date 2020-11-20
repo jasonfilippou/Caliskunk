@@ -10,13 +10,23 @@ import lombok.extern.slf4j.Slf4j;
 public class Util
 {
 	/**
+	 * Examines if a provided {@link String} could represent a valid product name.
+	 * @param productName A {@link String} that may or may not be a valid product name.
+	 * @return {@literal true} if {@code productName} is a valid product name, {@literal false} otherwise.
+	 */
+	public static boolean isValidProductName(final String productName)
+	{
+		return productName != null && productName.length() > 0 && productName.chars().allMatch(Character::isUpperCase);
+	}
+
+	/**
 	 * Examines the provided condition. If {@literal true}, does nothing, otherwise logs at ERROR level and throws an instance of {@link AssertionError}.
 	 * @param condition A {@literal boolean} condition to evaluate for truth.
 	 * @param errorMessage An error-descriptive {@link String} that will be fed to the {@link AssertionError} that we will log and
 	 *                     throw if {@code condition} is {@literal false}
 	 * @throws AssertionError if {@code condition} is {@code false}.
 	 */
-    public static void assertAndIfNotLogAndThrow(@NonNull final boolean condition, @NonNull final String errorMessage) throws AssertionError
+	public static void assertAndIfNotLogAndThrow(@NonNull final boolean condition, @NonNull final String errorMessage) throws AssertionError
 	{
 		if(!condition)
 		{
@@ -24,7 +34,6 @@ public class Util
 			throw new AssertionError(errorMessage);
 		}
 	}
-
 	/**
 	 * Abbreviates an input {@link String} from its first character up to the character denoted by {@code idx}.
 	 *

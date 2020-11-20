@@ -90,8 +90,8 @@ public class BackendServiceResponseBody implements Serializable
 					.costInCents(product.getCostInCents())
 					.clientProductId(product.getClientProductId())
 					.squareItemId(product.getSquareItemId())
-					.squareItemVariationId(product.getSquareItemVariationId())
 					.productType(product.getProductType())
+					.version(product.getVersion())
 				.build();
 	}
 

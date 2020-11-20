@@ -27,9 +27,8 @@ import static com.company.rest.products.test.model.backend.MockedSquareServicePo
 import static com.company.rest.products.test.model.backend.MockedSquareServicePutResponses.MOCKED_SQUARE_PUT_RESPONSES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.requests_responses.put.GoodPutRequests.GOOD_PUTS;
+import static com.company.rest.products.test.util.TestUtil.*;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.PUT;
-import static com.company.rest.products.test.util.TestUtil.flushRepo;
-import static com.company.rest.products.test.util.TestUtil.responseMatchesUpsertRequest;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -113,6 +112,7 @@ public class BackendServicePutTests
 					.availableOnline(postRequest.getAvailableOnline())
 					.availableElectronically(postRequest.getAvailableElectronically())
 					.availableForPickup(postRequest.getAvailableForPickup())
+					.version(DEFAULT_VERSION_ID_FOR_MOCKS)
 				.build();
 
 		// In this putRequest, we will change some fields and keep some others. Since PUT does NOT
@@ -130,6 +130,7 @@ public class BackendServicePutTests
 					.availableOnline(true)
 					.availableElectronically(false)
 					.availableForPickup(false)
+                    .version(mockedSquarePostResponse.getVersion()) // Simulating a realistic PUT call
 				.build();
 
 		final SquareServiceResponseBody mockedSquarePutResponse = SquareServiceResponseBody
@@ -145,6 +146,7 @@ public class BackendServicePutTests
 					.availableOnline(putRequest.getAvailableOnline())
 					.availableElectronically(putRequest.getAvailableElectronically())
 					.availableOnline(putRequest.getAvailableOnline())
+					.version(DEFAULT_VERSION_ID_FOR_MOCKS)
 				.build();
 
 		///////////
@@ -171,7 +173,7 @@ public class BackendServicePutTests
 		// Have to re-mock LiteProductRepository.findByClientProductId() because *this* time we *want* it to return our cached product.
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 		// Now, make the call and test it.
-		final BackendServiceResponseBody putResponse = backendService.putProduct(putRequest, postRequest.getClientProductId());
+		final BackendServiceResponseBody putResponse = backendService.putProduct(putRequest);
 		assertTrue("Request did not match response", responseMatchesUpsertRequest(putRequest, putResponse, PUT));
 	}
 

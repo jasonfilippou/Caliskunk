@@ -1,13 +1,11 @@
 package com.company.rest.products.util.request_bodies;
-
-import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.squareup.square.models.CatalogItem;
-import com.squareup.square.models.CatalogItemVariation;
-import com.squareup.square.models.CatalogObject;
-import lombok.*;
+import com.squareup.square.models.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.io.Serializable;
 import java.util.List;
@@ -24,69 +22,129 @@ import java.util.List;
 @Builder(access = AccessLevel.PUBLIC)
 public class SquareServiceResponseBody implements Serializable
 {
-	@JsonProperty("product_client_id") @NonNull private String clientProductId;
-	@JsonProperty("name")  private String name;
-	@JsonProperty("cost")   private Long costInCents;
-	@JsonProperty("product_type") private String productType;
-	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
-	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
-	@JsonProperty("description")  private String description;
-	@JsonProperty("available_online") private Boolean availableOnline;
-	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
-	@JsonProperty("available_electronically") private Boolean availableElectronically;
-	@JsonProperty("label_color") private String labelColor;
-	@JsonProperty("sku") private String sku;
-	@JsonProperty("upc") private String upc;
-	@JsonProperty("version") private Long version;
-	@JsonProperty("is_deleted") private Boolean isDeleted;              // Boolean flag implementing soft deletion.
-	@JsonProperty("present_at_all_locations") private Boolean presentAtAllLocations;
-	@JsonProperty("tax_ids") private List<String> taxIDs;
-	@JsonProperty("updated_at") private String updatedAt;
+	@JsonProperty("product_client_id")
+	@NonNull
+	private String clientProductId;
+	@JsonProperty("name")
+	private String name;
+	@JsonProperty("cost")
+	private Long costInCents;
+	@JsonProperty("product_type")
+	private String productType;
+	@JsonProperty("product_backend_id")
+	@NonNull
+	private String squareItemId;    // Provided by Square.
+	@JsonProperty("description")
+	private String description;
+	@JsonProperty("available_online")
+	private Boolean availableOnline;
+	@JsonProperty("available_for_pickup")
+	private Boolean availableForPickup;
+	@JsonProperty("available_electronically")
+	private Boolean availableElectronically;
+	@JsonProperty("label_color")
+	private String labelColor;
+	@JsonProperty("sku")
+	private String sku;
+	@JsonProperty("upc")
+	private String upc;
+	@JsonProperty("version")
+	private Long version;                       // Essential field for PUT requests.
+	@JsonProperty("is_deleted")
+	private Boolean isDeleted;              // Boolean flag implementing soft deletion.
+	@JsonProperty("present_at_all_locations")
+	private Boolean presentAtAllLocations;
+	@JsonProperty("tax_ids")
+	private List<String> taxIDs;
+	@JsonProperty("updated_at")
+	private String updatedAt;
 
+	/* *************************************************************************************** */
+	/* **************************** STATIC BUILDERS ****************************************** */
+	/* *************************************************************************************** */
+	/**
+	 * Build a {@link SquareServiceResponseBody} out of a {@link ProductUpsertRequestBody} and an {@link UpsertCatalogObjectResponse}.
+	 * @param clientUpsertRequest  An instance of {@link ProductUpsertRequestBody}.
+	 * @param squareUpsertResponse An instance of {@link UpsertCatalogObjectResponse}.
+	 * @return A new {@link SquareServiceResponseBody} with fields based on params.
+	 */
+	public static SquareServiceResponseBody fromUpsertRequestAndResponse(@NonNull final ProductUpsertRequestBody clientUpsertRequest,
+	                                                                     @NonNull final UpsertCatalogObjectResponse squareUpsertResponse)
+	{
+		final CatalogObject catalogObject = squareUpsertResponse.getCatalogObject();
+		final CatalogItem catalogItem = catalogObject.getItemData();
+		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
+		return SquareServiceResponseBody.builder()
+		                                .clientProductId(clientUpsertRequest.getClientProductId())
+		                                .name(catalogItem.getName())
+		                                .costInCents(catalogItemVariation.getPriceMoney().getAmount())
+		                                .productType(clientUpsertRequest.getProductType())
+		                                .squareItemId(catalogObject.getId())
+		                                .description(catalogItem.getDescription())
+		                                .availableOnline(catalogItem.getAvailableOnline())
+		                                .availableForPickup(catalogItem.getAvailableForPickup())
+		                                .availableElectronically(catalogItem.getAvailableElectronically())
+		                                .labelColor(catalogItem.getLabelColor())
+		                                .sku(catalogItemVariation.getSku())
+		                                .upc(catalogItemVariation.getUpc())
+		                                .version(catalogObject.getVersion())
+		                                .isDeleted(catalogObject.getIsDeleted())
+		                                .presentAtAllLocations(catalogObject.getPresentAtAllLocations())
+		                                .taxIDs(catalogItem.getTaxIds())
+		                                .updatedAt(catalogObject.getUpdatedAt())
+		                                .build();
+	}
+	/**
+	 * Build a {@link SquareServiceResponseBody} out of a {@link ProductGetRequestBody} and a {@link RetrieveCatalogObjectResponse}.
+	 * @param clientGetRequest  An instance of {@link ProductGetRequestBody}.
+	 * @param squareGetResponse An instance of {@link RetrieveCatalogObjectResponse}.
+	 * @return A new {@link SquareServiceResponseBody} with fields based on params.
+	 */
+	public static SquareServiceResponseBody fromGetRequestAndResponse(final ProductGetRequestBody clientGetRequest,
+	                                                                  final RetrieveCatalogObjectResponse squareGetResponse)
+	{
+		final CatalogObject catalogObject = squareGetResponse.getObject();
+		final CatalogItem catalogItem = catalogObject.getItemData();
+		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
+		return SquareServiceResponseBody.builder()
+		                                .clientProductId(clientGetRequest.getClientProductId())
+		                                .name(catalogItem.getName())
+		                                .costInCents(catalogItemVariation.getPriceMoney().getAmount())
+		                                .productType(clientGetRequest.getLiteProduct().getProductType())
+		                                .squareItemId(catalogObject.getId())
+		                                .description(catalogItem.getDescription())
+		                                .availableOnline(catalogItem.getAvailableOnline())
+		                                .availableForPickup(catalogItem.getAvailableForPickup())
+		                                .availableElectronically(catalogItem.getAvailableElectronically())
+		                                .labelColor(catalogItem.getLabelColor())
+		                                .sku(catalogItemVariation.getSku())
+		                                .upc(catalogItemVariation.getUpc())
+		                                .version(catalogObject.getVersion())
+		                                .isDeleted(catalogObject.getIsDeleted())
+		                                .presentAtAllLocations(catalogObject.getPresentAtAllLocations())
+		                                .taxIDs(catalogItem.getTaxIds())
+		                                .updatedAt(catalogObject.getUpdatedAt())
+		                                .build();
+	}
 
 	/**
-	 * Populate data to feed to {@link BackendService} based on information mined by the Square API.
-	 *
-	 * @param itemObject The {@link CatalogObject} that wraps a {@link CatalogItem}, sent to us by Square.
-	 * @param itemVarObject The {@link CatalogObject} that wraps a {@link CatalogItemVariation}, sent to us by Square.
-	 * @return An instance of {@link SquareServiceResponseBody} which describes the information related to the current call.
+	 * Build a {@link SquareServiceResponseBody} out of a {@link ProductDeleteRequestBody} and an {@link DeleteCatalogObjectResponse}.
+	 * @param clientDeleteRequest  An instance of {@link ProductDeleteRequestBody}.
+	 * @param squareDeleteResponse An instance of {@link UpsertCatalogObjectResponse}.
+	 * @return A new {@link SquareServiceResponseBody} with fields based on params.
 	 */
-	public static SquareServiceResponseBody fromSquareData(@NonNull final CatalogObject itemObject,
-	                                                       @NonNull final CatalogObject itemVarObject,
-	                                                       @NonNull final LiteProduct liteProduct)
+	public static SquareServiceResponseBody fromDeleteRequestAndResponse(final ProductDeleteRequestBody clientDeleteRequest,
+	                                                                     final DeleteCatalogObjectResponse squareDeleteResponse)
 	{
-		final CatalogItem item = itemObject.getItemData();
-		final CatalogItemVariation variation = itemVarObject.getItemVariationData();
 
-		return SquareServiceResponseBody
-						.builder()
-							// Product client ID and type.
-							.clientProductId(liteProduct.getClientProductId())
-							.productType(liteProduct.getProductType())
-
-
-							// Data contained in the CatalogObject instance
-							.squareItemId(itemObject.getId())
-							.updatedAt(itemObject.getUpdatedAt())
-							.isDeleted(itemObject.getIsDeleted())
-							.presentAtAllLocations(itemObject.getPresentAtAllLocations())
-							.version(itemObject.getVersion())
-
-							// Data pulled from the CatalogItem instance
-							.name(item.getName())
-							.description(item.getDescription())
-							.availableElectronically(item.getAvailableElectronically())
-							.availableForPickup(item.getAvailableForPickup())
-							.availableOnline(item.getAvailableOnline())
-							.labelColor(item.getLabelColor())
-
-
-							// Data pulled from CatalogItemVariation instance
-							.squareItemVariationId(itemVarObject.getId())
-							.costInCents(variation.getPriceMoney().getAmount())
-							.sku(variation.getSku())
-							.upc(variation.getUpc())
-
-						.build();
+		return SquareServiceResponseBody.builder()
+		                                .clientProductId(clientDeleteRequest.getClientProductId())
+		                                .name(clientDeleteRequest.getLiteProduct().getProductName())
+		                                .costInCents(clientDeleteRequest.getLiteProduct().getCostInCents())
+		                                .productType(clientDeleteRequest.getLiteProduct().getProductType())
+		                                .squareItemId(clientDeleteRequest.getLiteProduct().getSquareItemId())
+		                                .isDeleted(true)
+		                                .updatedAt(squareDeleteResponse.getDeletedAt())
+		                                .build();
 	}
 }

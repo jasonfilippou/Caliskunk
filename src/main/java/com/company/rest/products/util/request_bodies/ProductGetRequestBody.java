@@ -1,5 +1,5 @@
 package com.company.rest.products.util.request_bodies;
-
+import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -19,5 +19,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ProductGetRequestBody implements Serializable
 {
-	@JsonProperty @NonNull	private String clientProductId;
+	@JsonProperty @NonNull private String clientProductId;
+	@JsonProperty private LiteProduct liteProduct;      // Will be populated later as we go down the API.
+
+	public ProductGetRequestBody(final String id)
+	{
+		clientProductId = id;
+	}
 }

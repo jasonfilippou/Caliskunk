@@ -4,6 +4,7 @@ import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.requests_responses.put.GoodPutRequests.GOOD_PUTS;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION_ID_FOR_MOCKS;
 public class MockedBackendServicePutResponses
 {
 	/** An array of prepared {@link BackendServiceResponseBody} instances.
@@ -39,6 +40,7 @@ public class MockedBackendServicePutResponses
 			                                 .productType(putRequest.getProductType())
 			                                 .sku(putRequest.getSku())
 			                                 .upc(putRequest.getUpc())
+			                                 .version(DEFAULT_VERSION_ID_FOR_MOCKS)
 		                                 .build();
 	}
 	/**

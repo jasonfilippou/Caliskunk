@@ -27,6 +27,7 @@ import static com.company.rest.products.test.model.backend.MockedSquareServiceGe
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.get.GoodGetRequests.GOOD_GETS;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION_ID_FOR_MOCKS;
 import static com.company.rest.products.test.util.TestUtil.flushRepo;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -115,6 +116,7 @@ public class BackendServiceGetTests
 						                                                  .squareItemId("#RANDOM_ITEM_ID")
 						                                                  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(request.getCostInCents())
+																		  .version(DEFAULT_VERSION_ID_FOR_MOCKS)
 						                                                  .isDeleted(false)
 		                                                             .build();
 

@@ -26,8 +26,7 @@ import static com.company.rest.products.test.model.backend.MockedSquareServiceDe
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests.GOOD_DELETES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
-import static com.company.rest.products.test.util.TestUtil.flushRepo;
-import static com.company.rest.products.test.util.TestUtil.responseMatchesDeleteRequest;
+import static com.company.rest.products.test.util.TestUtil.*;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -106,6 +105,7 @@ public class BackendServiceDeleteTests
 						                                                  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(postRequest.getCostInCents())
 						                                                  .isDeleted(false)
+																		  .version(DEFAULT_VERSION_ID_FOR_MOCKS)
 		                                                             .build();
 
 		/////////////////////////////////////////////////////////////////////////

@@ -39,6 +39,8 @@ public class TestUtil
 		POST, PUT, PATCH
 	}
 
+	public static final Long DEFAULT_VERSION_ID_FOR_MOCKS = 1000000L;
+
 	/**
 	 * Ensure that a provided {@link ResponseEntity} has the provided {@link HttpStatus}.
 	 * @param responseEntity The response of the {@link com.company.rest.products.controller.ProductController}.

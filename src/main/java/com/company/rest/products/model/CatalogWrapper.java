@@ -62,10 +62,10 @@ public class CatalogWrapper
 	 * @see UpsertCatalogObjectResponse
 	 * @return An instance of {@link BatchRetrieveCatalogObjectsResponse} which contains the data requested from the Square API.
 	 */
-	public BatchRetrieveCatalogObjectsResponse retrieveObject(@NonNull final BatchRetrieveCatalogObjectsRequest request)
+	public RetrieveCatalogObjectResponse retrieveObject(@NonNull final String objectId)
 																			throws ExecutionException, InterruptedException
 	{
-		return catalog.batchRetrieveCatalogObjectsAsync(request).get();
+		return catalog.retrieveCatalogObjectAsync(objectId, false).get();
 	}
 
 	/**

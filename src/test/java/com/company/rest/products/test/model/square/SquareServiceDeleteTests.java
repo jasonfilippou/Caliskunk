@@ -129,7 +129,6 @@ public class SquareServiceDeleteTests
 		                                                                                     .productType(postRequest.getProductType())
 		                                                                                     .costInCents(postRequest.getCostInCents())
 		                                                                                     .squareItemId("A random Square Item ID")
-		                                                                                     .squareItemVariationId("A random Square Item Variation ID")
 		                                                                                     .build());
 		// validateDeletionResponse(delResponse, postResponse.getSquareItemId(), postResponse.getSquareItemVariationId())); // Will be relevant in End-To-End tests.
 		assertTrue("Bad DEL response from Square layer", responseMatchesDeleteRequest(new ProductDeleteRequestBody(postRequest.getClientProductId()),
@@ -155,7 +154,6 @@ public class SquareServiceDeleteTests
 			                                                                                     .productName(GOOD_POSTS[i].getName())
 			                                                                                     .costInCents(GOOD_POSTS[i].getCostInCents())
 			                                                                                     .squareItemId("A random Square Item ID")
-			                                                                                     .squareItemVariationId("A random Square Item Variation ID")
 			                                                                                     .build()) ;
 			assertTrue("Bad DEL response from Square service",
 			           responseMatchesDeleteRequest(GOOD_DELETES[i], delResponse));
