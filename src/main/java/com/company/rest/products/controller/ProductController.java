@@ -62,9 +62,9 @@ public class ProductController
 
 	private void validatePutRequest(final ProductUpsertRequestBody putRequest) throws InconsistentRequestException
 	{
-		if(putRequest.getName() == null || putRequest.getName().length() == 0 || putRequest.getVersion() == null)
+		if(putRequest.getVersion() == null)
 		{
-			throw new InconsistentRequestException("Request had bad name or no version ID.");
+			throw new InconsistentRequestException("Request had no version ID.");
 		}
 		else
 		{
@@ -254,7 +254,7 @@ public class ProductController
 		try
 		{
 			validatePutRequest(request);
-			request.setClientProductId(id);
+			request.setClientProductId(id); // And now on the request has the ID in the body for the rest of its journey! :)
 			final BackendServiceResponseBody backendResponse = backendService.putProduct(request);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully updated product!", productResponse, HttpStatus.OK);

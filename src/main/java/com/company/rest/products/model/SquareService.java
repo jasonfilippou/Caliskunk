@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.company.rest.products.util.Util.*;
 import static java.util.Optional.ofNullable;
@@ -146,18 +145,16 @@ public class SquareService
 		                          catalogObject.getType().equals(CODE_FOR_CATALOG_ITEMS) &&
 		                          !catalogObject.getIsDeleted() &&
 		                          postResponse.getIdMappings().size() == 2 &&
-		                          postResponse.getIdMappings().stream().flatMap(Stream::of)
+		                          postResponse.getIdMappings().stream().map(CatalogIdMapping::getClientObjectId)
                                                                        .collect(Collectors.toList())
                                                                        .containsAll(Arrays.asList(postRequest.getClientProductId(),
-					                                                                              postRequest.getClientProductId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX,
-					                                                                              postRequest.getSquareProductId(),
-					                                                                              postRequest.getSquareProductId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX)) &&
+					                                                                              postRequest.getClientProductId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX)) &&
 		                          postResponse.getContext().getResponse().getStatusCode() == HttpStatus.OK.value() &&
 		                          catalogItemVariation.getItemId().equals(catalogObject.getId()) &&
 		                          catalogItemVariation.getPriceMoney().getCurrency().equals(CURRENCY) &&
 		                          catalogItem.getName().equals(postRequest.getName()) &&    // This subsumes abbreviation test
 		                          catalogItemVariation.getName().equals(catalogItem.getName() + DEFAULT_ITEM_VARIATION_NAME_SUFFIX) &&
-		                          nullableFieldsMatch(catalogItem, catalogItemVariation, postRequest),
+		                          optionalFieldsMatch(catalogItem, catalogItemVariation, postRequest),
 		                          "Bad Upsert response from Square API"
 		                         );
 	}
@@ -167,7 +164,7 @@ public class SquareService
 		return (postResponse.getErrors() == null || postResponse.getErrors().size() == 0);
 	}
 
-	private boolean nullableFieldsMatch(final CatalogItem catalogItem, final CatalogItemVariation catalogItemVariation,
+	private boolean optionalFieldsMatch(final CatalogItem catalogItem, final CatalogItemVariation catalogItemVariation,
 	                                    final ProductUpsertRequestBody postRequest)
 	{
 		return 	ofNullable(catalogItem.getAvailableElectronically()).equals(ofNullable(postRequest.getAvailableElectronically())) &&

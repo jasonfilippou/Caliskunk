@@ -100,8 +100,8 @@ public class SquareServiceResponseBody implements Serializable
 	 * @param squareGetResponse An instance of {@link RetrieveCatalogObjectResponse}.
 	 * @return A new {@link SquareServiceResponseBody} with fields based on params.
 	 */
-	public static SquareServiceResponseBody fromGetRequestAndResponse(final ProductGetRequestBody clientGetRequest,
-	                                                                  final RetrieveCatalogObjectResponse squareGetResponse)
+	public static SquareServiceResponseBody fromGetRequestAndResponse(@NonNull final ProductGetRequestBody clientGetRequest,
+	                                                                  @NonNull final RetrieveCatalogObjectResponse squareGetResponse)
 	{
 		final CatalogObject catalogObject = squareGetResponse.getObject();
 		final CatalogItem catalogItem = catalogObject.getItemData();
@@ -133,8 +133,8 @@ public class SquareServiceResponseBody implements Serializable
 	 * @param squareDeleteResponse An instance of {@link UpsertCatalogObjectResponse}.
 	 * @return A new {@link SquareServiceResponseBody} with fields based on params.
 	 */
-	public static SquareServiceResponseBody fromDeleteRequestAndResponse(final ProductDeleteRequestBody clientDeleteRequest,
-	                                                                     final DeleteCatalogObjectResponse squareDeleteResponse)
+	public static SquareServiceResponseBody fromDeleteRequestAndResponse(@NonNull final ProductDeleteRequestBody clientDeleteRequest,
+	                                                                     @NonNull final DeleteCatalogObjectResponse squareDeleteResponse)
 	{
 
 		return SquareServiceResponseBody.builder()

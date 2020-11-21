@@ -1,7 +1,6 @@
 package com.company.rest.products.util.request_bodies;
 
 import com.company.rest.products.model.BackendService;
-import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -10,7 +9,6 @@ import lombok.Data;
 import lombok.NonNull;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * A response that {@link BackendService} provides {@link com.company.rest.products.controller.ProductController}.
@@ -27,7 +25,6 @@ public class BackendServiceResponseBody implements Serializable
 	// so separate logic can be useful when refactoring.
 	@JsonProperty("product_id") @NonNull private String clientProductId;    // Provided by client.
 	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
-	@JsonProperty("product_variation_backend_id") @NonNull private String squareItemVariationId;    // Provided by Square.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
@@ -40,39 +37,52 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("upc") private String upc;
 	@JsonProperty("version") private Long version;
 	@JsonProperty("is_deleted") private Boolean isDeleted;
-	@JsonProperty("present_at_all_locations") private Boolean presentAtAllLocations;
-	@JsonProperty("tax_ids") private List<String> taxIDs;
 	@JsonProperty("updated_at") private String updatedAt;
 
 	/**
-	 * Create a response to feed to {@link com.company.rest.products.controller.ProductController} based on information
-	 * mined from both {@link SquareService} <b>and</b> {@link com.company.rest.products.controller.ProductController}.
 	 *
-	 * @param squareResponse The response provided by {@link SquareService} after we called it.
-	 *
-	 * @return An instance of {@link BackendServiceResponseBody} that contains information about the run of {@link BackendService}.
 	 */
-	public static BackendServiceResponseBody buildBackendResponseBody(@NonNull final SquareServiceResponseBody squareResponse)
+	public static BackendServiceResponseBody fromUpsertRequestAndResponse(@NonNull final ProductUpsertRequestBody upsertRequest,
+	                                                                      @NonNull final SquareServiceResponseBody upsertResponse)
 	{
 		return builder()
-					.clientProductId(squareResponse.getClientProductId())
-					.squareItemId(squareResponse.getSquareItemId())
-					.squareItemVariationId(squareResponse.getSquareItemVariationId())
-					.name(squareResponse.getName())
-					.productType(squareResponse.getProductType())
-					.costInCents(squareResponse.getCostInCents())
-					.description(squareResponse.getDescription())
-					.isDeleted(squareResponse.getIsDeleted())
-					.availableOnline(squareResponse.getAvailableOnline())
-					.availableForPickup(squareResponse.getAvailableForPickup())
-					.availableElectronically(squareResponse.getAvailableElectronically())
-					.presentAtAllLocations(squareResponse.getPresentAtAllLocations())
-					.labelColor(squareResponse.getLabelColor())
-					.upc(squareResponse.getUpc())
-					.sku(squareResponse.getSku())
-					.version(squareResponse.getVersion())
-					.taxIDs(squareResponse.getTaxIDs())
-					.updatedAt(squareResponse.getUpdatedAt())
+				.name(upsertResponse.getName())
+				.version(upsertResponse.getVersion())
+				.squareItemId(upsertResponse.getSquareItemId())
+				.availableElectronically(upsertResponse.getAvailableElectronically())
+				.availableForPickup(upsertResponse.getAvailableForPickup())
+				.availableOnline(upsertResponse.getAvailableOnline())
+				.isDeleted(upsertResponse.getIsDeleted())
+				.clientProductId(upsertResponse.getClientProductId())
+				.costInCents(upsertResponse.getCostInCents())
+				.labelColor(upsertResponse.getLabelColor())
+				.upc(upsertResponse.getUpc())
+				.sku(upsertResponse.getSku())
+				.productType(upsertResponse.getProductType())
+				.updatedAt(upsertResponse.getUpdatedAt())
+				.description(upsertResponse.getDescription())
+				.build();
+	}
+
+	public static BackendServiceResponseBody fromGetRequestAndResponse(@NonNull final ProductGetRequestBody getRequest,
+	                                                                   @NonNull final SquareServiceResponseBody getResponse)
+	{
+		return builder()
+				.name(getResponse.getName())
+				.version(getResponse.getVersion())
+				.squareItemId(getResponse.getSquareItemId())
+				.availableElectronically(getResponse.getAvailableElectronically())
+				.availableForPickup(getResponse.getAvailableForPickup())
+				.availableOnline(getResponse.getAvailableOnline())
+				.isDeleted(getResponse.getIsDeleted())
+				.clientProductId(getResponse.getClientProductId())
+				.costInCents(getResponse.getCostInCents())
+				.labelColor(getResponse.getLabelColor())
+				.upc(getResponse.getUpc())
+				.sku(getResponse.getSku())
+				.productType(getResponse.getProductType())
+				.updatedAt(getResponse.getUpdatedAt())
+				.description(getResponse.getDescription())
 				.build();
 	}
 
@@ -84,7 +94,6 @@ public class BackendServiceResponseBody implements Serializable
 	 */
 	public static BackendServiceResponseBody fromLiteProduct(@NonNull final LiteProduct product)
 	{
-		// Right now all it does is copy data over, but this can change in the future.
 		return builder()
 					.name(product.getProductName())
 					.costInCents(product.getCostInCents())
@@ -117,14 +126,11 @@ public class BackendServiceResponseBody implements Serializable
 		                                    .description(response.getDescription())
 		                                    .isDeleted(response.getIsDeleted())
 		                                    .labelColor(response.getLabelColor())
-		                                    .presentAtAllLocations(response.getPresentAtAllLocations())
 		                                    .productType(response.getProductType())
 		                                    .sku(response.getSku())
 		                                    .upc(response.getUpc())
-		                                    .taxIDs(response.getTaxIDs())
 		                                    // The following are alright, since this is a class used only in mocks anyhow
 		                                    .squareItemId("#RANDOM_SQUARE_ITEM_ID")
-		                                    .squareItemVariationId("RANDOM_SQUARE_ITEM_VAR_ID")
 		                                    .updatedAt(response.getUpdatedAt())
 		                                    .version(response.getVersion())
 		                                 .build();

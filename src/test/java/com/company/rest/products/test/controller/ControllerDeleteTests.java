@@ -106,7 +106,7 @@ public class ControllerDeleteTests
 			////////////////////////////////////
 
 			// Mock the backend DEL call.
-			when(backendService.deleteProduct(GOOD_DELETES[i].getClientProductId()))
+			when(backendService.deleteProduct(GOOD_DELETES[i]))
 						.thenReturn(MOCKED_BACKEND_DELETE_RESPONSES[i]);    // You will still be getting the data from POST!
 
 			// Call controller

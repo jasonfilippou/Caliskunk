@@ -2,10 +2,12 @@ package com.company.rest.products.util.request_bodies;
 
 import com.company.rest.products.model.BackendService;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Information about the object that the user made an API call for. Is contained within an instance of
@@ -37,8 +39,6 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("upc") private String upc;
 	@JsonProperty("version") private Long version;          // Needed for PUT queries.
 	@JsonProperty("is_deleted") private Boolean isDeleted;
-	@JsonProperty("present_at_all_locations") private Boolean presentAtAllLocations;
-	@JsonProperty("tax_ids") private List<String> taxIDs;
 	@JsonProperty("updated_at") private String updatedAt;
 
 	/**
@@ -63,12 +63,10 @@ public class ProductResponseBody implements Serializable
 					.availableOnline(backendResponse.getAvailableOnline())
 					.availableForPickup(backendResponse.getAvailableForPickup())
 					.availableElectronically(backendResponse.getAvailableElectronically())
-					.presentAtAllLocations(backendResponse.getPresentAtAllLocations())
 					.labelColor(backendResponse.getLabelColor())
 					.upc(backendResponse.getUpc())
 					.sku(backendResponse.getSku())
 					.version(backendResponse.getVersion())
-					.taxIDs(backendResponse.getTaxIDs())
 					.updatedAt(backendResponse.getUpdatedAt())
 				.build();
 	}

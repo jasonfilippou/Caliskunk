@@ -19,8 +19,7 @@ import static lombok.AccessLevel.PUBLIC;
 @AllArgsConstructor
 public class ProductUpsertRequestBody implements Serializable
 {
-	@JsonProperty("id") public String clientProductId; // Not asserted @NonNull, since PUT and PATCH give them separately in URI.
-	@JsonProperty("square_id") public String squareProductId;   // Useful for Square - level queries.
+	@JsonProperty("id") public String clientProductId;          // Not asserted @NonNull, since PUT and PATCH give them separately in URI.
 	@JsonProperty("name")  public String name;
 	@JsonProperty("product_type") public String productType;
 	@JsonProperty("cost_in_cents") public Long costInCents;
@@ -31,5 +30,6 @@ public class ProductUpsertRequestBody implements Serializable
 	@JsonProperty("label_color") public String labelColor;
 	@JsonProperty("sku") public String sku;
 	@JsonProperty("upc") public String upc;
-	@JsonProperty("version") public Long version;       // A field used by Square for UPDATEs. Will never be populated by user.
+	public String squareProductId;   // Useful for Square Service - level queries. Never given by the user.
+	public Long version;                // A field used by Square for UPDATEs. Will never be given by user.
 }
