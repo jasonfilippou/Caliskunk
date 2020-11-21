@@ -19,8 +19,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ProductGetRequestBody implements Serializable
 {
-	@JsonProperty @NonNull private String clientProductId;
-	@JsonProperty private LiteProduct liteProduct;      // Will be populated later as we go down the API.
+	@JsonProperty("id") @NonNull private String clientProductId;
+	private LiteProduct liteProduct;      // Will be populated later as we go down the API.
 
 	public ProductGetRequestBody(final String id)
 	{

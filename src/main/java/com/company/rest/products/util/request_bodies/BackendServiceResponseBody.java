@@ -20,10 +20,7 @@ import java.io.Serializable;
 @Builder(access = AccessLevel.PUBLIC)
 public class BackendServiceResponseBody implements Serializable
 {
-	// For now this class is almost identical to SquareServiceResponseBody, in order for us
-	// to give a breadth of information to the user. However, this can change,
-	// so separate logic can be useful when refactoring.
-	@JsonProperty("product_id") @NonNull private String clientProductId;    // Provided by client.
+	@JsonProperty("id") @NonNull private String clientProductId;    // Provided by client.
 	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
@@ -39,51 +36,26 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("is_deleted") private Boolean isDeleted;
 	@JsonProperty("updated_at") private String updatedAt;
 
-	/**
-	 *
-	 */
-	public static BackendServiceResponseBody fromUpsertRequestAndResponse(@NonNull final ProductUpsertRequestBody upsertRequest,
-	                                                                      @NonNull final SquareServiceResponseBody upsertResponse)
-	{
-		return builder()
-				.name(upsertResponse.getName())
-				.version(upsertResponse.getVersion())
-				.squareItemId(upsertResponse.getSquareItemId())
-				.availableElectronically(upsertResponse.getAvailableElectronically())
-				.availableForPickup(upsertResponse.getAvailableForPickup())
-				.availableOnline(upsertResponse.getAvailableOnline())
-				.isDeleted(upsertResponse.getIsDeleted())
-				.clientProductId(upsertResponse.getClientProductId())
-				.costInCents(upsertResponse.getCostInCents())
-				.labelColor(upsertResponse.getLabelColor())
-				.upc(upsertResponse.getUpc())
-				.sku(upsertResponse.getSku())
-				.productType(upsertResponse.getProductType())
-				.updatedAt(upsertResponse.getUpdatedAt())
-				.description(upsertResponse.getDescription())
-				.build();
-	}
 
-	public static BackendServiceResponseBody fromGetRequestAndResponse(@NonNull final ProductGetRequestBody getRequest,
-	                                                                   @NonNull final SquareServiceResponseBody getResponse)
+	public static BackendServiceResponseBody fromSquareResponse(@NonNull final SquareServiceResponseBody squareServiceResponse)
 	{
 		return builder()
-				.name(getResponse.getName())
-				.version(getResponse.getVersion())
-				.squareItemId(getResponse.getSquareItemId())
-				.availableElectronically(getResponse.getAvailableElectronically())
-				.availableForPickup(getResponse.getAvailableForPickup())
-				.availableOnline(getResponse.getAvailableOnline())
-				.isDeleted(getResponse.getIsDeleted())
-				.clientProductId(getResponse.getClientProductId())
-				.costInCents(getResponse.getCostInCents())
-				.labelColor(getResponse.getLabelColor())
-				.upc(getResponse.getUpc())
-				.sku(getResponse.getSku())
-				.productType(getResponse.getProductType())
-				.updatedAt(getResponse.getUpdatedAt())
-				.description(getResponse.getDescription())
-				.build();
+			.name(squareServiceResponse.getName())
+			.version(squareServiceResponse.getVersion())
+			.squareItemId(squareServiceResponse.getSquareItemId())
+			.availableElectronically(squareServiceResponse.getAvailableElectronically())
+			.availableForPickup(squareServiceResponse.getAvailableForPickup())
+			.availableOnline(squareServiceResponse.getAvailableOnline())
+			.isDeleted(squareServiceResponse.getIsDeleted())
+			.clientProductId(squareServiceResponse.getClientProductId())
+			.costInCents(squareServiceResponse.getCostInCents())
+			.labelColor(squareServiceResponse.getLabelColor())
+			.upc(squareServiceResponse.getUpc())
+			.sku(squareServiceResponse.getSku())
+			.productType(squareServiceResponse.getProductType())
+			.updatedAt(squareServiceResponse.getUpdatedAt())
+			.description(squareServiceResponse.getDescription())
+			.build();
 	}
 
 	/**

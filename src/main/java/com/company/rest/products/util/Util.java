@@ -14,7 +14,7 @@ public class Util
 	 * @param productName A {@link String} that may or may not be a valid product name.
 	 * @return {@literal true} if {@code productName} is a valid product name, {@literal false} otherwise.
 	 */
-	public static boolean isValidProductName(final String productName)
+	public static boolean isValidProductName(@NonNull final String productName)
 	{
 		return productName != null && productName.length() > 0 && productName.chars().allMatch(Character::isUpperCase);
 	}
@@ -26,7 +26,7 @@ public class Util
 	 *                     throw if {@code condition} is {@literal false}
 	 * @throws AssertionError if {@code condition} is {@code false}.
 	 */
-	public static void assertAndIfNotLogAndThrow(@NonNull final boolean condition, @NonNull final String errorMessage) throws AssertionError
+	public static void assertAndIfNotLogAndThrow(@NonNull final Boolean condition, @NonNull final String errorMessage) throws AssertionError
 	{
 		if(!condition)
 		{
@@ -69,7 +69,7 @@ public class Util
 	 *
 	 * @return {@code s} itself, if it begins with {@code c}, otherwise {@code cs}.
 	 */
-	public static String ensureFirstCharIs(@NonNull final String s, final char c)
+	public static String ensureFirstCharIs(@NonNull final String s, @NonNull final Character c)
 	{
 		return (s.length() > 1 && s.charAt(0) == c) ? s : (c + s);
 	}

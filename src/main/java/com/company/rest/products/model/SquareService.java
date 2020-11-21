@@ -40,7 +40,6 @@ public class SquareService
 	public static final String CODE_FOR_CATALOG_ITEMS = "ITEM";
 	public static final String CODE_FOR_CATALOG_ITEM_VARIATIONS = "ITEM_VARIATION";
 	public static final Integer ABBRV_CHARS = 3;
-	public static final String DEFAULT_SQUARE_CATALOG_ITEM_TYPE = "REGULAR";
 	private final CatalogWrapper catalogWrapper;
 
 	/**

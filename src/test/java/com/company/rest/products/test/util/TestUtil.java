@@ -126,7 +126,6 @@ public class TestUtil
 	                                                        .name(request.getName())
 	                                                        .clientProductId(request.getClientProductId())
 															.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-	                                                        .squareItemVariationId("#RANDOM_SQUARE_ITEM_VAR_ID")
 	                                                        .productType(request.getProductType())
 	                                                        .costInCents(request.getCostInCents())
 	                                                        .availableElectronically(request.getAvailableElectronically())
@@ -137,7 +136,7 @@ public class TestUtil
 															.upc(request.getUpc())
 															.description(request.getDescription())
 															.labelColor(request.getLabelColor())
-															.presentAtAllLocations(true)
+
                                                           .build();
 		// Mock the call to the backend service
 		when(backendService.postProduct(request)).thenReturn(mockedResponse);
@@ -209,7 +208,6 @@ public class TestUtil
 	                                                        .name(request.getName())
 	                                                        .clientProductId(request.getClientProductId())
 															.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-	                                                        .squareItemVariationId("#RANDOM_SQUARE_ITEM_VAR_ID")
 	                                                        .productType(request.getProductType())
 	                                                        .costInCents(request.getCostInCents())
 	                                                        .availableElectronically(request.getAvailableElectronically())
@@ -220,7 +218,6 @@ public class TestUtil
 															.upc(request.getUpc())
 															.description(request.getDescription())
 															.labelColor(request.getLabelColor())
-															.presentAtAllLocations(true)
                                                           .build();
 		// Mock the call to the backend service
 		when(backendService.postProduct(request)).thenReturn(mockedResponse);

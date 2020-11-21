@@ -114,7 +114,6 @@ public class BackendServiceGetTests
 																		  .clientProductId(request.getClientProductId())
 																		  .productType(request.getProductType())
 						                                                  .squareItemId("#RANDOM_ITEM_ID")
-						                                                  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(request.getCostInCents())
 																		  .version(DEFAULT_VERSION_ID_FOR_MOCKS)
 						                                                  .isDeleted(false)

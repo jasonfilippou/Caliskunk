@@ -20,6 +20,14 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ProductDeleteRequestBody implements Serializable
 {
-	@JsonProperty @NonNull	private String clientProductId;
-	@JsonProperty private LiteProduct liteProduct;
+	@JsonProperty("id") @NonNull	private String clientProductId;
+	private LiteProduct liteProduct;
+	/**
+	 * ID-based constructor.
+	 * @param clientProductId The client-provided ID, which should be unique in the application.
+	 */
+	public ProductDeleteRequestBody(final String clientProductId)
+	{
+		this.clientProductId = clientProductId;
+	}
 }

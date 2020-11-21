@@ -7,10 +7,7 @@ import com.company.rest.products.util.exceptions.BackendServiceException;
 import com.company.rest.products.util.exceptions.InconsistentRequestException;
 import com.company.rest.products.util.exceptions.ProductNotFoundException;
 import com.company.rest.products.util.exceptions.ResourceAlreadyCreatedException;
-import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
-import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
-import com.company.rest.products.util.request_bodies.ProductResponseBody;
-import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
+import com.company.rest.products.util.request_bodies.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
-import static com.company.rest.products.util.Util.logException;
-
+import static com.company.rest.products.util.Util.*;
+import static java.util.Optional.ofNullable;
 /**
  * Entry point to API. Decouples response and business logic by offloading all heavy lifting to {@link BackendService},
  * following an MVC pattern.
@@ -39,7 +36,6 @@ public class ProductController
 	public static final Integer DEFAULT_PAGE_SIZE = 10;
 	public static final Integer DEFAULT_PAGE_IDX = 0;
 	public static final String SORT_BY = "costInCents";
-
 	@Autowired
 	public ProductController(final BackendService backendService)
 	{
@@ -50,77 +46,25 @@ public class ProductController
 	/* ********************   UTILITIES FOR INPUT VALIDATION  ******************************** */
 	/* *************************************************************************************** */
 
-	private void validatePostRequest(final ProductUpsertRequestBody postRequest) throws InconsistentRequestException
-	{
-		// Ensure that product ID, name, type, and cost values are appropriate.
-		if (!crucialFieldsOk(postRequest))
-		{
-			throw new InconsistentRequestException("Bad POST request supplied.");
-		}
-		postRequest.setName(postRequest.getName().strip().toUpperCase());
-	}
 
-	private void validatePutRequest(final ProductUpsertRequestBody putRequest) throws InconsistentRequestException
-	{
-		if(putRequest.getVersion() == null)
-		{
-			throw new InconsistentRequestException("Request had no version ID.");
-		}
-		else
-		{
-			putRequest.setName(putRequest.getName().strip().toUpperCase());
-		}
-	}
 
-	private boolean crucialFieldsOk(final ProductUpsertRequestBody upsertRequest)
-	{
-		return idFieldPresent(upsertRequest) && nameCostAndProductTypeOk(upsertRequest);
-	}
-
-	private boolean idFieldPresent(final ProductUpsertRequestBody upsertRequest)
-	{
-		return upsertRequest.getClientProductId() != null && upsertRequest.getClientProductId().length() >= 1;
-	}
-
-	private boolean nameCostAndProductTypeOk(final ProductUpsertRequestBody upsertRequest)
-	{
-		// Ensure that name, type, and cost values are appropriate.
-		return 	(upsertRequest.getCostInCents() != null && upsertRequest.getCostInCents() > 0L)
-
-	            &&
-
-				(upsertRequest.getProductType() != null && acceptedProductType(upsertRequest.getProductType()))
-
-				&&
-
-				(upsertRequest.getName() != null && upsertRequest.getName().length() > 0);
-	}
-
-	private boolean acceptedProductType(final String productType)
-	{
-		return LiteProduct.PRODUCT_TYPES.contains(productType.trim().toUpperCase());
-	}
 
 	/* *************************************************************************************** */
 	/* ********************   UTILITIES FOR RESPONDING TO CLIENT ***************************** */
 	/* *************************************************************************************** */
-
 	private ResponseEntity<ResponseMessage> response(final String requestStatus, final String message,
 	                                                 final Object data, final HttpStatus httpStatus)
 	{
-		return new ResponseEntity<>(new ResponseMessage(requestStatus,message,data), httpStatus);
+		return new ResponseEntity<>(new ResponseMessage(requestStatus, message, data), httpStatus);
 	}
-
 	private ResponseEntity<ResponseMessage> failure(final String message, final HttpStatus httpStatus)
 	{
-		return response(ResponseMessage.FAILURE, message,null, httpStatus);
+		return response(ResponseMessage.FAILURE, message, null, httpStatus);
 	}
-
 	private ResponseEntity<ResponseMessage> failure(final Throwable thrown, final HttpStatus httpStatus)
 	{
 		return failure(thrown.getMessage(), httpStatus);
 	}
-
 	private ResponseEntity<ResponseMessage> success(final String message, final Object data,
 	                                                final HttpStatus statusToReport)
 	{
@@ -130,26 +74,26 @@ public class ProductController
 	/* *************************************************************************************** */
 	/* ************************** AGGREGATE ROOT GET AND POST ******************************** */
 	/* *************************************************************************************** */
-
 	/**
 	 * Entry point for a GET ALL request.
-	 * @param pageIdx the current index of the page in the paginated response.
+	 *
+	 * @param pageIdx     the current index of the page in the paginated response.
 	 * @param itemsInPage the number of items in the current page.
-	 * @param sortBy the field of {@link LiteProduct} which we will use for sorting the products.
-	 * @see BackendService#getAllProducts(Integer, Integer, String)
+	 * @param sortBy      the field of {@link LiteProduct} which we will use for sorting the products.
 	 * @return an appropriate JSON response.
+	 * @see BackendService#getAllProducts(Integer, Integer, String)
 	 */
 	@GetMapping(value = "/products")
 	public ResponseEntity<ResponseMessage> getAll(@PathVariable(required = false, name = "page") Integer pageIdx,
-	                                              @PathVariable(required = false, name ="items_in_page") Integer itemsInPage,
+	                                              @PathVariable(required = false, name = "items_in_page") Integer itemsInPage,
 	                                              @PathVariable(required = false, name = "sort_by") String sortBy)
 	{
-		if(pageIdx == null) pageIdx = DEFAULT_PAGE_IDX;
-		if(itemsInPage == null)	itemsInPage = DEFAULT_PAGE_SIZE;
-		if(sortBy == null) sortBy = "costInCents";
-		if((pageIdx < 0) || (itemsInPage < 1)) // Autoboxed
+		if (pageIdx == null) pageIdx = DEFAULT_PAGE_IDX;
+		if (itemsInPage == null) itemsInPage = DEFAULT_PAGE_SIZE;
+		if (sortBy == null) sortBy = "costInCents";
+		if ((pageIdx < 0) || (itemsInPage < 1)) // Autoboxed
 		{
-			log.error("Received a bad GET ALL request (page=" +pageIdx +", itemsInPage=" + itemsInPage);
+			log.error("Received a bad GET ALL request (page=" + pageIdx + ", itemsInPage=" + itemsInPage);
 			return failure("Please provide non-negative page and items per page parameters", HttpStatus.BAD_REQUEST);
 		}
 		else
@@ -169,12 +113,12 @@ public class ProductController
 			}
 		}
 	}
-
 	/**
 	 * Entry point for a POST request.
-	 * @see BackendService#postProduct(ProductUpsertRequestBody)
+	 *
 	 * @param request The JSON body of the POST request.
 	 * @return an appropriate JSON response.
+	 * @see BackendService#postProduct(ProductUpsertRequestBody)
 	 */
 	@PostMapping(value = "/products")
 	public ResponseEntity<ResponseMessage> postProduct(@RequestBody ProductUpsertRequestBody request)
@@ -183,7 +127,7 @@ public class ProductController
 		{
 			validatePostRequest(request);
 			final BackendServiceResponseBody backendResponse = backendService.postProduct(request);
-			validatePostResponse(request, backendResponse);
+			validatePostResponse(backendResponse, request);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully posted product!", productResponse, HttpStatus.CREATED);
 		}
@@ -192,7 +136,7 @@ public class ProductController
 			logException(e, this.getClass().getName() + "::postProduct");
 			return failure(e, HttpStatus.BAD_REQUEST);
 		}
-		catch(ResourceAlreadyCreatedException exc)
+		catch (ResourceAlreadyCreatedException exc)
 		{
 			logException(exc, this.getClass().getName() + "::postProduct");
 			return failure(exc, HttpStatus.CONFLICT);
@@ -203,29 +147,88 @@ public class ProductController
 			return failure(exc, exc.getStatus());
 		}
 	}
+	private void validatePostRequest(final ProductUpsertRequestBody postRequest) throws InconsistentRequestException
+	{
+		// Ensure that product ID, name, type, and cost values are appropriate.
+		if (!crucialFieldsOk(postRequest))
+		{
+			throw new InconsistentRequestException("Bad POST request supplied.");
+		}
+		postRequest.setName(postRequest.getName().strip().toUpperCase());
+	}
+	private boolean crucialFieldsOk(final ProductUpsertRequestBody upsertRequest)
+	{
+		return idFieldPresent(upsertRequest) && nameCostAndProductTypeOk(upsertRequest);
+	}
+	private boolean idFieldPresent(final ProductUpsertRequestBody upsertRequest)
+	{
+		return upsertRequest.getClientProductId() != null && upsertRequest.getClientProductId().length() >= 1;
+	}
+	private boolean nameCostAndProductTypeOk(final ProductUpsertRequestBody upsertRequest)
+	{
+		// Ensure that name, type, and cost values are appropriate.
+		return (upsertRequest.getCostInCents() != null && upsertRequest.getCostInCents() > 0L) &&
+		       (upsertRequest.getProductType() != null && acceptedProductType(upsertRequest.getProductType())) &&
+		       (upsertRequest.getName() != null && upsertRequest.getName().length() > 0);
+	}
+	private boolean acceptedProductType(final String productType)
+	{
+		return LiteProduct.PRODUCT_TYPES.contains(productType.trim().toUpperCase());
+	}
+
+	private void validatePostResponse(final BackendServiceResponseBody postResponse, final ProductUpsertRequestBody postRequest)
+	{
+		assertAndIfNotLogAndThrow(!postResponse.getIsDeleted() &&
+		                          postResponse.getUpdatedAt() != null &&
+		                          postResponse.getVersion() != null &&
+		                          postResponse.getSquareItemId() != null &&
+		                          postResponseMatchesRequest(postResponse, postRequest),
+		                          "Upsert Request did not match response");
+	}
+
+	private boolean postResponseMatchesRequest(final BackendServiceResponseBody postResponse, final ProductUpsertRequestBody postRequest)
+	{
+		return 	postResponse.getClientProductId().equals(postRequest.getClientProductId()) &&
+				optionalFieldsMatch(postResponse, postRequest);
+	}
+
+	private boolean optionalFieldsMatch(final BackendServiceResponseBody postResponse, final ProductUpsertRequestBody postRequest)
+	{
+		return ofNullable(postResponse.getName()).equals(ofNullable(postRequest.getName())) &&
+		       ofNullable(postResponse.getProductType()).equals(ofNullable(postRequest.getProductType())) &&
+		       ofNullable(postResponse.getAvailableElectronically()).equals(ofNullable(postRequest.getAvailableElectronically())) &&
+		       ofNullable(postResponse.getAvailableForPickup()).equals(ofNullable(postRequest.getAvailableForPickup())) &&
+		       ofNullable(postResponse.getAvailableOnline()).equals(ofNullable(postRequest.getAvailableOnline())) &&
+		       ofNullable(postResponse.getCostInCents()).equals(ofNullable(postRequest.getCostInCents())) &&
+		       ofNullable(postResponse.getDescription()).equals(ofNullable(postRequest.getDescription())) &&
+		       ofNullable(postResponse.getLabelColor()).equals(ofNullable(postRequest.getLabelColor())) &&
+		       ofNullable(postResponse.getSku()).equals(ofNullable(postRequest.getSku())) &&
+		       ofNullable(postResponse.getUpc()).equals(ofNullable(postRequest.getUpc()));
+	}
 
 	/* *************************************************************************************** */
 	/* ************************************ GET ONE ****************************************** */
 	/* *************************************************************************************** */
-
 	/**
 	 * Entry point for a GET(id) request.
+	 *
 	 * @param id a non-{@code null} {@link String} representing the ID of the object we want to GET.
-     * @see BackendService#getProduct(ProductGetRequestBody)
 	 * @return an appropriate JSON response.
+	 * @see BackendService#getProduct(ProductGetRequestBody)
 	 */
 	@GetMapping("/product/{id}")
 	public ResponseEntity<ResponseMessage> getProduct(@PathVariable("id") String id)
 	{
 		try
 		{
-			ProductGetRequestBody getRequest = new ProductGetRequestBody(id);
+			final ProductGetRequestBody getRequest = new ProductGetRequestBody(id);
+			validateGetRequest(getRequest);
 			final BackendServiceResponseBody backendResponse = backendService.getProduct(getRequest);
-			validateGetResponse(getRequest, backendResponse);
-			final ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
-			return success("Successfully got product with ID " + id + ".",  productResponse, HttpStatus.FOUND);
+			validateGetResponse(backendResponse, getRequest);
+			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
+			return success("Successfully got product with ID " + id + ".", productResponse, HttpStatus.FOUND);
 		}
-		catch(ProductNotFoundException e)
+		catch (ProductNotFoundException e)
 		{
 			logException(e, this.getClass().getName() + "::getProduct");
 			return failure(e, HttpStatus.NOT_FOUND);
@@ -237,25 +240,48 @@ public class ProductController
 		}
 	}
 
+	private void validateGetRequest(final ProductGetRequestBody requestBody)
+	{
+		assertAndIfNotLogAndThrow(requestBody.getClientProductId() != null,
+		                          "Bad GET request");        // As long as this is a path variable, we should be good.
+	}
+
+	private void validateGetResponse(final BackendServiceResponseBody getResponse, final ProductGetRequestBody getRequest)
+	{
+		assertAndIfNotLogAndThrow(getRequest.getLiteProduct() != null && // Must have been populated by backend.
+									getRequest.getClientProductId().equals(getResponse.getClientProductId()) &&
+		                            liteProductFieldsMatch(getResponse, getRequest),"Bad GET response");
+	}
+
+	private boolean liteProductFieldsMatch(final BackendServiceResponseBody getResponse, final ProductGetRequestBody getRequest)
+	{
+		return getResponse.getName().equals(getRequest.getLiteProduct().getProductName()) &&
+		       getResponse.getSquareItemId().equals(getRequest.getLiteProduct().getSquareItemId()) &&
+		       getResponse.getCostInCents().equals(getRequest.getLiteProduct().getCostInCents()) &&
+		       getResponse.getProductType().equals(getRequest.getLiteProduct().getProductType()) &&
+		       getResponse.getVersion().equals(getRequest.getLiteProduct().getVersion());
+	}
+
 	/* *************************************************************************************** */
 	/* *************************************** PUT ******************************************* */
 	/* *************************************************************************************** */
 
 	/**
 	 * Entry point for a PUT(id) request.
-	 * @param request the new JSON data to replace the product with.
+	 * @param putRequest the new JSON data to replace the product with.
 	 * @return an appropriate JSON response.
 	 * @see BackendService#putProduct(ProductUpsertRequestBody)
 	 */
 	@PutMapping("/product/{id}")
-	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductUpsertRequestBody request,
+	public ResponseEntity<ResponseMessage> putProduct(@RequestBody ProductUpsertRequestBody putRequest,
 	                                                  @PathVariable("id") String id)
 	{
 		try
 		{
-			validatePutRequest(request);
-			request.setClientProductId(id); // And now on the request has the ID in the body for the rest of its journey! :)
-			final BackendServiceResponseBody backendResponse = backendService.putProduct(request);
+			validatePutRequest(putRequest);
+			putRequest.setClientProductId(id); // And from now on the request has the ID in the body for the rest of its journey! :)
+			final BackendServiceResponseBody backendResponse = backendService.putProduct(putRequest);
+			validatePutResponse(backendResponse, putRequest);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully updated product!", productResponse, HttpStatus.OK);
 		}
@@ -269,6 +295,38 @@ public class ProductController
 			logException(exc, this.getClass().getName() + "::putProduct");
 			return failure(exc, exc.getStatus());
 		}
+	}
+
+	private void validatePutRequest(final ProductUpsertRequestBody putRequest) throws InconsistentRequestException
+	{
+		if (putRequest.getVersion() == null)
+		{
+			throw new InconsistentRequestException("Request had no version ID.");
+		}
+		else if (putRequest.getName() != null && !isValidProductName(putRequest.getName()))
+		{
+			throw new InconsistentRequestException("Request had bad name: " + putRequest.getName() + ".");
+		}
+		else if (isValidProductName(putRequest.getName()))
+		{
+			putRequest.setName(putRequest.getName().strip().toUpperCase());
+		}
+	}
+
+	private void validatePutResponse(final BackendServiceResponseBody putResponse, final ProductUpsertRequestBody putRequest)
+	{
+		assertAndIfNotLogAndThrow(!putResponse.getIsDeleted() &&
+		                          putResponse.getUpdatedAt() != null &&
+		                          putResponse.getVersion() != null &&
+		                          putResponse.getSquareItemId() != null &&
+		                          putResponseMatchesRequest(putResponse, putRequest),
+		                          "Upsert Request did not match response");
+	}
+
+
+	private boolean putResponseMatchesRequest(final BackendServiceResponseBody putResponse, final ProductUpsertRequestBody putRequest)
+	{
+		return optionalFieldsMatch(putResponse, putRequest);
 	}
 
 	/* *************************************************************************************** */
@@ -306,7 +364,7 @@ public class ProductController
 	/**
 	 * Entry point for a DELETE(id) request.
 	 * @param id The ID of the object to delete.
-	 * @see BackendService#deleteProduct(String)
+	 * @see BackendService#deleteProduct(ProductDeleteRequestBody)
 	 * @return an appropriate JSON response.
 	 */
 	@DeleteMapping("/product/{id}")
@@ -314,7 +372,10 @@ public class ProductController
 	{
 		try
 		{
-			final BackendServiceResponseBody backendResponse = backendService.deleteProduct(id);
+			final ProductDeleteRequestBody deleteRequest = new ProductDeleteRequestBody(id);
+			validateDeleteRequest(deleteRequest);
+			final BackendServiceResponseBody backendResponse = backendService.deleteProduct(new ProductDeleteRequestBody(id));
+			validateDeleteResponse(backendResponse, deleteRequest);
 			final ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
 			return success("Successfully deleted product with ID " + id + ".",
 			               productResponse, HttpStatus.OK);
@@ -324,5 +385,26 @@ public class ProductController
 			logException(e, this.getClass().getName() + "::deleteProduct");
 			return failure(e, e.getStatus());
 		}
+	}
+
+	private void validateDeleteRequest(final ProductDeleteRequestBody deleteRequest)
+	{
+		assertAndIfNotLogAndThrow(deleteRequest.getClientProductId() != null, "Bad DELETE request");
+	}
+
+	private void validateDeleteResponse(final BackendServiceResponseBody deleteResponse, final ProductDeleteRequestBody deleteRequest)
+	{
+		assertAndIfNotLogAndThrow(deleteRequest.getLiteProduct() != null && // Must have been populated by backend.
+		                          deleteRequest.getClientProductId().equals(deleteResponse.getClientProductId()) &&
+		                          liteProductFieldsMatch(deleteResponse, deleteRequest),"Bad GET response");
+	}
+
+	private boolean liteProductFieldsMatch(final BackendServiceResponseBody deleteResponse, final ProductDeleteRequestBody deleteRequest)
+	{
+		return deleteResponse.getName().equals(deleteRequest.getLiteProduct().getProductName()) &&
+		       deleteResponse.getSquareItemId().equals(deleteRequest.getLiteProduct().getSquareItemId()) &&
+		       deleteResponse.getCostInCents().equals(deleteRequest.getLiteProduct().getCostInCents()) &&
+		       deleteResponse.getProductType().equals(deleteRequest.getLiteProduct().getProductType()) &&
+		       deleteResponse.getVersion().equals(deleteRequest.getLiteProduct().getVersion());
 	}
 }

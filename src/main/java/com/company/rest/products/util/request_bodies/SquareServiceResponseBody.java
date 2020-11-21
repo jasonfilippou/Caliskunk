@@ -22,7 +22,7 @@ import java.util.List;
 @Builder(access = AccessLevel.PUBLIC)
 public class SquareServiceResponseBody implements Serializable
 {
-	@JsonProperty("product_client_id")
+	@JsonProperty("id")
 	@NonNull
 	private String clientProductId;
 	@JsonProperty("name")
@@ -52,8 +52,6 @@ public class SquareServiceResponseBody implements Serializable
 	private Long version;                       // Essential field for PUT requests.
 	@JsonProperty("is_deleted")
 	private Boolean isDeleted;              // Boolean flag implementing soft deletion.
-	@JsonProperty("present_at_all_locations")
-	private Boolean presentAtAllLocations;
 	@JsonProperty("tax_ids")
 	private List<String> taxIDs;
 	@JsonProperty("updated_at")
@@ -89,7 +87,6 @@ public class SquareServiceResponseBody implements Serializable
 		                                .upc(catalogItemVariation.getUpc())
 		                                .version(catalogObject.getVersion())
 		                                .isDeleted(catalogObject.getIsDeleted())
-		                                .presentAtAllLocations(catalogObject.getPresentAtAllLocations())
 		                                .taxIDs(catalogItem.getTaxIds())
 		                                .updatedAt(catalogObject.getUpdatedAt())
 		                                .build();
@@ -121,7 +118,6 @@ public class SquareServiceResponseBody implements Serializable
 		                                .upc(catalogItemVariation.getUpc())
 		                                .version(catalogObject.getVersion())
 		                                .isDeleted(catalogObject.getIsDeleted())
-		                                .presentAtAllLocations(catalogObject.getPresentAtAllLocations())
 		                                .taxIDs(catalogItem.getTaxIds())
 		                                .updatedAt(catalogObject.getUpdatedAt())
 		                                .build();

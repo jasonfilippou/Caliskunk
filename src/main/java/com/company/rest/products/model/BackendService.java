@@ -15,7 +15,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -71,7 +70,6 @@ public class BackendService
 		try
 		{
 			validatePostRequest(postRequest);
-//			assert postRequest.getClientProductId() != null && isValidProductName(postRequest.getName()) : "Bad POST request.";
 			final String id = postRequest.getClientProductId();
 			if (localRepo.findByClientProductId(id).isPresent())
 			{
@@ -84,9 +82,9 @@ public class BackendService
 				// We first POST to Square and *then* store the cached version in our
 				// local DB in order to grab the unique ID that Square provides us with.
 				final SquareServiceResponseBody squareServiceResponse = squareService.postProduct(postRequest);
-				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(squareServiceResponse));
 				validatePostResponse(squareServiceResponse, postRequest);
-				return BackendServiceResponseBody.fromUpsertRequestAndResponse(postRequest, squareServiceResponse);
+				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(squareServiceResponse));
+				return BackendServiceResponseBody.fromSquareResponse(squareServiceResponse);
 			}
 		}
 		catch (SquareServiceException exc)
@@ -111,6 +109,10 @@ public class BackendService
 	private void validatePostResponse(final SquareServiceResponseBody squareServiceResponse, final ProductUpsertRequestBody clientPostRequest)
 	{
 		assertAndIfNotLogAndThrow(!squareServiceResponse.getIsDeleted() &&
+		                           squareServiceResponse.getUpdatedAt() != null &&
+		                           squareServiceResponse.getVersion() != null &&
+		                           squareServiceResponse.getSquareItemId() != null &&
+		                           squareServiceResponse.getProductType().equals(clientPostRequest.getProductType()) &&
 		                           squareServiceResponse.getClientProductId().equals(clientPostRequest.getClientProductId()) &&
 								   squareServiceResponse.getName().equals(clientPostRequest.getName()) &&
 		                           optionalFieldsMatch(squareServiceResponse, clientPostRequest),
@@ -159,7 +161,7 @@ public class BackendService
 				expandGetRequest(getRequest, cached.get());
 				final SquareServiceResponseBody squareServiceResponse = squareService.getProduct(getRequest);
 				validateGetResponse(squareServiceResponse, getRequest);
-				return BackendServiceResponseBody.fromGetRequestAndResponse(getRequest, squareServiceResponse);
+				return BackendServiceResponseBody.fromSquareResponse(squareServiceResponse);
 			}
 		}
 		catch(SquareServiceException exc)
@@ -196,7 +198,7 @@ public class BackendService
 
 	private void expandGetRequest(final ProductGetRequestBody getRequest, final LiteProduct liteProduct)
 	{
-		assert getRequest.getClientProductId().equals(liteProduct.getClientProductId()) : "Mismatch in product IDs during GET.";
+		assertAndIfNotLogAndThrow(getRequest.getClientProductId().equals(liteProduct.getClientProductId()), "Mismatch in product IDs during GET.");
 		getRequest.setLiteProduct(liteProduct);
 	}
 
@@ -275,7 +277,7 @@ public class BackendService
 				validatePutResponse(squareServiceResponse, putRequest);
 				localRepo.deleteByClientProductId(id);                      // Since we PUT, we have to replace entirely. TODO: would it be faster to execute an HDL-assisted SQL UPDATE query for LiteProductRepository?
 				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(squareServiceResponse));   // This will replace the version as well.
-				return BackendServiceResponseBody.fromUpsertRequestAndResponse(putRequest, squareServiceResponse);
+				return BackendServiceResponseBody.fromSquareResponse(squareServiceResponse);
 			}
 		}
 		catch(SquareServiceException exc)
@@ -283,7 +285,7 @@ public class BackendService
 			logException(exc, this.getClass().getName() + "::putProduct");
 			throw new BackendServiceException(exc, exc.getStatus());
 		}
-		catch (Throwable t)
+		catch(Throwable t)
 		{
 			logException(t, this.getClass().getName() + "::putProduct");
 			throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -295,7 +297,7 @@ public class BackendService
 		assertAndIfNotLogAndThrow(putRequest.getVersion() != null &&
 		                          putRequest.getClientProductId() != null &&
 		                          putRequest.getSquareProductId() == null && // Shouldn't know anything about Square just yet!
-		                          isValidProductName(putRequest.getName()),"Bad PUT request.");
+		                          putRequest.getName() == null || isValidProductName(putRequest.getName()),"Bad PUT request."); // Might not update name
 	}
 
 	private void validatePutResponse(final SquareServiceResponseBody putResponse, final ProductUpsertRequestBody putRequest)
@@ -336,10 +338,11 @@ public class BackendService
 			}
 			else
 			{
+				expandDeleteRequest(deleteRequest, cached.get());
 				final SquareServiceResponseBody squareServiceResponse = squareService.deleteProduct(deleteRequest);
-				validateDeleteResponse(deleteRequest, squareServiceResponse);
+				validateDeleteResponse(squareServiceResponse, deleteRequest);
 				localRepo.deleteByClientProductId(id); // delete(cached) will probably be slower
-				return BackendServiceResponseBody.fromDeleteRequestAndResponse(deleteRequest, squareServiceResponse);
+				return BackendServiceResponseBody.fromSquareResponse(squareServiceResponse);
 			}
 		}
 		catch(SquareServiceException exc)
@@ -347,5 +350,27 @@ public class BackendService
 			logException(exc, this.getClass().getName() + "::deleteProduct");
 			throw new BackendServiceException(exc, exc.getStatus());
 		}
+	}
+
+	private void validateDeleteRequest(final ProductDeleteRequestBody deleteRequest)
+	{
+		assertAndIfNotLogAndThrow(deleteRequest.getClientProductId() != null , "Bad DELETE request");
+	}
+
+	private void expandDeleteRequest(final ProductDeleteRequestBody deleteRequest, final LiteProduct liteProduct)
+	{
+		assertAndIfNotLogAndThrow(deleteRequest.getClientProductId().equals(liteProduct.getClientProductId()), "Bad DELETE request");
+		deleteRequest.setLiteProduct(liteProduct);
+	}
+
+	private void validateDeleteResponse(final SquareServiceResponseBody squareServiceResponse, final ProductDeleteRequestBody deleteRequest)
+	{
+		assertAndIfNotLogAndThrow(squareServiceResponse.getClientProductId().equals(deleteRequest.getClientProductId()) &&
+		                          squareServiceResponse.getProductType().equals(deleteRequest.getLiteProduct().getProductType()) &&
+		                          squareServiceResponse.getSquareItemId().equals(deleteRequest.getLiteProduct().getSquareItemId()) &&
+		                          squareServiceResponse.getCostInCents().equals(deleteRequest.getLiteProduct().getCostInCents()) &&
+		                          squareServiceResponse.getName().equals(deleteRequest.getLiteProduct().getProductName()) &&
+		                          squareServiceResponse.getIsDeleted() && squareServiceResponse.getUpdatedAt() != null,
+								  "Bad DELETE response");
 	}
 }

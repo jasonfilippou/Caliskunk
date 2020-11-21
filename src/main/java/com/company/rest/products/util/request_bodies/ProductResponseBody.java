@@ -26,7 +26,7 @@ public class ProductResponseBody implements Serializable
 	// For now this class is almost identical to BackendServiceResponseBody, in order for us
 	// to give a breadth of information to the user. However, this can change,
 	// so separate logic can be useful when refactoring.
-	@JsonProperty("product_id") @NonNull private String clientProductId;    // Provided by client.
+	@JsonProperty("id") @NonNull private String clientProductId;    // Provided by client.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost_in_cents")  @NonNull private Long costInCents;
