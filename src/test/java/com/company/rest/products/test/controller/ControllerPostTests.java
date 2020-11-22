@@ -17,10 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static com.company.rest.products.test.controller.MockedBackendServicePostResponses.MOCKED_BACKEND_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
+import static com.company.rest.products.test.util.TestUtil.*;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
-import static com.company.rest.products.test.util.TestUtil.checkEntityStatusAndFetchResponse;
-import static com.company.rest.products.test.util.TestUtil.responseMatchesUpsertRequest;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +53,7 @@ public class ControllerPostTests
 	@Test
 	public void testOnePost()
 	{
-		final ProductUpsertRequestBody request = ProductUpsertRequestBody
+		final ProductUpsertRequestBody postRequest  = ProductUpsertRequestBody
 													.builder()
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
@@ -63,33 +63,28 @@ public class ControllerPostTests
 														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(true)
 													.build();
 
 		final BackendServiceResponseBody preparedResponse = BackendServiceResponseBody
 														.builder()
-	                                                        .name(request.getName())
-	                                                        .clientProductId(request.getClientProductId())
-															.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-	                                                        .squareItemVariationId("#RANDOM_SQUARE_ITEM_VAR_ID")
-	                                                        .productType(request.getProductType())
-	                                                        .costInCents(request.getCostInCents())
-	                                                        .availableElectronically(request.getAvailableElectronically())
-															.availableForPickup(request.getAvailableForPickup())
-															.availableOnline(request.getAvailableOnline())
-															.isDeleted(false)
-															.sku(request.getSku())
-															.upc(request.getUpc())
-															.description(request.getDescription())
-															.labelColor(request.getLabelColor())
-															.presentAtAllLocations(true)
-                                                          .build();
-		when(backendService.postProduct(request)).thenReturn(preparedResponse);
-		final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(request);
+                                                        .name(postRequest.getName().strip().toUpperCase())
+                                                        .clientProductId(postRequest.getClientProductId())
+														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
+                                                        .productType(postRequest.getProductType())
+                                                        .costInCents(postRequest.getCostInCents())
+														.isDeleted(false)
+														.updatedAt(DEFAULT_UPDATED_AT_STRING)
+														.sku(postRequest.getSku())
+														.upc(postRequest.getUpc())
+														.description(postRequest.getDescription())
+														.labelColor(postRequest.getLabelColor())
+														.version(10000L)    // Random Long
+														.build();
+
+		when(backendService.postProduct(postRequest)).thenReturn(preparedResponse);
+		final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(postRequest);
 		final ProductResponseBody response = checkEntityStatusAndFetchResponse(postResponseEntity, HttpStatus.CREATED);
-		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response, POST));
+		assertTrue("Request did not match response", responseMatchesUpsertRequest(postRequest, response, POST));
 	}
 
 	@Test
@@ -99,16 +94,14 @@ public class ControllerPostTests
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Mock
-			when(backendService.postProduct(GOOD_POSTS[i]))
-				.thenReturn(MockedBackendServicePostResponses.RESPONSES[i]);
+			when(backendService.postProduct(GOOD_POSTS[i])).thenReturn(MOCKED_BACKEND_POST_RESPONSES[i]);
 
 			// Call controller
 			final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(GOOD_POSTS[i]);
 			final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);
 
 			// Assess response
-			assertTrue("Mismatch in response #" + i + " (0-indexed).",
-			           responseMatchesUpsertRequest(GOOD_POSTS[i], response, POST));
+			assertTrue("Mismatch in response #" + i + " (0-indexed).", responseMatchesUpsertRequest(GOOD_POSTS[i], response, POST));
 		}
 	}
 

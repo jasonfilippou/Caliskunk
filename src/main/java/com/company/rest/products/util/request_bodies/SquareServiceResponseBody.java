@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NonNull;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Information about the run of the {@link SquareService} routine that was called.
@@ -36,12 +35,6 @@ public class SquareServiceResponseBody implements Serializable
 	private String squareItemId;    // Provided by Square.
 	@JsonProperty("description")
 	private String description;
-	@JsonProperty("available_online")
-	private Boolean availableOnline;
-	@JsonProperty("available_for_pickup")
-	private Boolean availableForPickup;
-	@JsonProperty("available_electronically")
-	private Boolean availableElectronically;
 	@JsonProperty("label_color")
 	private String labelColor;
 	@JsonProperty("sku")
@@ -52,8 +45,6 @@ public class SquareServiceResponseBody implements Serializable
 	private Long version;                       // Essential field for PUT requests.
 	@JsonProperty("is_deleted")
 	private Boolean isDeleted;              // Boolean flag implementing soft deletion.
-	@JsonProperty("tax_ids")
-	private List<String> taxIDs;
 	@JsonProperty("updated_at")
 	private String updatedAt;
 
@@ -79,15 +70,11 @@ public class SquareServiceResponseBody implements Serializable
 		                                .productType(clientUpsertRequest.getProductType())
 		                                .squareItemId(catalogObject.getId())
 		                                .description(catalogItem.getDescription())
-		                                .availableOnline(catalogItem.getAvailableOnline())
-		                                .availableForPickup(catalogItem.getAvailableForPickup())
-		                                .availableElectronically(catalogItem.getAvailableElectronically())
 		                                .labelColor(catalogItem.getLabelColor())
 		                                .sku(catalogItemVariation.getSku())
 		                                .upc(catalogItemVariation.getUpc())
 		                                .version(catalogObject.getVersion())
 		                                .isDeleted(catalogObject.getIsDeleted())
-		                                .taxIDs(catalogItem.getTaxIds())
 		                                .updatedAt(catalogObject.getUpdatedAt())
 		                                .build();
 	}
@@ -110,15 +97,11 @@ public class SquareServiceResponseBody implements Serializable
 		                                .productType(clientGetRequest.getLiteProduct().getProductType())
 		                                .squareItemId(catalogObject.getId())
 		                                .description(catalogItem.getDescription())
-		                                .availableOnline(catalogItem.getAvailableOnline())
-		                                .availableForPickup(catalogItem.getAvailableForPickup())
-		                                .availableElectronically(catalogItem.getAvailableElectronically())
 		                                .labelColor(catalogItem.getLabelColor())
 		                                .sku(catalogItemVariation.getSku())
 		                                .upc(catalogItemVariation.getUpc())
 		                                .version(catalogObject.getVersion())
 		                                .isDeleted(catalogObject.getIsDeleted())
-		                                .taxIDs(catalogItem.getTaxIds())
 		                                .updatedAt(catalogObject.getUpdatedAt())
 		                                .build();
 	}

@@ -58,7 +58,7 @@ public class GoodPostRequests
 					                        .productType("flower")
 					                        .costInCents(280000L)
 					                        .labelColor("F96A0C")
-					                        .availableForPickup(true)
+					                        
 							.build(),
 
 					ProductUpsertRequestBody.builder()
@@ -67,9 +67,9 @@ public class GoodPostRequests
 					                        .productType("flower")
 					                        .costInCents(5500L)
 					                        .labelColor("E5FA90")
-					                        .availableForPickup(true)
-					                        .availableElectronically(false)
-					                        .availableOnline(false)
+					                        
+					                        
+					                        
 							.build(),
 
 					ProductUpsertRequestBody.builder()
@@ -94,7 +94,7 @@ public class GoodPostRequests
 					                        .productType("flower")
 					                        .costInCents(3000L)
 					                        .labelColor("102BAC")
-					                        .availableForPickup(true)
+					                        
 					                        .sku("TH01132301")
 					                        .upc("042100005264")
 					                        .description("How did you ever live without this?")
@@ -150,10 +150,6 @@ public class GoodPostRequests
 					                        .productType("flower")
 					                        .costInCents(10000L)
 					                        .labelColor("FB8905")
-
-					                        .availableForPickup(true)
-					                        .availableOnline(true)
-					                        .availableElectronically(true)
 							.build(),
 					ProductUpsertRequestBody.builder()
 					                        .name("Bobby Flay 1/8 oz")
@@ -168,10 +164,6 @@ public class GoodPostRequests
 					                        .productType("flower")
 					                        .costInCents(9000L)
 					                        .labelColor("5962BB")
-					                        .availableElectronically(true)
-					                        .availableForPickup(false)
-					                        .availableForPickup(true) // This should be allowable, and just re-writes the value
-					                        .availableOnline(false)
 					                        .description("Now on sale!")
 							.build(),
 
@@ -246,7 +238,7 @@ public class GoodPostRequests
 					                        .costInCents(2000L)
 					                        .labelColor("89BB1D")
 					                        .description("Disposable cartridge.")
-					                        .availableOnline(true)
+					                        
 							.build(),
 
 					/* ********************************************************************** */

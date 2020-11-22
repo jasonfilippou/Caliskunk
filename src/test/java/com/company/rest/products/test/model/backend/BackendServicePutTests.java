@@ -95,9 +95,9 @@ public class BackendServicePutTests
 					.labelColor("7FFFD4")
 					.upc("RANDOM_UPC")
 					.sku("RANDOM_SKU")
-					.availableOnline(false)
-					.availableElectronically(false)
-					.availableForPickup(false)
+
+
+
 				.build();
 
 		final SquareServiceResponseBody mockedSquarePostResponse = SquareServiceResponseBody
@@ -106,13 +106,9 @@ public class BackendServicePutTests
 					.clientProductId(postRequest.getClientProductId())
 					.productType(postRequest.getProductType())
 					.squareItemId("#RANDOM_ITEM_ID")
-					.squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 					.costInCents(postRequest.getCostInCents())
 					.isDeleted(false)
-					.availableOnline(postRequest.getAvailableOnline())
-					.availableElectronically(postRequest.getAvailableElectronically())
-					.availableForPickup(postRequest.getAvailableForPickup())
-					.version(DEFAULT_VERSION_ID_FOR_MOCKS)
+					.version(DEFAULT_VERSION_FOR_TESTS)
 				.build();
 
 		// In this putRequest, we will change some fields and keep some others. Since PUT does NOT
@@ -127,9 +123,6 @@ public class BackendServicePutTests
 					.labelColor("25AAAC")
 					.upc("RANDOM_UPC")
 					.sku("RANDOM_SKU")
-					.availableOnline(true)
-					.availableElectronically(false)
-					.availableForPickup(false)
                     .version(mockedSquarePostResponse.getVersion()) // Simulating a realistic PUT call
 				.build();
 
@@ -139,14 +132,9 @@ public class BackendServicePutTests
 					.clientProductId(postRequest.getClientProductId())
 					.productType(postRequest.getProductType())
 					.squareItemId("#RANDOM_ITEM_ID")
-					.squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 					.costInCents(postRequest.getCostInCents())
 					.isDeleted(false)
-					.availableForPickup(putRequest.getAvailableForPickup())
-					.availableOnline(putRequest.getAvailableOnline())
-					.availableElectronically(putRequest.getAvailableElectronically())
-					.availableOnline(putRequest.getAvailableOnline())
-					.version(DEFAULT_VERSION_ID_FOR_MOCKS)
+					.version(DEFAULT_VERSION_FOR_TESTS)
 				.build();
 
 		///////////
@@ -155,8 +143,8 @@ public class BackendServicePutTests
 		final LiteProduct cachedMiniProduct = buildLiteProductFromSquareResponse(mockedSquarePostResponse);
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.empty());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
-		when(squareService.upsertProduct(postRequest, postRequest.getClientProductId())).thenReturn(mockedSquarePostResponse);
-		when(squareService.upsertProduct(putRequest, postRequest.getClientProductId())).thenReturn(mockedSquarePutResponse); // Notice how we pull the ID from the POST request...
+		when(squareService.postProduct(postRequest)).thenReturn(mockedSquarePostResponse);
+		when(squareService.putProduct(putRequest)).thenReturn(mockedSquarePutResponse); // Notice how we pull the ID from the POST request...
 		doNothing().when(repository).deleteByClientProductId(postRequest.getClientProductId());
 
 		///////////////
@@ -172,7 +160,8 @@ public class BackendServicePutTests
 
 		// Have to re-mock LiteProductRepository.findByClientProductId() because *this* time we *want* it to return our cached product.
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
-		// Now, make the call and test it.
+		// Now, make the call and test it. Don't forget that the backend service assumes that the id has been placed inside the PUT request.
+		putRequest.setClientProductId(postRequest.getClientProductId());
 		final BackendServiceResponseBody putResponse = backendService.putProduct(putRequest);
 		assertTrue("Request did not match response", responseMatchesUpsertRequest(putRequest, putResponse, PUT));
 	}
@@ -198,7 +187,7 @@ public class BackendServicePutTests
 			////////////////////////
 
 			// Mock square and JPA Repo calls involved in POST
-			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
+			when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 
 			// Call backend service for POST
@@ -212,13 +201,15 @@ public class BackendServicePutTests
 			/////////////////////////////////////////////
 
 			// Mock the Square service upsert call and the repo SEARCH, SAVE and DEL calls.
-			when(squareService.upsertProduct(GOOD_PUTS[i], GOOD_POSTS[i].getClientProductId())).thenReturn(MOCKED_SQUARE_DELETE_RESPONSES[i]);
+			// GOOD_PUTS[i].setClientProductId(GOOD_POSTS[i].getClientProductId());    // Recall: The Square service
+			when(squareService.putProduct(GOOD_PUTS[i])).thenReturn(MOCKED_SQUARE_DELETE_RESPONSES[i]);
 			when(repository.findByClientProductId(GOOD_POSTS[i].getClientProductId())).thenReturn(Optional.of(buildLiteProductFromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i])));
 			doNothing().when(repository).deleteByClientProductId(any(String.class));
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 
 			// Perform and check the backend PUT call.
-			final BackendServiceResponseBody putResponse = backendService.putProduct(GOOD_PUTS[i], GOOD_POSTS[i].getClientProductId());
+			GOOD_PUTS[i].setClientProductId(GOOD_POSTS[i].getClientProductId());    // Recall: The Controller does this before it makes the backend PUT call!
+			final BackendServiceResponseBody putResponse = backendService.putProduct(GOOD_PUTS[i]);
 			assertTrue("Request did not match response", responseMatchesUpsertRequest(GOOD_PUTS[i], putResponse, PUT));
 		}
 	}

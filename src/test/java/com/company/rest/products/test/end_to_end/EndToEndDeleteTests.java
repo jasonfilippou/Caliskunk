@@ -71,6 +71,8 @@ public class EndToEndDeleteTests
 		final ResponseEntity<ResponseMessage> delResponseEntity = controller.deleteProduct(productId);
 		final ProductResponseBody delResponseBody = checkEntityStatusAndFetchResponse(delResponseEntity, HttpStatus.OK);
 		assertTrue("Request did not match response", responseMatchesDeleteRequest(deleteRequest, delResponseBody));
+
+		// TODO: Do the relevant GET, ensure it fails.
 	}
 
 	@Test
@@ -108,6 +110,8 @@ public class EndToEndDeleteTests
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
 			           responseMatchesDeleteRequest(GOOD_DELETES[i], delResponse));
 		}
+
+		// TODO: Do  GET and ensure it fails.
 	}
 
 }

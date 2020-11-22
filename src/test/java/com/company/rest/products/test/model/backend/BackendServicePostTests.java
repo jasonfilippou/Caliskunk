@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
@@ -56,11 +55,9 @@ public class BackendServicePostTests
 	@Mock
 	private LiteProductRepository repository;     // Another class that will be mocked
 
-
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
 	/* *********************************************************************************************************** */
-
 
 	@Before
 	public void setUp()
@@ -79,32 +76,30 @@ public class BackendServicePostTests
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
-														.productType("Flower")
-														.clientProductId("#RANDOM_ID")
-														.costInCents(10000L) // 'L for long literal
-														.description("Will eat your face.")
-														.labelColor("7FFFD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(true)
+													.name("Culeothesis Necrosis")
+													.productType("Flower")
+													.clientProductId("#RANDOM_ID")
+													.costInCents(10000L) // 'L for long literal
+													.description("Will eat your face.")
+													.labelColor("7FFFD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
 													.build();
 
 		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
-																	.builder()
-						                                                  .name(request.getName())
-																	      .clientProductId(request.getClientProductId())
-																		  .productType(request.getProductType())
-						                                                  .squareItemId("#RANDOM_ITEM_ID")
-						                                                  .squareItemVariationId("RANDOM_ITEM_VAR_ID")
-						                                                  .costInCents(request.getCostInCents())
-						                                                  .isDeleted(false)
-																	      .version(DEFAULT_VERSION_ID_FOR_MOCKS)
-		                                                             .build();
+																.builder()
+			                                                    .name(request.getName())
+														        .clientProductId(request.getClientProductId())
+															    .productType(request.getProductType())
+			                                                    .squareItemId("#RANDOM_ITEM_ID")
+			                                                    .costInCents(request.getCostInCents())
+			                                                    .isDeleted(false)
+																.description(request.getDescription())
+																.labelColor(request.getLabelColor())
+														        .version(DEFAULT_VERSION_FOR_TESTS)
+                                                                .build();
 
-		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(preparedResponse);
+		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(preparedResponse);
 		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody response = backendService.postProduct(request);
@@ -118,8 +113,7 @@ public class BackendServicePostTests
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Mock
-			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class)))
-					.thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
+			when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
 
 			// Call backend service
 			final BackendServiceResponseBody response = backendService.postProduct(GOOD_POSTS[i]);

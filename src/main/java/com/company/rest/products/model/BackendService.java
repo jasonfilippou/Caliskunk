@@ -108,7 +108,7 @@ public class BackendService
 
 	private void validatePostResponse(final SquareServiceResponseBody squareServiceResponse, final ProductUpsertRequestBody clientPostRequest)
 	{
-		assertAndIfNotLogAndThrow(!squareServiceResponse.getIsDeleted() &&
+		assertAndIfNotLogAndThrow(nullOrFalse(squareServiceResponse.getIsDeleted()) &&
 		                           squareServiceResponse.getUpdatedAt() != null &&
 		                           squareServiceResponse.getVersion() != null &&
 		                           squareServiceResponse.getSquareItemId() != null &&
@@ -121,10 +121,7 @@ public class BackendService
 
 	private boolean optionalFieldsMatch(final SquareServiceResponseBody squareServiceResponse, final ProductUpsertRequestBody clientPostRequest)
 	{
-		return ofNullable(squareServiceResponse.getAvailableElectronically()).equals(ofNullable(clientPostRequest.getAvailableElectronically())) &&
-		       ofNullable(squareServiceResponse.getAvailableForPickup()).equals(ofNullable(clientPostRequest.getAvailableForPickup())) &&
-		       ofNullable(squareServiceResponse.getAvailableOnline()).equals(ofNullable(clientPostRequest.getAvailableOnline())) &&
-		       ofNullable(squareServiceResponse.getCostInCents()).equals(ofNullable(clientPostRequest.getCostInCents())) &&
+		return ofNullable(squareServiceResponse.getCostInCents()).equals(ofNullable(clientPostRequest.getCostInCents())) &&
 		       ofNullable(squareServiceResponse.getDescription()).equals(ofNullable(clientPostRequest.getDescription())) &&
 		       ofNullable(squareServiceResponse.getLabelColor()).equals(ofNullable(clientPostRequest.getLabelColor())) &&
 		       ofNullable(squareServiceResponse.getSku()).equals(ofNullable(clientPostRequest.getSku())) &&
@@ -371,6 +368,6 @@ public class BackendService
 		                          squareServiceResponse.getCostInCents().equals(deleteRequest.getLiteProduct().getCostInCents()) &&
 		                          squareServiceResponse.getName().equals(deleteRequest.getLiteProduct().getProductName()) &&
 		                          squareServiceResponse.getIsDeleted() && squareServiceResponse.getUpdatedAt() != null,
-								  "Bad DELETE response");
+								  "Bad DELETE response");   // Remember; no version information for DELETE provided by Square.
 	}
 }

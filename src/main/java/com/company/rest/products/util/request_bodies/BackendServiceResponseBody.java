@@ -26,9 +26,6 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
 	@JsonProperty("description")  private String description;
-	@JsonProperty("available_online") private Boolean availableOnline;
-	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
-	@JsonProperty("available_electronically") private Boolean availableElectronically;
 	@JsonProperty("label_color") private String labelColor;
 	@JsonProperty("sku") private String sku;
 	@JsonProperty("upc") private String upc;
@@ -43,9 +40,6 @@ public class BackendServiceResponseBody implements Serializable
 			.name(squareServiceResponse.getName())
 			.version(squareServiceResponse.getVersion())
 			.squareItemId(squareServiceResponse.getSquareItemId())
-			.availableElectronically(squareServiceResponse.getAvailableElectronically())
-			.availableForPickup(squareServiceResponse.getAvailableForPickup())
-			.availableOnline(squareServiceResponse.getAvailableOnline())
 			.isDeleted(squareServiceResponse.getIsDeleted())
 			.clientProductId(squareServiceResponse.getClientProductId())
 			.costInCents(squareServiceResponse.getCostInCents())
@@ -90,10 +84,7 @@ public class BackendServiceResponseBody implements Serializable
 	{
 		return BackendServiceResponseBody.builder()
 		                                    .clientProductId(response.getClientProductId())
-		                                    .availableElectronically(response.getAvailableElectronically())
-		                                    .availableForPickup(response.getAvailableForPickup())
-		                                    .availableOnline(response.getAvailableOnline())
-		                                    .name(response.getName())
+		                                    .name(response.getName().strip().toUpperCase())
 		                                    .costInCents(response.getCostInCents())
 		                                    .description(response.getDescription())
 		                                    .isDeleted(response.getIsDeleted())

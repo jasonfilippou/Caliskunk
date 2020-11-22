@@ -100,9 +100,9 @@ public class EndToEndGetTests
 														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(false)
+
+
+
 													.build();
 
 		// Make the call to the controller

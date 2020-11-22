@@ -31,9 +31,6 @@ public class ProductResponseBody implements Serializable
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost_in_cents")  @NonNull private Long costInCents;
 	@JsonProperty("description")  private String description;
-	@JsonProperty("available_online") private Boolean availableOnline;
-	@JsonProperty("available_for_pickup") private Boolean availableForPickup;
-	@JsonProperty("available_electronically") private Boolean availableElectronically;
 	@JsonProperty("label_color") private String labelColor;
 	@JsonProperty("sku") private String sku;
 	@JsonProperty("upc") private String upc;
@@ -51,23 +48,18 @@ public class ProductResponseBody implements Serializable
 	 */
 	public static ProductResponseBody fromBackendResponseBody(final BackendServiceResponseBody backendResponse)
 	{
-		// Right now all it does is copy data over, but this can change in the future.
-
 		return builder()
-					.clientProductId(backendResponse.getClientProductId())
-					.name(backendResponse.getName())
-					.productType(backendResponse.getProductType())
-					.costInCents(backendResponse.getCostInCents())
-					.description(backendResponse.getDescription())
-					.isDeleted(backendResponse.getIsDeleted())
-					.availableOnline(backendResponse.getAvailableOnline())
-					.availableForPickup(backendResponse.getAvailableForPickup())
-					.availableElectronically(backendResponse.getAvailableElectronically())
-					.labelColor(backendResponse.getLabelColor())
-					.upc(backendResponse.getUpc())
-					.sku(backendResponse.getSku())
-					.version(backendResponse.getVersion())
-					.updatedAt(backendResponse.getUpdatedAt())
+				.clientProductId(backendResponse.getClientProductId())
+				.name(backendResponse.getName())
+				.productType(backendResponse.getProductType())
+				.costInCents(backendResponse.getCostInCents())
+				.description(backendResponse.getDescription())
+				.isDeleted(backendResponse.getIsDeleted())
+				.labelColor(backendResponse.getLabelColor())
+				.upc(backendResponse.getUpc())
+				.sku(backendResponse.getSku())
+				.version(backendResponse.getVersion())
+				.updatedAt(backendResponse.getUpdatedAt())
 				.build();
 	}
 }

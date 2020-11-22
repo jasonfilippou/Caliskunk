@@ -32,9 +32,9 @@ public class ExampleCalls
 				.productType("REGULAR")
 				.abbreviation("Cul")
 				.labelColor("7FFFD4")
-				.availableOnline(true)
-				.availableElectronically(true)
-				.availableForPickup(true)
+
+
+
 				.build();
 		System.out.println("CatalogItem created...");
 

@@ -62,17 +62,17 @@ public class EndToEndPostTests
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Ramses V")
-														.productType("topical")
-														.clientProductId("#RANDOM_ID")
-														.costInCents(10000L) // 'L for long literal
-														.description("Will challenge his father for the throne")
-														.labelColor("7FAAD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-														.availableOnline(false)
-														.availableElectronically(false)
-														.availableForPickup(true)
+													.name("Ramses V")
+													.productType("topical")
+													.clientProductId("#RANDOM_ID")
+													.costInCents(10000L) // 'L for long literal
+													.description("Will challenge his father for the throne")
+													.labelColor("7FAAD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
+
+
+
 													.build();
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
 		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);

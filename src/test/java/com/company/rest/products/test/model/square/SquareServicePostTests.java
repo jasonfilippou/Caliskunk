@@ -6,7 +6,6 @@ import com.company.rest.products.model.SquareService;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import com.squareup.square.models.*;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +23,8 @@ import java.util.concurrent.ExecutionException;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
-import static java.util.Optional.ofNullable;
+import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
+import static com.company.rest.products.test.util.TestUtil.responseMatchesUpsertRequest;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -52,25 +52,6 @@ public class SquareServicePostTests
 
 	@Mock
 	private CatalogWrapper catalogWrapper;     // Class that will be mocked
-
-	private boolean responseMatchesRequest(@NonNull SquareServiceResponseBody response,
-	                                       @NonNull ProductUpsertRequestBody request)
-	{
-		return	response.getName().equals(request.getName()) &&
-		        response.getCostInCents().equals(request.getCostInCents()) &&
-
-		       	ofNullable(request.getAvailableElectronically()).equals(ofNullable(response.getAvailableElectronically())) &&
-				ofNullable(request.getAvailableForPickup()).equals(ofNullable(response.getAvailableForPickup())) &&
-				ofNullable(request.getAvailableOnline()).equals(ofNullable(response.getAvailableOnline())) &&
-				ofNullable(request.getLabelColor()).equals(ofNullable(response.getLabelColor())) &&
-				ofNullable(request.getDescription()).equals(ofNullable(response.getDescription())) &&
-				ofNullable(request.getSku()).equals(ofNullable(response.getSku())) &&
-				ofNullable(request.getUpc()).equals(ofNullable(response.getUpc())) &&
-
-		       // A POST request shouldn't trip a deletion flag.
-		       (response.getIsDeleted() == null || !response.getIsDeleted());   
-	}
-
 
 	/* *********************************************************************************************************** */
 	/* ***************************************** TESTS *********************************************************** */
@@ -136,21 +117,18 @@ public class SquareServicePostTests
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
-														.productType("Flower")
-														.clientProductId("#RANDOM_ITEM_ID")
-														.costInCents(10000L) // 'L for long literal
-														.description("Will eat your face.")
-														.labelColor("7FFFD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(true)
+													.name("Culeothesis Necrosis")
+													.productType("Flower")
+													.clientProductId("#RANDOM_ITEM_ID")
+													.costInCents(10000L) // 'L for long literal
+													.description("Will eat your face.")
+													.labelColor("7FFFD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
 													.build();
 		// catalog calls already mocked by setUp(); we can just call the method we want to debug.
-		final SquareServiceResponseBody response = squareService.upsertProduct(request, request.getClientProductId());
-		assertTrue("Request did not match response", responseMatchesRequest(response, request));
+		final SquareServiceResponseBody response = squareService.postProduct(request);
+		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response, POST));
 	}
 
 	@Test
@@ -160,10 +138,10 @@ public class SquareServicePostTests
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Call backend service
-			final SquareServiceResponseBody response = squareService.upsertProduct(GOOD_POSTS[i], GOOD_POSTS[i].getClientProductId());
+			final SquareServiceResponseBody response = squareService.postProduct(GOOD_POSTS[i]);
 
 			// Assess response
-			assertTrue("Mismatch in response #" + i, responseMatchesRequest(response, GOOD_POSTS[i]));
+			assertTrue("Mismatch in response #" + i, responseMatchesUpsertRequest(GOOD_POSTS[i], response, POST));
 		}
 	}
 

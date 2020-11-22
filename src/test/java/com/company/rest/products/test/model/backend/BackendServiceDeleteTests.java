@@ -91,9 +91,9 @@ public class BackendServiceDeleteTests
 														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
-														.availableOnline(false)
-														.availableElectronically(false)
-														.availableForPickup(false)
+
+
+
 													.build();
 
 		final SquareServiceResponseBody mockedSquaredResponse = SquareServiceResponseBody
@@ -102,10 +102,9 @@ public class BackendServiceDeleteTests
 																		  .clientProductId(postRequest.getClientProductId())
 																		  .productType(postRequest.getProductType())
 						                                                  .squareItemId("#RANDOM_ITEM_ID")
-						                                                  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 						                                                  .costInCents(postRequest.getCostInCents())
 						                                                  .isDeleted(false)
-																		  .version(DEFAULT_VERSION_ID_FOR_MOCKS)
+																		  .version(DEFAULT_VERSION_FOR_TESTS)
 		                                                             .build();
 
 		/////////////////////////////////////////////////////////////////////////
@@ -113,7 +112,7 @@ public class BackendServiceDeleteTests
 		// with appropriate mocks along the way.                               //
 		/////////////////////////////////////////////////////////////////////////
 
-		when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(mockedSquaredResponse);
+		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(mockedSquaredResponse);
 		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(mockedSquaredResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(postRequest);
@@ -126,14 +125,15 @@ public class BackendServiceDeleteTests
 		//////////////
 
 		// Both the square service _and_ the repository calls need to be mocked.
-		when(squareService.deleteProduct(any(LiteProduct.class))).thenReturn(mockedSquaredResponse);
+		when(squareService.deleteProduct(any(ProductDeleteRequestBody.class))).thenReturn(mockedSquaredResponse);
 		doNothing().when(repository).deleteByClientProductId(postRequest.getClientProductId());
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
 		// Now, make the call and test it.
-		final BackendServiceResponseBody delResponse = backendService.deleteProduct(postRequest.getClientProductId());
-		assertTrue("Request did not match response", responseMatchesDeleteRequest(new ProductDeleteRequestBody(postRequest.getClientProductId()),
-		                                                                                                                delResponse));
+		final BackendServiceResponseBody delResponse = backendService.deleteProduct(new ProductDeleteRequestBody(postRequest.getClientProductId()));
+		assertTrue("Request did not match response", responseMatchesDeleteRequest(new ProductDeleteRequestBody(
+																								postRequest.getClientProductId(),
+																								cachedMiniProduct), delResponse)); // Need the LiteProduct component to test against square response!
 	}
 
 
@@ -151,34 +151,32 @@ public class BackendServiceDeleteTests
 			/////////////////////////////////////////////////////////////////
 			// Prepare LiteProduct to be returned by mocked deletion calls //
 			/////////////////////////////////////////////////////////////////
-			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_DELETE_RESPONSES[i]);  // Need the POST response for the product type
+			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_DELETE_RESPONSES[i]);
 
 			////////////////////////
 			// POST request first //
 			////////////////////////
 
 			// Mock square and JPA Repo calls involved in POST
-			when(squareService.upsertProduct(any(ProductUpsertRequestBody.class), any(String.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
+			when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 
 
 			// Call backend service for POST
 			final BackendServiceResponseBody postResponse = backendService.postProduct(GOOD_POSTS[i]);
 
-			// Optionally, assess POST response. Presumably this has already happened in our POST test suite.
-			// assertTrue("Mismatch in response #" + i + " (0-indexed).", responseMatchesPostRequest(GOOD_POSTS[i], postResponse));
-
 			////////////////////////////////////////////
 			// DEL request based on the previous POST //
 			////////////////////////////////////////////
 
 			// Mock the square DEL call and the repo SEARCH and DEL calls.
-			when(squareService.deleteProduct(any(LiteProduct.class))).thenReturn(MOCKED_SQUARE_DELETE_RESPONSES[i]);
+			when(squareService.deleteProduct(any(ProductDeleteRequestBody.class))).thenReturn(MOCKED_SQUARE_DELETE_RESPONSES[i]);
 			doNothing().when(repository).deleteByClientProductId(any(String.class));
 			when(repository.findByClientProductId(GOOD_DELETES[i].getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
 			// Perform and check the backend DEL call.
-			final BackendServiceResponseBody deleteResponse = backendService.deleteProduct(GOOD_DELETES[i].getClientProductId());
+			final BackendServiceResponseBody deleteResponse = backendService.deleteProduct(GOOD_DELETES[i]);
+			GOOD_DELETES[i].setLiteProduct(cachedMiniProduct);  // Need the LiteProduct component to test against square response!
 			assertTrue("Request did not match response", responseMatchesDeleteRequest(GOOD_DELETES[i], deleteResponse));
 		}
 	}

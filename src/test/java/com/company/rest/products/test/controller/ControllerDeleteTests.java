@@ -66,7 +66,7 @@ public class ControllerDeleteTests
 
 		// Now do the corresponding DELETE, and ensure it works. Mock the backend DELETE call.
 		final ProductDeleteRequestBody deleteRequest = new ProductDeleteRequestBody(productId);
-		when(backendService.deleteProduct(productId)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
+		when(backendService.deleteProduct(deleteRequest)).thenReturn(BackendServiceResponseBody.fromProductResponseBody(postResponse));
 		final ResponseEntity<ResponseMessage> delResponseEntity = controller.deleteProduct(productId);
 		final ProductResponseBody delResponseBody = checkEntityStatusAndFetchResponse(delResponseEntity, HttpStatus.OK);
 		assertTrue("Request did not match response", responseMatchesDeleteRequest(deleteRequest, delResponseBody));
@@ -81,7 +81,7 @@ public class ControllerDeleteTests
 		//  Use already prepared request and mocked response bodies //
 		//////////////////////////////////////////////////////////////
 		assert GOOD_DELETES.length == GOOD_POSTS.length :
-								"Mismatch between #resources to be posteed and #resources to be deleted.";
+								"Mismatch between #resources to be posted and #resources to be deleted.";
 
 		final int numRequests = GOOD_DELETES.length;
 		for(int i = 0; i <  numRequests; i++)

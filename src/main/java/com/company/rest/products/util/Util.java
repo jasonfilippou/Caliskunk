@@ -1,5 +1,4 @@
 package com.company.rest.products.util;
-
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +15,7 @@ public class Util
 	 */
 	public static boolean isValidProductName(@NonNull final String productName)
 	{
-		return productName != null && productName.length() > 0 && productName.chars().allMatch(Character::isUpperCase);
+		return  productName.length() > 0 && productName.chars().allMatch(Character::isUpperCase);
 	}
 
 	/**
@@ -74,4 +73,13 @@ public class Util
 		return (s.length() > 1 && s.charAt(0) == c) ? s : (c + s);
 	}
 
+	/**
+	 * Assesses if the provided {@link Boolean} is {@literal null} or {@link Boolean#FALSE}.
+	 * @param val A {@link Boolean} value.
+	 * @return {@literal true} if the param is {@literal null}  or {@link Boolean#FALSE}.
+	 */
+	public static boolean nullOrFalse(final Boolean val)
+	{
+		return val == null || val == Boolean.FALSE;
+	}
 }

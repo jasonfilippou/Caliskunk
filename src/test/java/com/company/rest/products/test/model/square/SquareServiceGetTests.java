@@ -3,7 +3,6 @@ package com.company.rest.products.test.model.square;
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
-import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
@@ -139,25 +138,21 @@ public class SquareServiceGetTests
 		// Prepare request
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
-														.productType("Flower")
-														.clientProductId("#RANDOM_ITEM_ID")
-														.costInCents(10000L) // 'L for long literal
-														.description("Will eat your face.")
-														.labelColor("7FFFD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-														.availableOnline(false)
-														.availableElectronically(false)
-														.availableForPickup(true)
+													.name("Culeothesis Necrosis")
+													.productType("Flower")
+													.clientProductId("#RANDOM_ITEM_ID")
+													.costInCents(10000L) // 'L for long literal
+													.description("Will eat your face.")
+													.labelColor("7FFFD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
 													.build();
 
-		// Make the POST, and optionally assess response (given that we already have a POST testing suite)
-		final SquareServiceResponseBody postResponse = squareService.upsertProduct(request, request.getClientProductId());
-		// assertTrue("Request did not match response", responseMatchesPostRequest(postResponse, request));
+		// Make the POST
+		final SquareServiceResponseBody postResponse = squareService.postProduct(request);
 
 		// Make the GET call and test it.
-		final SquareServiceResponseBody getResponse = squareService.getProduct(LiteProduct.buildLiteProductFromSquareResponse(postResponse));
+		final SquareServiceResponseBody getResponse = squareService.getProduct(request.toProductGetRequestBody());
 		assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(new ProductGetRequestBody(request.getClientProductId()), getResponse));
 	}
 
@@ -169,10 +164,11 @@ public class SquareServiceGetTests
 		for (ProductUpsertRequestBody goodPost : GOOD_POSTS)
 		{
 			// Make Square Service POST call and retrieve response
-			final SquareServiceResponseBody postResponse = squareService.upsertProduct(goodPost, goodPost.getClientProductId());
-			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesPostRequest(postResponse, GOOD_POSTS[i]));
-			final SquareServiceResponseBody getResponse = squareService.getProduct(LiteProduct.buildLiteProductFromSquareResponse(postResponse));
-			assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(new ProductGetRequestBody(goodPost.getClientProductId()), getResponse));
+			final SquareServiceResponseBody postResponse = squareService.postProduct(goodPost);
+
+			// Make Square Service GET call, retrieve and  assess response
+			final SquareServiceResponseBody getResponse = squareService.getProduct(goodPost.toProductGetRequestBody());
+			assertTrue("Bad GET response from Square layer", responseMatchesGetRequest(goodPost.toProductGetRequestBody(), getResponse));
 		}
 	}
 

@@ -18,6 +18,7 @@ import java.util.Optional;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
 import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
+import static com.company.rest.products.util.Util.nullOrFalse;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -38,8 +39,17 @@ public class TestUtil
 	{
 		POST, PUT, PATCH
 	}
+	/**
+	 * A test-wide constant to assist with mocked tests that need to see a version field in various responses.
+	 * @see CatalogObject#getVersion()
+	 */
+	public static final Long DEFAULT_VERSION_FOR_TESTS = 1000000L;
 
-	public static final Long DEFAULT_VERSION_ID_FOR_MOCKS = 1000000L;
+	/**
+	 * A test-wide constant to assist with mocked tests that need to see a stringified date field in various responses.
+	 * @see CatalogObject#getUpdatedAt()
+	 */
+	public static final String DEFAULT_UPDATED_AT_STRING = "01/01/1970 00:00:01";
 
 	/**
 	 * Ensure that a provided {@link ResponseEntity} has the provided {@link HttpStatus}.
@@ -116,28 +126,26 @@ public class TestUtil
 														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(false)
+
+
+
 													.build();
 		// Define mocked answer
 		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
 														.builder()
-	                                                        .name(request.getName())
-	                                                        .clientProductId(request.getClientProductId())
-															.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-	                                                        .productType(request.getProductType())
-	                                                        .costInCents(request.getCostInCents())
-	                                                        .availableElectronically(request.getAvailableElectronically())
-															.availableForPickup(request.getAvailableForPickup())
-															.availableOnline(request.getAvailableOnline())
-															.isDeleted(false)
-															.sku(request.getSku())
-															.upc(request.getUpc())
-															.description(request.getDescription())
-															.labelColor(request.getLabelColor())
-
-                                                          .build();
+                                                        .name(request.getName().strip().toUpperCase())
+                                                        .clientProductId(request.getClientProductId())
+														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
+														.updatedAt(DEFAULT_UPDATED_AT_STRING)
+                                                        .productType(request.getProductType())
+                                                        .costInCents(request.getCostInCents())
+														.isDeleted(false)
+														.sku(request.getSku())
+														.upc(request.getUpc())
+														.description(request.getDescription())
+														.labelColor(request.getLabelColor())
+														.version(DEFAULT_VERSION_FOR_TESTS)
+                                                        .build();
 		// Mock the call to the backend service
 		when(backendService.postProduct(request)).thenReturn(mockedResponse);
 
@@ -158,17 +166,17 @@ public class TestUtil
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Pengolin's Revenge")
-														.productType("Vaporizer")
-														.clientProductId(id)
-														.costInCents(13000L) // 'L for long literal
-														.description("We're done.")
-														.labelColor("7FFFD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(false)
+													.name("Pengolin's Revenge")
+													.productType("Vaporizer")
+													.clientProductId(id)
+													.costInCents(13000L) // 'L for long literal
+													.description("We're done.")
+													.labelColor("7FFFD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
+
+
+
 													.build();
 		return controller.postProduct(request);
 	}
@@ -190,35 +198,32 @@ public class TestUtil
 		// Build PUT request body
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Pengolin's Revenge")
-														.productType("Vaporizer")
-														.clientProductId(clientProductId)
-														.costInCents(13000L) // 'L for long literal
-														.description("We're done.")
-														.labelColor("7FFFD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(false)
+													.name("Pengolin's Revenge")
+													.productType("Vaporizer")
+													.clientProductId(clientProductId)
+													.costInCents(13000L) // 'L for long literal
+													.description("We're done.")
+													.labelColor("7FFFD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
+
+
+
 													.build();
 		// Define mocked answer of backend layer
 		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
 														.builder()
-	                                                        .name(request.getName())
-	                                                        .clientProductId(request.getClientProductId())
-															.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-	                                                        .productType(request.getProductType())
-	                                                        .costInCents(request.getCostInCents())
-	                                                        .availableElectronically(request.getAvailableElectronically())
-															.availableForPickup(request.getAvailableForPickup())
-															.availableOnline(request.getAvailableOnline())
-															.isDeleted(false)
-															.sku(request.getSku())
-															.upc(request.getUpc())
-															.description(request.getDescription())
-															.labelColor(request.getLabelColor())
-                                                          .build();
+                                                        .name(request.getName())
+                                                        .clientProductId(request.getClientProductId())
+														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
+                                                        .productType(request.getProductType())
+                                                        .costInCents(request.getCostInCents())
+														.isDeleted(false)
+														.sku(request.getSku())
+														.upc(request.getUpc())
+														.description(request.getDescription())
+														.labelColor(request.getLabelColor())
+														 .build();
 		// Mock the call to the backend service
 		when(backendService.postProduct(request)).thenReturn(mockedResponse);
 
@@ -239,17 +244,17 @@ public class TestUtil
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Pengolin's Revenge")
-														.productType("Vaporizer")
-														.clientProductId(id)
-														.costInCents(13000L) // 'L for long literal
-														.description("We're done.")
-														.labelColor("7FFFD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-														.availableOnline(true)
-														.availableElectronically(true)
-														.availableForPickup(false)
+													.name("Pengolin's Revenge")
+													.productType("Vaporizer")
+													.clientProductId(id)
+													.costInCents(13000L) // 'L for long literal
+													.description("We're done.")
+													.labelColor("7FFFD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
+
+
+
 													.build();
 		return controller.postProduct(request);
 	}
@@ -268,17 +273,9 @@ public class TestUtil
 	                                                   @NonNull final ProductResponseBody responseBody,
 	                                                   @NonNull final TestUtil.UpsertType upsertType)
 	{
-		return
-				// Basic data that will always be provided:
-				upsertRequestBody.getName().equals(responseBody.getName()) &&
-				upsertRequestBody.getProductType().equals(responseBody.getProductType()) &&
-				upsertRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
-
-				// Subsequent fields that may or may not have been provided:
-				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType) &&
-
-				// Let us also ensure that the upsert request didn't trip the object's deletion flag:
-				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
+		return	!isDeleted(responseBody) &&
+                ensureIdsMatch(upsertRequestBody, responseBody, upsertType) &&
+				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType);
 	}
 
 	/**
@@ -290,17 +287,9 @@ public class TestUtil
 	                                                   @NonNull final BackendServiceResponseBody responseBody,
 	                                                   @NonNull final TestUtil.UpsertType upsertType)
 	{
-		return
-				// Basic data that will always be provided:
-				upsertRequestBody.getName().equals(responseBody.getName()) &&
-				upsertRequestBody.getProductType().equals(responseBody.getProductType()) &&
-				upsertRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
-
-				// Subsequent fields that may or may not have been provided:
-				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType) &&
-
-				// Let us also ensure that the upsert request didn't trip the object's deletion flag:
-				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
+		return	!isDeleted(responseBody) &&
+	            ensureIdsMatch(upsertRequestBody, responseBody, upsertType) &&
+                optionalFieldsMatch(upsertRequestBody, responseBody, upsertType);
 	}
 
 	/**
@@ -312,27 +301,31 @@ public class TestUtil
 	                                                   @NonNull final SquareServiceResponseBody responseBody,
 	                                                   @NonNull final TestUtil.UpsertType upsertType)
 	{
-		return
-				// Basic data that will always be provided:
-				upsertRequestBody.getName().equals(responseBody.getName()) &&
-				upsertRequestBody.getCostInCents().equals(responseBody.getCostInCents()) &&
+		return	!isDeleted(responseBody) &&
+	            ensureIdsMatch(upsertRequestBody, responseBody, upsertType) &&
+	            optionalFieldsMatch(upsertRequestBody, responseBody, upsertType);
+	}
 
-				// Subsequent fields that may or may not have been provided:
-				optionalFieldsMatch(upsertRequestBody, responseBody, upsertType) &&
+	private static boolean isDeleted(final ProductResponseBody responseBody)
+	{
+		return !nullOrFalse(responseBody.getIsDeleted());
+	}
+
+	private static boolean isDeleted(final BackendServiceResponseBody responseBody)
+	{
+		return !nullOrFalse(responseBody.getIsDeleted());
+	}
 
 
-				// Let us also ensure that the upsert request didn't trip the object's deletion flag:
-				(responseBody.getIsDeleted() == null) || !responseBody.getIsDeleted();
+	private static boolean isDeleted(final SquareServiceResponseBody responseBody)
+	{
+		return !nullOrFalse(responseBody.getIsDeleted());
 	}
 
 	private static boolean optionalFieldsMatch(final ProductUpsertRequestBody upsertRequestBody, final ProductResponseBody responseBody,
 	                                                                                            final UpsertType upsertType)
 	{
-		return  ensureIdsMatch(upsertRequestBody, responseBody, upsertType) &&
-				ofNullable(upsertRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically())) &&
-				ofNullable(upsertRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup())) &&
-				ofNullable(upsertRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline())) &&
-				ofNullable(upsertRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
+		return  ofNullable(upsertRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
 				ofNullable(upsertRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription())) &&
 				ofNullable(upsertRequestBody.getSku()).equals(ofNullable(responseBody.getSku())) &&
 				ofNullable(upsertRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc()));
@@ -341,25 +334,16 @@ public class TestUtil
 	private static boolean optionalFieldsMatch(final ProductUpsertRequestBody upsertRequestBody, final BackendServiceResponseBody responseBody,
 											                                                    final UpsertType upsertType)
 	{
-		return  ensureIdsMatch(upsertRequestBody, responseBody, upsertType) &&
-				ofNullable(upsertRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically())) &&
-				ofNullable(upsertRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup())) &&
-				ofNullable(upsertRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline())) &&
-				ofNullable(upsertRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
+		return  ofNullable(upsertRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
 				ofNullable(upsertRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription())) &&
 				ofNullable(upsertRequestBody.getSku()).equals(ofNullable(responseBody.getSku())) &&
 				ofNullable(upsertRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc()));
 	}
 
-
 	private static boolean optionalFieldsMatch(final ProductUpsertRequestBody upsertRequestBody, final SquareServiceResponseBody responseBody,
 											                                                    final UpsertType upsertType)
 	{
-		return  ensureIdsMatch(upsertRequestBody, responseBody, upsertType) &&
-			    ofNullable(upsertRequestBody.getAvailableElectronically()).equals(ofNullable(responseBody.getAvailableElectronically())) &&
-				ofNullable(upsertRequestBody.getAvailableForPickup()).equals(ofNullable(responseBody.getAvailableForPickup())) &&
-				ofNullable(upsertRequestBody.getAvailableOnline()).equals(ofNullable(responseBody.getAvailableOnline())) &&
-				ofNullable(upsertRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
+		return  ofNullable(upsertRequestBody.getLabelColor()).equals(ofNullable(responseBody.getLabelColor())) &&
 				ofNullable(upsertRequestBody.getDescription()).equals(ofNullable(responseBody.getDescription())) &&
 				ofNullable(upsertRequestBody.getSku()).equals(ofNullable(responseBody.getSku())) &&
 				ofNullable(upsertRequestBody.getUpc()).equals(ofNullable(responseBody.getUpc()));
@@ -374,7 +358,7 @@ public class TestUtil
 		}
 		else  // PUT, PATCH, where ID is not required, since it's provided separately at the URL
 		{
-			return upsertRequestBody.getClientProductId() == null;
+			return responseBody.getClientProductId() != null; // The ProductResponseBody should *always* contain the ID.
 		}
 	}
 
@@ -387,7 +371,7 @@ public class TestUtil
 		}
 		else  // PUT, PATCH, where ID is not required, since it's provided separately at the URL
 		{
-			return upsertRequestBody.getClientProductId() == null;
+			return responseBody.getClientProductId() != null; // The BackendServiceResponseBody should *always* contain the ID.
 		}
 	}
 
@@ -400,7 +384,7 @@ public class TestUtil
 		}
 		else  // PUT, PATCH, where ID is not required, since it's provided separately at the URL
 		{
-			return upsertRequestBody.getClientProductId() == null;
+			return responseBody.getClientProductId() != null; // The SquareServiceResponseBody should *always* contain the ID.
 		}
 	}
 
@@ -408,78 +392,147 @@ public class TestUtil
 	 *  Ensures that the provided {@link ProductGetRequestBody} matches the provided {@link ProductResponseBody}.
 	 *
 	 * @param getRequestBody A GET request provided by the client.
-	 * @param responseBody The {@link ProductController}'s response to the GET request.
+	 * @param getResponseBody The {@link ProductController}'s response to the GET request.
 	 * @return {@literal true} if GET request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
-	                                                @NonNull ProductResponseBody responseBody)
+	                                                @NonNull ProductResponseBody getResponseBody)
 	{
-		return	getRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+		return getRequestBody.getClientProductId().equals(getResponseBody.getClientProductId()) &&
+		       liteProductFieldsMatchIfPresent(getRequestBody, getResponseBody);
 	}
 
 	/**
 	 *  Ensures that the provided {@link ProductGetRequestBody} matches the provided {@link BackendServiceResponseBody}.
 	 *
 	 * @param getRequestBody A GET request provided by the client.
-	 * @param responseBody The {@link BackendService}'s response to the GET request.
+	 * @param getResponseBody The {@link BackendService}'s response to the GET request.
 	 * @return {@literal true} if GET request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
-	                                                @NonNull BackendServiceResponseBody responseBody)
+	                                                @NonNull BackendServiceResponseBody getResponseBody)
 	{
-		return	getRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+		return getRequestBody.getClientProductId().equals(getResponseBody.getClientProductId()) &&
+		       liteProductFieldsMatchIfPresent(getRequestBody, getResponseBody);
 	}
+
 
 	/**
 	 * Ensures that the provided {@link ProductGetRequestBody} matches the provided {@link SquareServiceResponseBody}.
 	 *
 	 * @param getRequestBody A GET request provided by the client.
-	 * @param responseBody The {@link SquareService}'s response to the GET request.
+	 * @param getResponseBody The {@link SquareService}'s response to the GET request.
 	 * @return {@literal true} if GET request matches controller response, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
-	                                                @NonNull SquareServiceResponseBody responseBody)
+	                                                @NonNull SquareServiceResponseBody getResponseBody)
 	{
-		return	getRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+		return getRequestBody.getClientProductId().equals(getResponseBody.getClientProductId()) &&
+		       liteProductFieldsMatchIfPresent(getRequestBody, getResponseBody);
+	}
+
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductGetRequestBody getRequestBody, @NonNull ProductResponseBody getResponseBody)
+	{
+		return getRequestBody.getLiteProduct() == null ||
+		       getRequestBody.getLiteProduct().getClientProductId().equals(getResponseBody.getClientProductId()) &&
+		       getRequestBody.getLiteProduct().getProductName().equals(getResponseBody.getName()) &&
+		       getRequestBody.getLiteProduct().getProductType().equals(getResponseBody.getProductType()) &&
+		       getRequestBody.getLiteProduct().getVersion().equals(getResponseBody.getVersion());
+				// No Square ID in Product responses.
+	}
+
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductGetRequestBody getRequestBody, @NonNull BackendServiceResponseBody getResponseBody)
+	{
+		return getRequestBody.getLiteProduct() == null ||
+		       getRequestBody.getLiteProduct().getClientProductId().equals(getResponseBody.getClientProductId()) &&
+		       getRequestBody.getLiteProduct().getProductName().equals(getResponseBody.getName()) &&
+		       getRequestBody.getLiteProduct().getSquareItemId().equals(getResponseBody.getSquareItemId()) &&
+		       getRequestBody.getLiteProduct().getProductType().equals(getResponseBody.getProductType()) &&
+		       getRequestBody.getLiteProduct().getVersion().equals(getResponseBody.getVersion());
+		// Both square ID and version required here.
+	}
+
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductGetRequestBody getRequestBody, @NonNull SquareServiceResponseBody getResponseBody)
+	{
+		return getRequestBody.getLiteProduct() == null ||
+		       getRequestBody.getLiteProduct().getClientProductId().equals(getResponseBody.getClientProductId()) &&
+		       getRequestBody.getLiteProduct().getProductName().equals(getResponseBody.getName()) &&
+		       getRequestBody.getLiteProduct().getSquareItemId().equals(getResponseBody.getSquareItemId()) &&
+		       getRequestBody.getLiteProduct().getProductType().equals(getResponseBody.getProductType()) &&
+		       getRequestBody.getLiteProduct().getVersion().equals(getResponseBody.getVersion());
+		// Both square ID and version required here.
 	}
 
 	/**
 	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link BackendServiceResponseBody}.
 	 *
-	 * @param delRequestBody A DEL request provided by the client.
-	 * @param responseBody The {@link ProductController}'s response to the GET request.
+	 * @param deleteRequestBody A DEL request provided by the client.
+	 * @param deleteResponseBody The {@link ProductController}'s response to the GET request.
 	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
 	 */
-	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
-	                                                   @NonNull final ProductResponseBody responseBody)
+	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody deleteRequestBody,
+	                                                   @NonNull final ProductResponseBody deleteResponseBody)
 	{
-		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+		return deleteRequestBody.getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
+		       liteProductFieldsMatchIfPresent(deleteRequestBody, deleteResponseBody);
 	}
 	/**
 	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link BackendServiceResponseBody}.
 	 *
-	 * @param delRequestBody A DEL request provided by the client.
-	 * @param responseBody The {@link BackendService}'s response to the GET request.
+	 * @param deleteRequestBody A DEL request provided by the client.
+	 * @param deleteResponseBody The {@link BackendService}'s response to the GET request.
 	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
 	 */
-	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
-	                                                   @NonNull final BackendServiceResponseBody responseBody)
+	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody deleteRequestBody,
+	                                                   @NonNull final BackendServiceResponseBody deleteResponseBody)
 	{
-		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+		return deleteRequestBody.getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
+		       liteProductFieldsMatchIfPresent(deleteRequestBody, deleteResponseBody);
 	}
 
 	/**
 	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link SquareServiceResponseBody}.
 	 *
-	 * @param delRequestBody A DEL request provided by the client.
-	 * @param responseBody The {@link SquareService}'s response to the GET request.
+	 * @param deleteRequestBody A DEL request provided by the client.
+	 * @param deleteResponseBody The {@link SquareService}'s response to the GET request.
 	 * @return {@literal true} if DEL request matches controller response, {@literal false} otherwise.
 	 */
-	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody delRequestBody,
-	                                                   @NonNull final SquareServiceResponseBody responseBody)
+	public static boolean responseMatchesDeleteRequest(@NonNull final ProductDeleteRequestBody deleteRequestBody,
+	                                                   @NonNull final SquareServiceResponseBody deleteResponseBody)
 	{
-		return delRequestBody.getClientProductId().equals(responseBody.getClientProductId());
+		return deleteRequestBody.getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
+		       liteProductFieldsMatchIfPresent(deleteRequestBody, deleteResponseBody);
 	}
+
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductDeleteRequestBody deleteRequestBody, @NonNull ProductResponseBody deleteResponseBody)
+	{
+		return deleteRequestBody.getLiteProduct() == null ||
+		       deleteRequestBody.getLiteProduct().getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
+		       deleteRequestBody.getLiteProduct().getProductName().equals(deleteResponseBody.getName()) &&
+		       deleteRequestBody.getLiteProduct().getProductType().equals(deleteResponseBody.getProductType());
+				// No Square ID because it's a product response, and no version because it's a DELETE.
+	}
+
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductDeleteRequestBody deleteRequestBody, @NonNull BackendServiceResponseBody deleteResponseBody)
+	{
+		return deleteRequestBody.getLiteProduct() == null ||
+			   deleteRequestBody.getLiteProduct().getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
+		       deleteRequestBody.getLiteProduct().getProductName().equals(deleteResponseBody.getName()) &&
+		       deleteRequestBody.getLiteProduct().getSquareItemId().equals(deleteResponseBody.getSquareItemId()) &&
+		       deleteRequestBody.getLiteProduct().getProductType().equals(deleteResponseBody.getProductType());
+				// There's a square ID field because it's square service body, but no version field because it's a DELETE.
+	}
+
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductDeleteRequestBody deleteRequestBody, @NonNull SquareServiceResponseBody deleteResponseBody)
+	{
+		return deleteRequestBody.getLiteProduct() == null ||
+		       deleteRequestBody.getLiteProduct().getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
+		       deleteRequestBody.getLiteProduct().getProductName().equals(deleteResponseBody.getName()) &&
+		       deleteRequestBody.getLiteProduct().getSquareItemId().equals(deleteResponseBody.getSquareItemId()) &&
+		       deleteRequestBody.getLiteProduct().getProductType().equals(deleteResponseBody.getProductType());
+			  // There's a square ID field because it's square service body, but no version field because it's a DELETE.
+	}
+
 
 	/**
 	 * A method useful for tests, where we want to mock {@link com.company.rest.products.model.CatalogWrapper}'s calls,

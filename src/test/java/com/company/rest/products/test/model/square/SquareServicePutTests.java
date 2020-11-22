@@ -27,6 +27,7 @@ import static com.company.rest.products.test.util.TestUtil.*;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
 /**
  * PUT tests for {@link SquareService}.
  *
@@ -88,9 +89,6 @@ public class SquareServicePutTests
 				.labelColor("7FFFD4")
 				.upc("RANDOM_UPC")
 				.sku("RANDOM_SKU")
-				.availableOnline(false)
-				.availableElectronically(false)
-				.availableForPickup(true)
 				.build();
 
 		final ProductUpsertRequestBody putRequest = ProductUpsertRequestBody    // Change some fields, keep others.
@@ -98,16 +96,14 @@ public class SquareServicePutTests
 				.name("Culeothesis Necrosis OG")
 				.costInCents(15000L)
 				.labelColor("AB8235")
-				.availableElectronically(false)
-		        .availableForPickup(true)           // No change, but client should be able to re-specify no problem.
+                .upc("RANDOM_UPC")
 				.build();
 
-		// Make the POST, and optionally test it, considering that we already have a POST test suite.
-		final SquareServiceResponseBody postResponse = squareService.upsertProduct(postRequest, postRequest.getClientProductId());
-		// assertTrue("BAD POST request from Square layer.", responseMatchesUpsertRequest(postRequest, postResponse, POST));
+		// Make the POST
+		final SquareServiceResponseBody postResponse = squareService.postProduct(postRequest);
 
 		// Make the Square Service PUT call and test it.
-		final SquareServiceResponseBody putResponse = squareService.upsertProduct(putRequest, postRequest.getClientProductId());
+		final SquareServiceResponseBody putResponse = squareService.putProduct(putRequest);
 		assertTrue("Bad PUT response from Square layer", responseMatchesUpsertRequest(putRequest, putResponse, PUT));
 	}
 
@@ -120,13 +116,10 @@ public class SquareServicePutTests
 		for(int i = 0; i <  numRequests; i++)
 		{
 			// Make Square Service POST call and retrieve response
-			final SquareServiceResponseBody postResponse = squareService.upsertProduct(GOOD_POSTS[i], GOOD_POSTS[i].getClientProductId());
-
-			// Optionally, assess POST response. Presumably, the POST test suite has covered that already.
-			//	assertTrue("Mismatch in response #" + i + ".", responseMatchesUpsertRequest(GOOD_POSTS[i], postResponse, POST));
+			final SquareServiceResponseBody postResponse = squareService.postProduct(GOOD_POSTS[i]);
 
 			// Perform PUT and assess it.
-			final SquareServiceResponseBody putResponse = squareService.upsertProduct(GOOD_PUTS[i], GOOD_POSTS[i].getClientProductId());
+			final SquareServiceResponseBody putResponse = squareService.putProduct(GOOD_PUTS[i]);
 			assertTrue("Bad PUT response from Square service", responseMatchesUpsertRequest(GOOD_PUTS[i], putResponse, PUT));
 		}
 	}

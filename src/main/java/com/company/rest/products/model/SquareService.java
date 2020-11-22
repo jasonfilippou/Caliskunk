@@ -104,9 +104,6 @@ public class SquareService
 		return new CatalogItem.Builder()
 				.name(postRequest.getName())
 				.abbreviation(abbreviate(postRequest.getName(), ABBRV_CHARS))
-				.availableElectronically(postRequest.getAvailableElectronically())
-				.availableForPickup(postRequest.getAvailableForPickup())
-				.availableOnline(postRequest.getAvailableOnline())
 				.description(postRequest.getDescription())
 				.labelColor(postRequest.getLabelColor())
 				.variations(Collections.singletonList(variation))
@@ -142,7 +139,7 @@ public class SquareService
 		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
 		assertAndIfNotLogAndThrow(noErrorsInResponse(postResponse) &&
 		                          catalogObject.getType().equals(CODE_FOR_CATALOG_ITEMS) &&
-		                          !catalogObject.getIsDeleted() &&
+		                          nullOrFalse(catalogObject.getIsDeleted()) &&
 		                          postResponse.getIdMappings().size() == 2 &&
 		                          postResponse.getIdMappings().stream().map(CatalogIdMapping::getClientObjectId)
                                                                        .collect(Collectors.toList())
@@ -166,10 +163,7 @@ public class SquareService
 	private boolean optionalFieldsMatch(final CatalogItem catalogItem, final CatalogItemVariation catalogItemVariation,
 	                                    final ProductUpsertRequestBody postRequest)
 	{
-		return 	ofNullable(catalogItem.getAvailableElectronically()).equals(ofNullable(postRequest.getAvailableElectronically())) &&
-				ofNullable(catalogItem.getAvailableOnline()).equals(ofNullable(postRequest.getAvailableOnline())) &&
-				ofNullable(catalogItem.getAvailableForPickup()).equals(ofNullable(postRequest.getAvailableForPickup())) &&
-				ofNullable(catalogItem.getDescription()).equals(ofNullable(postRequest.getDescription())) &&
+		return 	ofNullable(catalogItem.getDescription()).equals(ofNullable(postRequest.getDescription())) &&
 				ofNullable(catalogItem.getLabelColor()).equals(ofNullable(postRequest.getLabelColor())) &&
 				ofNullable(catalogItemVariation.getPriceMoney().getAmount()).equals(ofNullable(postRequest.getCostInCents())) &&
 				ofNullable(catalogItemVariation.getSku()).equals(ofNullable(postRequest.getSku())) &&

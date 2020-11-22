@@ -71,9 +71,9 @@ public class EndToEndPutTests
 				.labelColor("7FFFD4")
 				.upc("RANDOM_UPC")
 				.sku("RANDOM_SKU")
-				.availableOnline(true)
-				.availableElectronically(true)
-				.availableForPickup(false)
+
+
+
 				.build();
 
 		final ProductUpsertRequestBody putRequest = ProductUpsertRequestBody    // Some fields different, but not all
@@ -84,7 +84,7 @@ public class EndToEndPutTests
 				.upc("RANDOM_UPC")          // Can very well define a field and input the same value if client wants.
 				.sku("RANDOM_SKU")
 				.sku("RANDOM_SKU_UPDATED")  // Builder should allow client to change their mind.
-				.availableForPickup(true)
+
 				.build();
 
 		// Do the POST first, so that we can update it afterwards with the PUT.
@@ -95,6 +95,8 @@ public class EndToEndPutTests
 		final ResponseEntity<ResponseMessage> putResponseEntity = controller.putProduct(putRequest, productId);
 		final ProductResponseBody putResponse = checkEntityStatusAndFetchResponse(putResponseEntity, HttpStatus.OK);
 		assertTrue("Request did not match response", responseMatchesUpsertRequest(putRequest, putResponse, PUT));
+
+		// TODO: Do a GET and ensure it returns the updated information.
 	}
 
 	@Test
@@ -131,6 +133,8 @@ public class EndToEndPutTests
 			// Assess response
 			assertTrue("Mismatch in response #" + i + " (0-indexed).",
 			           responseMatchesDeleteRequest(GOOD_DELETES[i], delResponse));
+
+			// TODO: Do a GET and ensure it returns the updated information.
 		}
 	}
 }

@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.stream.Collectors;
 
 import static com.company.rest.products.util.Util.*;
@@ -116,19 +115,19 @@ public class ProductController
 	/**
 	 * Entry point for a POST request.
 	 *
-	 * @param request The JSON body of the POST request.
+	 * @param postRequest The JSON body of the POST request.
 	 * @return an appropriate JSON response.
 	 * @see BackendService#postProduct(ProductUpsertRequestBody)
 	 */
 	@PostMapping(value = "/products")
-	public ResponseEntity<ResponseMessage> postProduct(@RequestBody ProductUpsertRequestBody request)
+	public ResponseEntity<ResponseMessage> postProduct(@RequestBody ProductUpsertRequestBody postRequest)
 	{
 		try
 		{
-			validatePostRequest(request);
-			final BackendServiceResponseBody backendResponse = backendService.postProduct(request);
-			validatePostResponse(backendResponse, request);
-			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
+			validatePostRequest(postRequest);
+			final BackendServiceResponseBody backendResponse = backendService.postProduct(postRequest);
+			validatePostResponse(backendResponse, postRequest);
+			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse); // TODO: change these static methods to class - specific ones.
 			return success("Successfully posted product!", productResponse, HttpStatus.CREATED);
 		}
 		catch (InconsistentRequestException e)
@@ -178,7 +177,7 @@ public class ProductController
 
 	private void validatePostResponse(final BackendServiceResponseBody postResponse, final ProductUpsertRequestBody postRequest)
 	{
-		assertAndIfNotLogAndThrow(!postResponse.getIsDeleted() &&
+		assertAndIfNotLogAndThrow(nullOrFalse(postResponse.getIsDeleted()) &&
 		                          postResponse.getUpdatedAt() != null &&
 		                          postResponse.getVersion() != null &&
 		                          postResponse.getSquareItemId() != null &&
@@ -196,9 +195,6 @@ public class ProductController
 	{
 		return ofNullable(postResponse.getName()).equals(ofNullable(postRequest.getName())) &&
 		       ofNullable(postResponse.getProductType()).equals(ofNullable(postRequest.getProductType())) &&
-		       ofNullable(postResponse.getAvailableElectronically()).equals(ofNullable(postRequest.getAvailableElectronically())) &&
-		       ofNullable(postResponse.getAvailableForPickup()).equals(ofNullable(postRequest.getAvailableForPickup())) &&
-		       ofNullable(postResponse.getAvailableOnline()).equals(ofNullable(postRequest.getAvailableOnline())) &&
 		       ofNullable(postResponse.getCostInCents()).equals(ofNullable(postRequest.getCostInCents())) &&
 		       ofNullable(postResponse.getDescription()).equals(ofNullable(postRequest.getDescription())) &&
 		       ofNullable(postResponse.getLabelColor()).equals(ofNullable(postRequest.getLabelColor())) &&
@@ -248,20 +244,8 @@ public class ProductController
 
 	private void validateGetResponse(final BackendServiceResponseBody getResponse, final ProductGetRequestBody getRequest)
 	{
-		assertAndIfNotLogAndThrow(getRequest.getLiteProduct() != null && // Must have been populated by backend.
-									getRequest.getClientProductId().equals(getResponse.getClientProductId()) &&
-		                            liteProductFieldsMatch(getResponse, getRequest),"Bad GET response");
+		assertAndIfNotLogAndThrow(getRequest.getClientProductId().equals(getResponse.getClientProductId()) , "Bad GET response");
 	}
-
-	private boolean liteProductFieldsMatch(final BackendServiceResponseBody getResponse, final ProductGetRequestBody getRequest)
-	{
-		return getResponse.getName().equals(getRequest.getLiteProduct().getProductName()) &&
-		       getResponse.getSquareItemId().equals(getRequest.getLiteProduct().getSquareItemId()) &&
-		       getResponse.getCostInCents().equals(getRequest.getLiteProduct().getCostInCents()) &&
-		       getResponse.getProductType().equals(getRequest.getLiteProduct().getProductType()) &&
-		       getResponse.getVersion().equals(getRequest.getLiteProduct().getVersion());
-	}
-
 	/* *************************************************************************************** */
 	/* *************************************** PUT ******************************************* */
 	/* *************************************************************************************** */
@@ -303,19 +287,12 @@ public class ProductController
 		{
 			throw new InconsistentRequestException("Request had no version ID.");
 		}
-		else if (putRequest.getName() != null && !isValidProductName(putRequest.getName()))
-		{
-			throw new InconsistentRequestException("Request had bad name: " + putRequest.getName() + ".");
-		}
-		else if (isValidProductName(putRequest.getName()))
-		{
-			putRequest.setName(putRequest.getName().strip().toUpperCase());
-		}
+		putRequest.setName(putRequest.getName().strip().toUpperCase());
 	}
 
 	private void validatePutResponse(final BackendServiceResponseBody putResponse, final ProductUpsertRequestBody putRequest)
 	{
-		assertAndIfNotLogAndThrow(!putResponse.getIsDeleted() &&
+		assertAndIfNotLogAndThrow(nullOrFalse(putResponse.getIsDeleted()) &&
 		                          putResponse.getUpdatedAt() != null &&
 		                          putResponse.getVersion() != null &&
 		                          putResponse.getSquareItemId() != null &&
@@ -394,17 +371,8 @@ public class ProductController
 
 	private void validateDeleteResponse(final BackendServiceResponseBody deleteResponse, final ProductDeleteRequestBody deleteRequest)
 	{
-		assertAndIfNotLogAndThrow(deleteRequest.getLiteProduct() != null && // Must have been populated by backend.
-		                          deleteRequest.getClientProductId().equals(deleteResponse.getClientProductId()) &&
-		                          liteProductFieldsMatch(deleteResponse, deleteRequest),"Bad GET response");
+		assertAndIfNotLogAndThrow(deleteRequest.getClientProductId().equals(deleteResponse.getClientProductId()),
+		                          "Bad DELETE response");
 	}
 
-	private boolean liteProductFieldsMatch(final BackendServiceResponseBody deleteResponse, final ProductDeleteRequestBody deleteRequest)
-	{
-		return deleteResponse.getName().equals(deleteRequest.getLiteProduct().getProductName()) &&
-		       deleteResponse.getSquareItemId().equals(deleteRequest.getLiteProduct().getSquareItemId()) &&
-		       deleteResponse.getCostInCents().equals(deleteRequest.getLiteProduct().getCostInCents()) &&
-		       deleteResponse.getProductType().equals(deleteRequest.getLiteProduct().getProductType()) &&
-		       deleteResponse.getVersion().equals(deleteRequest.getLiteProduct().getVersion());
-	}
 }
