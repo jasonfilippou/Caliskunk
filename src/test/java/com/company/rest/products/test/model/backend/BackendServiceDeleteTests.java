@@ -86,26 +86,27 @@ public class BackendServiceDeleteTests
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
 														.clientProductId("#RANDOM_ID")
-														.costInCents(10000L) // 'L for long literal
+														.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
 														.description("Will eat your face.")
 														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
 														.sku("RANDOM_SKU")
-
-
-
 													.build();
 
 		final SquareServiceResponseBody mockedSquaredResponse = SquareServiceResponseBody
-																	.builder()
-						                                                  .name(postRequest.getName())
-																		  .clientProductId(postRequest.getClientProductId())
-																		  .productType(postRequest.getProductType())
-						                                                  .squareItemId("#RANDOM_ITEM_ID")
-						                                                  .costInCents(postRequest.getCostInCents())
-						                                                  .isDeleted(false)
-																		  .version(DEFAULT_VERSION_FOR_TESTS)
-		                                                             .build();
+															.builder()
+															.name(postRequest.getName())
+															.clientProductId(postRequest.getClientProductId())
+															.productType(postRequest.getProductType())
+															.squareItemId("#RANDOM_ITEM_ID")
+															.costInCents(postRequest.getCostInCents())
+															.version(DEFAULT_VERSION_FOR_TESTS)
+															.updatedAt(DEFAULT_UPDATED_AT_STRING)
+															.description(postRequest.getDescription())
+															.labelColor(postRequest.getLabelColor())
+															.sku(postRequest.getSku())
+															.upc(postRequest.getUpc())
+															.build();
 
 		/////////////////////////////////////////////////////////////////////////
 		// Make the POST call that we will base the subsequent DEL request on, //
@@ -117,14 +118,12 @@ public class BackendServiceDeleteTests
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(postRequest);
 
-		// Optionally, assess POST response.  Must have already happened in POST tests.
-		// assertTrue("Request did not match response", responseMatchesPostRequest(request, response));
-
 		//////////////
 		// DEL Call //
 		//////////////
 
 		// Both the square service _and_ the repository calls need to be mocked.
+		mockedSquaredResponse.setIsDeleted(true);
 		when(squareService.deleteProduct(any(ProductDeleteRequestBody.class))).thenReturn(mockedSquaredResponse);
 		doNothing().when(repository).deleteByClientProductId(postRequest.getClientProductId());
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));

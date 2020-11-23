@@ -1,5 +1,6 @@
 package com.company.rest.products.model;
-
+import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
+import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.squareup.square.SquareClient;
 import com.squareup.square.api.CatalogApi;
 import com.squareup.square.models.*;
@@ -53,7 +54,7 @@ public class CatalogWrapper
 
 	/**
 	 * Sends a batch retrieve (GET) request to the Square API.
-	 * @param objectId A {@link String} containing the Square - provided ID of the product to retrieve.
+	 * @param getRequest A {@link ProductGetRequestBody} containing the Square - provided ID of the product to retrieve.
 	 * @throws ExecutionException if Square throws it to us.
 	 * @throws InterruptedException if Square throws it to us.
 	 * @see BatchRetrieveCatalogObjectsRequest
@@ -61,10 +62,10 @@ public class CatalogWrapper
 	 * @see UpsertCatalogObjectResponse
 	 * @return An instance of {@link BatchRetrieveCatalogObjectsResponse} which contains the data requested from the Square API.
 	 */
-	public RetrieveCatalogObjectResponse retrieveObject(@NonNull final String objectId)
+	public RetrieveCatalogObjectResponse retrieveObject(@NonNull final ProductGetRequestBody getRequest)
 																			throws ExecutionException, InterruptedException
 	{
-		return catalog.retrieveCatalogObjectAsync(objectId, false).get();
+		return catalog.retrieveCatalogObjectAsync(getRequest.getLiteProduct().getSquareItemId(), false).get();
 	}
 
 	/**
@@ -76,14 +77,14 @@ public class CatalogWrapper
 	 * @throws ExecutionException if Square throws it to us.
 	 * @throws InterruptedException if Square throws it to us.
 	 *
-	 * @param squareItemID the unique ID Square provided to the {@link CatalogObject} to be deleted.
+	 * @param deleteRequest A {@link ProductDeleteRequestBody} containing the unique ID Square provided to the {@link CatalogObject} to be deleted.
 	 * @see CatalogApi#deleteCatalogObjectAsync(String)
 	 * @see CatalogApi#deleteCatalogObject(String)
 	 * @return An instance of {@link DeleteCatalogObjectResponse} which contains the data that the Square API sent us after
 	 *              a successful or unsuccessful deletion.
 	 */
-	public DeleteCatalogObjectResponse deleteObject(@NonNull final String squareItemID) throws ExecutionException, InterruptedException
+	public DeleteCatalogObjectResponse deleteObject(@NonNull final ProductDeleteRequestBody deleteRequest) throws ExecutionException, InterruptedException
 	{
-		return catalog.deleteCatalogObjectAsync(squareItemID).get();
+		return catalog.deleteCatalogObjectAsync(deleteRequest.getLiteProduct().getSquareItemId()).get();
 	}
 }

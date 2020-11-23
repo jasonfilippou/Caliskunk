@@ -12,13 +12,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
-import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
-import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
+import static com.company.rest.products.model.SquareService.*;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static com.company.rest.products.util.Util.nullOrFalse;
+import static com.company.rest.products.util.Util.stringsMatch;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -50,6 +50,39 @@ public class TestUtil
 	 * @see CatalogObject#getUpdatedAt()
 	 */
 	public static final String DEFAULT_UPDATED_AT_STRING = "01/01/1970 00:00:01";
+
+	/**
+	 * A default pricing model for our tests.
+	 */
+	public static final String PRICE_MODEL = "FIXED_PRICING";
+
+	/**
+	 * A default cost, in cents, for our tests.
+	 */
+	public static final Long DEFAULT_COST_IN_CENTS = 10000L;
+
+	/**
+	 * A default "type" field for {@link CatalogObject} instances. Required by Square.
+	 */
+	public static final String DEFAULT_CATALOG_OBJECT_TYPE = "REGULAR";
+
+	/**
+	 * A default product name for our tests.
+	 */
+	public static final String DEFAULT_PRODUCT_NAME = "Culeothesis Necrosis";
+	/**
+	 *  A {@link String} that {@link CatalogObject} requires to signify that the {@link CatalogObject} is
+	 *  actually a wrapper around a {@link CatalogItem} instance.
+	 * @see #CODE_FOR_CATALOG_ITEM_VARIATIONS
+	 */
+	public static final String CODE_FOR_CATALOG_ITEMS = "ITEM";
+
+	/**
+	 *  A {@link String} that {@link CatalogObject} requires to signify that the {@link CatalogObject} is
+	 *  actually a wrapper around a {@link CatalogItemVariation} instance.
+	 * @see #CODE_FOR_CATALOG_ITEMS
+	 */
+	public static final String CODE_FOR_CATALOG_ITEM_VARIATIONS = "ITEM_VARIATION";
 
 	/**
 	 * Ensure that a provided {@link ResponseEntity} has the provided {@link HttpStatus}.
@@ -107,8 +140,6 @@ public class TestUtil
 	 * @param backendService A usually {@code @Autowired} {@link BackendService} instance, whose relevant call will be mocked in this method
 	 * @param controller A usually {@code @Autowired} {@link ProductController} instance, to which we will submit our query.
 	 * @see #makeAPost(String, ProductController)
-	 * @see #makeAPut(String, ProductController)
-	 * @see #makeAPut(String, BackendService, ProductController)
 	 * @return An appropriate {@link ResponseEntity}.
 	 */
 	public static ResponseEntity<ResponseMessage> makeAPost(@NonNull final String clientProductId,
@@ -158,89 +189,9 @@ public class TestUtil
 	 * @param id  The unique product ID provided by the client.
 	 * @param controller A usually {@code @Autowired} {@link ProductController} instance, instance, to which we will submit our query.
 	 * @see #makeAPost(String, BackendService, ProductController)
-	 * @see #makeAPut(String, ProductController)
-	 * @see #makeAPut(String, BackendService, ProductController)
 	 * @return An appropriate {@link ResponseEntity}.
 	 */
 	public static ResponseEntity<ResponseMessage> makeAPost(@NonNull final String id, @NonNull final ProductController controller)
-	{
-		final ProductUpsertRequestBody request = ProductUpsertRequestBody
-													.builder()
-													.name("Pengolin's Revenge")
-													.productType("Vaporizer")
-													.clientProductId(id)
-													.costInCents(13000L) // 'L for long literal
-													.description("We're done.")
-													.labelColor("7FFFD4")
-													.upc("RANDOM_UPC")
-													.sku("RANDOM_SKU")
-
-
-
-													.build();
-		return controller.postProduct(request);
-	}
-
-	/**
-	 * Performs a PUT request at the level of the controller, but mocking the backend service call.
-	 * @param clientProductId The unique product ID provided by the client.
-	 * @param backendService A usually {@code @Autowired} {@link BackendService} instance, whose relevant call will be mocked in this method
-	 * @param controller A usually {@code @Autowired} {@link ProductController} instance, to which we will submit our query.
-	 * @see #makeAPost(String, BackendService, ProductController)
-	 * @see #makeAPost(String, ProductController)
-	 * @see #makeAPut(String, ProductController)
-	 * @return An appropriate {@link ResponseEntity}.
-	 */
-	public static ResponseEntity<ResponseMessage> makeAPut(@NonNull final String clientProductId,
-	                                                        @NonNull final BackendService backendService,
-	                                                        @NonNull final ProductController controller)
-	{
-		// Build PUT request body
-		final ProductUpsertRequestBody request = ProductUpsertRequestBody
-													.builder()
-													.name("Pengolin's Revenge")
-													.productType("Vaporizer")
-													.clientProductId(clientProductId)
-													.costInCents(13000L) // 'L for long literal
-													.description("We're done.")
-													.labelColor("7FFFD4")
-													.upc("RANDOM_UPC")
-													.sku("RANDOM_SKU")
-
-
-
-													.build();
-		// Define mocked answer of backend layer
-		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
-														.builder()
-                                                        .name(request.getName())
-                                                        .clientProductId(request.getClientProductId())
-														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-                                                        .productType(request.getProductType())
-                                                        .costInCents(request.getCostInCents())
-														.isDeleted(false)
-														.sku(request.getSku())
-														.upc(request.getUpc())
-														.description(request.getDescription())
-														.labelColor(request.getLabelColor())
-														 .build();
-		// Mock the call to the backend service
-		when(backendService.postProduct(request)).thenReturn(mockedResponse);
-
-		// Make the call to the controller
-		return controller.postProduct(request);
-	}
-
-	/**
-	 * Performs a PUT request at the level of the controller, without any mocked calls.
-	 * @param id  The unique product ID provided by the client.
-	 * @param controller A usually {@code @Autowired} {@link ProductController} instance, instance, to which we will submit our query.
-	 * @see #makeAPost(String, ProductController)
-	 * @see #makeAPost(String, BackendService, ProductController)
-	 * @see #makeAPut(String, BackendService, ProductController)
-	 * @return An appropriate {@link ResponseEntity}.
-	 */
-	public static ResponseEntity<ResponseMessage> makeAPut(@NonNull final String id, @NonNull final ProductController controller)
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
@@ -424,44 +375,46 @@ public class TestUtil
 	 * @param getResponseBody The {@link SquareService}'s response to the GET request.
 	 * @return {@literal true} if GET request matches controller response, {@literal false} otherwise.
 	 */
-	public static boolean responseMatchesGetRequest(@NonNull ProductGetRequestBody getRequestBody,
-	                                                @NonNull SquareServiceResponseBody getResponseBody)
+	public static boolean responseMatchesGetRequest(@NonNull final ProductGetRequestBody getRequestBody,
+	                                                @NonNull final SquareServiceResponseBody getResponseBody)
 	{
 		return getRequestBody.getClientProductId().equals(getResponseBody.getClientProductId()) &&
 		       liteProductFieldsMatchIfPresent(getRequestBody, getResponseBody);
 	}
 
-	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductGetRequestBody getRequestBody, @NonNull ProductResponseBody getResponseBody)
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull final ProductGetRequestBody getRequestBody, @NonNull final ProductResponseBody getResponseBody)
 	{
 		return getRequestBody.getLiteProduct() == null ||
 		       getRequestBody.getLiteProduct().getClientProductId().equals(getResponseBody.getClientProductId()) &&
-		       getRequestBody.getLiteProduct().getProductName().equals(getResponseBody.getName()) &&
-		       getRequestBody.getLiteProduct().getProductType().equals(getResponseBody.getProductType()) &&
+		       stringsMatch(getRequestBody.getLiteProduct().getProductName(), getResponseBody.getName()) &&
+		       stringsMatch(getRequestBody.getLiteProduct().getProductType(), getResponseBody.getProductType()) &&
 		       getRequestBody.getLiteProduct().getVersion().equals(getResponseBody.getVersion());
 				// No Square ID in Product responses.
 	}
 
-	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductGetRequestBody getRequestBody, @NonNull BackendServiceResponseBody getResponseBody)
+
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull final ProductGetRequestBody getRequestBody, @NonNull final BackendServiceResponseBody getResponseBody)
 	{
 		return getRequestBody.getLiteProduct() == null ||
 		       getRequestBody.getLiteProduct().getClientProductId().equals(getResponseBody.getClientProductId()) &&
-		       getRequestBody.getLiteProduct().getProductName().equals(getResponseBody.getName()) &&
+		       stringsMatch(getRequestBody.getLiteProduct().getProductName(), getResponseBody.getName()) &&
+		       stringsMatch(getRequestBody.getLiteProduct().getProductType(), getResponseBody.getProductType()) &&
 		       getRequestBody.getLiteProduct().getSquareItemId().equals(getResponseBody.getSquareItemId()) &&
-		       getRequestBody.getLiteProduct().getProductType().equals(getResponseBody.getProductType()) &&
 		       getRequestBody.getLiteProduct().getVersion().equals(getResponseBody.getVersion());
-		// Both square ID and version required here.
+			   // Both square ID and version required here.
 	}
 
-	private static boolean liteProductFieldsMatchIfPresent(@NonNull ProductGetRequestBody getRequestBody, @NonNull SquareServiceResponseBody getResponseBody)
+	private static boolean liteProductFieldsMatchIfPresent(@NonNull final ProductGetRequestBody getRequestBody, @NonNull final SquareServiceResponseBody getResponseBody)
 	{
 		return getRequestBody.getLiteProduct() == null ||
 		       getRequestBody.getLiteProduct().getClientProductId().equals(getResponseBody.getClientProductId()) &&
-		       getRequestBody.getLiteProduct().getProductName().equals(getResponseBody.getName()) &&
+		       stringsMatch(getRequestBody.getLiteProduct().getProductName(), getResponseBody.getName()) &&
+		       stringsMatch(getRequestBody.getLiteProduct().getProductType(), getResponseBody.getProductType()) &&
 		       getRequestBody.getLiteProduct().getSquareItemId().equals(getResponseBody.getSquareItemId()) &&
-		       getRequestBody.getLiteProduct().getProductType().equals(getResponseBody.getProductType()) &&
 		       getRequestBody.getLiteProduct().getVersion().equals(getResponseBody.getVersion());
-		// Both square ID and version required here.
+				// Both square ID and version required here.
 	}
+
 
 	/**
 	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link BackendServiceResponseBody}.
@@ -490,6 +443,8 @@ public class TestUtil
 		       liteProductFieldsMatchIfPresent(deleteRequestBody, deleteResponseBody);
 	}
 
+
+
 	/**
 	 * Ensures that the provided {@link ProductDeleteRequestBody} matches the provided {@link SquareServiceResponseBody}.
 	 *
@@ -508,8 +463,8 @@ public class TestUtil
 	{
 		return deleteRequestBody.getLiteProduct() == null ||
 		       deleteRequestBody.getLiteProduct().getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
-		       deleteRequestBody.getLiteProduct().getProductName().equals(deleteResponseBody.getName()) &&
-		       deleteRequestBody.getLiteProduct().getProductType().equals(deleteResponseBody.getProductType());
+		       stringsMatch(deleteRequestBody.getLiteProduct().getProductName(), deleteResponseBody.getName()) &&
+		       stringsMatch(deleteRequestBody.getLiteProduct().getProductType(), deleteResponseBody.getProductType());
 				// No Square ID because it's a product response, and no version because it's a DELETE.
 	}
 
@@ -517,9 +472,9 @@ public class TestUtil
 	{
 		return deleteRequestBody.getLiteProduct() == null ||
 			   deleteRequestBody.getLiteProduct().getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
-		       deleteRequestBody.getLiteProduct().getProductName().equals(deleteResponseBody.getName()) &&
-		       deleteRequestBody.getLiteProduct().getSquareItemId().equals(deleteResponseBody.getSquareItemId()) &&
-		       deleteRequestBody.getLiteProduct().getProductType().equals(deleteResponseBody.getProductType());
+			   stringsMatch(deleteRequestBody.getLiteProduct().getProductName(), deleteResponseBody.getName()) &&
+			   stringsMatch(deleteRequestBody.getLiteProduct().getProductType(), deleteResponseBody.getProductType()) &&
+		       deleteRequestBody.getLiteProduct().getSquareItemId().equals(deleteResponseBody.getSquareItemId());
 				// There's a square ID field because it's square service body, but no version field because it's a DELETE.
 	}
 
@@ -527,9 +482,9 @@ public class TestUtil
 	{
 		return deleteRequestBody.getLiteProduct() == null ||
 		       deleteRequestBody.getLiteProduct().getClientProductId().equals(deleteResponseBody.getClientProductId()) &&
-		       deleteRequestBody.getLiteProduct().getProductName().equals(deleteResponseBody.getName()) &&
-		       deleteRequestBody.getLiteProduct().getSquareItemId().equals(deleteResponseBody.getSquareItemId()) &&
-		       deleteRequestBody.getLiteProduct().getProductType().equals(deleteResponseBody.getProductType());
+		       stringsMatch(deleteRequestBody.getLiteProduct().getProductName(), deleteResponseBody.getName()) &&
+		       stringsMatch(deleteRequestBody.getLiteProduct().getProductType(), deleteResponseBody.getProductType()) &&
+		       deleteRequestBody.getLiteProduct().getSquareItemId().equals(deleteResponseBody.getSquareItemId());
 			  // There's a square ID field because it's square service body, but no version field because it's a DELETE.
 	}
 
@@ -539,8 +494,6 @@ public class TestUtil
 	 * which touch entities for {@link com.squareup.square.api.CatalogApi}. We receive an instance of {@link UpsertCatalogObjectRequest},
 	 * and construct a {@link UpsertCatalogObjectResponse} that represents a successful call to the Square API.
 	 *
-	 * This method is different from {@link #buildItemVariationResponseOutOfRequest(UpsertCatalogObjectRequest)} in that it is used for
-	 * 	 {@link CatalogItem} data instead of {@link CatalogItemVariation} data.
 	 *
 	 * @param request An {@link UpsertCatalogObjectRequest} containing the information given to {@link com.company.rest.products.model.CatalogWrapper}.
 	 *
@@ -549,47 +502,95 @@ public class TestUtil
 	 *
 	 * @see com.company.rest.products.test.model.backend.BackendServicePutTests
 	 * @see BackendServiceDeleteTests
-	 * @see #buildItemVariationResponseOutOfRequest(UpsertCatalogObjectRequest)
 	 */
-	public static UpsertCatalogObjectResponse buildItemResponseOutOfRequest(@NonNull final UpsertCatalogObjectRequest request)
+	public static UpsertCatalogObjectResponse buildItemResponseOutOfRequest(@NonNull final UpsertCatalogObjectRequest request,
+	                                                                       @NonNull final Long version)
 	{
-		final CatalogItem item = Optional.of(request.getObject().getItemData())
-		                                 .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItem"));
-		final CatalogObject itemWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, "RANDOM_ITEM_ID")
-				.itemData(item)
-				.build();
+		final CatalogObject itemWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, request.getObject().getId())
+															.itemData(request.getObject().getItemData())
+															.version(version)
+															.isDeleted(false)
+															.updatedAt(DEFAULT_UPDATED_AT_STRING)
+															.build();
+		final CatalogItem item = itemWrapper.getItemData();
+		final CatalogObject variationWrapper = item.getVariations().get(0);
 		return new UpsertCatalogObjectResponse.Builder()
 				.catalogObject(itemWrapper)
+				.idMappings(createCatalogMappings(request, itemWrapper, variationWrapper))
 				.build();
+	}
+
+	private static List<CatalogIdMapping> createCatalogMappings(final UpsertCatalogObjectRequest request, final CatalogObject itemWrapper,
+	                                                            final CatalogObject itemVariationWrapper)
+	{
+		return Arrays.asList(
+				new CatalogIdMapping.Builder()
+						.clientObjectId(request.getObject().getId())
+						.objectId("RANDOM_SQUARE_ID")
+						.build(),
+
+				new CatalogIdMapping.Builder()
+						.clientObjectId(itemVariationWrapper.getId())
+						.objectId("RANDOM_SQUARE_ID" + DEFAULT_ITEM_VARIATION_ID_SUFFIX)
+						.build()
+		                    );
 	}
 
 	/**
-	 * A method useful for tests, where we want to mock {@link com.company.rest.products.model.CatalogWrapper}'s calls,
-	 * which touch entities for {@link com.squareup.square.api.CatalogApi}. We receive an instance of {@link UpsertCatalogObjectRequest},
-	 * and construct a {@link UpsertCatalogObjectResponse} that represents a successful call to the Square API.
 	 *
-	 * This method is different from {@link #buildItemResponseOutOfRequest(UpsertCatalogObjectRequest)} in that it is used for
-	 * {@link CatalogItemVariation} data instead of {@link CatalogItem} data.
-	 *
- 	 * @param request An {@link UpsertCatalogObjectRequest} containing the information given to {@link com.company.rest.products.model.CatalogWrapper}.
-	 *
-	 * @return An instance of {@link UpsertCatalogObjectResponse}, usually appropriately formed based on the argument
-	 * in order to successfully mock a {@link com.company.rest.products.model.CatalogWrapper} call in testing.
-	 *
-	 * @see com.company.rest.products.test.model.backend.BackendServicePutTests
-	 * @see BackendServiceDeleteTests
-	 * @see #buildItemResponseOutOfRequest(UpsertCatalogObjectRequest)
 	 */
-	public static UpsertCatalogObjectResponse buildItemVariationResponseOutOfRequest(@NonNull final UpsertCatalogObjectRequest request)
+	public static RetrieveCatalogObjectResponse buildResponseOutOfRetrieveRequest(final ProductGetRequestBody getRequest)
 	{
-		final CatalogItemVariation itemVariation = Optional.of(request.getObject().getItemVariationData())
-		                                                   .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItemVariation"));
-		final CatalogObject itemVariationWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS, "RANDOM_ITEM_VAR_ID")
-				.itemVariationData(itemVariation)
-				.build();
-		return new UpsertCatalogObjectResponse.Builder()
-				.catalogObject(itemVariationWrapper)
+		return new RetrieveCatalogObjectResponse.Builder()
+				.object(buildObjectForRetrieveResponse(getRequest))
 				.build();
 	}
 
+	private static CatalogObject buildObjectForRetrieveResponse(final ProductGetRequestBody getRequest)
+	{
+		return new CatalogObject
+				.Builder(CODE_FOR_CATALOG_ITEMS, getRequest.getLiteProduct().getSquareItemId())
+				.isDeleted(false)
+				.updatedAt(DEFAULT_UPDATED_AT_STRING)
+				.version(getRequest.getLiteProduct().getVersion())
+				.itemData(new CatalogItem.Builder()
+						          .name(getRequest.getLiteProduct().getProductName())
+						          .variations(createVariationData(getRequest))
+						          .build())
+				.build();
+	}
+
+	private static List<CatalogObject> createVariationData(final ProductGetRequestBody getRequest)
+	{
+		final CatalogItemVariation variation = new CatalogItemVariation.Builder()
+																		.name(getRequest.getLiteProduct().getProductName() + DEFAULT_ITEM_VARIATION_NAME_SUFFIX)
+																		.itemId(getRequest.getLiteProduct().getSquareItemId())
+																		.upc("SOME_UPC")
+																		.sku("SOME_SKU")
+																		.pricingType(PRICE_MODEL)
+																		.priceMoney(new Money(getRequest.getLiteProduct().getCostInCents(),
+																		                      CURRENCY))
+																		.build();
+
+		final CatalogObject variationWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS,
+		                                                                 getRequest.getLiteProduct().getSquareItemId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX)
+																		.version(getRequest.getLiteProduct().getVersion())
+																		.updatedAt(DEFAULT_UPDATED_AT_STRING)
+																		.isDeleted(false)
+																		.itemVariationData(variation)
+																		.build();
+
+		return Collections.singletonList(variationWrapper);
+	}
+	/**
+	 *
+	 */
+	public static DeleteCatalogObjectResponse buildMockedDeleteResponseOutOfRequest(@NonNull final ProductDeleteRequestBody deleteRequest)
+	{
+		return new DeleteCatalogObjectResponse.Builder()
+				.deletedObjectIds(Arrays.asList(deleteRequest.getLiteProduct().getSquareItemId(),
+				                                deleteRequest.getLiteProduct().getSquareItemId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX))
+				.deletedAt(LocalDateTime.now().toString())
+				.build();
+	}
 }

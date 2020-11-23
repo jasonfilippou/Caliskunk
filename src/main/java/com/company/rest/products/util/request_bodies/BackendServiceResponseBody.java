@@ -37,7 +37,7 @@ public class BackendServiceResponseBody implements Serializable
 	public static BackendServiceResponseBody fromSquareResponse(@NonNull final SquareServiceResponseBody squareServiceResponse)
 	{
 		return builder()
-			.name(squareServiceResponse.getName())
+			.name(squareServiceResponse.getName().strip().toUpperCase())
 			.version(squareServiceResponse.getVersion())
 			.squareItemId(squareServiceResponse.getSquareItemId())
 			.isDeleted(squareServiceResponse.getIsDeleted())
@@ -61,11 +61,11 @@ public class BackendServiceResponseBody implements Serializable
 	public static BackendServiceResponseBody fromLiteProduct(@NonNull final LiteProduct product)
 	{
 		return builder()
-					.name(product.getProductName())
+					.name(product.getProductName().strip().toUpperCase())
 					.costInCents(product.getCostInCents())
 					.clientProductId(product.getClientProductId())
 					.squareItemId(product.getSquareItemId())
-					.productType(product.getProductType())
+					.productType(product.getProductType().strip().toUpperCase())
 					.version(product.getVersion())
 				.build();
 	}

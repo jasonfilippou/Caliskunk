@@ -125,6 +125,7 @@ public class ProductController
 		try
 		{
 			validatePostRequest(postRequest);
+			postRequest.setName(postRequest.getName().strip().toUpperCase());// Enable in end-to-end
 			final BackendServiceResponseBody backendResponse = backendService.postProduct(postRequest);
 			validatePostResponse(backendResponse, postRequest);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse); // TODO: change these static methods to class - specific ones.
@@ -153,7 +154,6 @@ public class ProductController
 		{
 			throw new InconsistentRequestException("Bad POST request supplied.");
 		}
-		postRequest.setName(postRequest.getName().strip().toUpperCase());
 	}
 	private boolean crucialFieldsOk(final ProductUpsertRequestBody upsertRequest)
 	{
@@ -168,7 +168,7 @@ public class ProductController
 		// Ensure that name, type, and cost values are appropriate.
 		return (upsertRequest.getCostInCents() != null && upsertRequest.getCostInCents() > 0L) &&
 		       (upsertRequest.getProductType() != null && acceptedProductType(upsertRequest.getProductType())) &&
-		       (upsertRequest.getName() != null && upsertRequest.getName().length() > 0);
+		       (isValidProductName(upsertRequest.getName()));
 	}
 	private boolean acceptedProductType(final String productType)
 	{
@@ -193,7 +193,7 @@ public class ProductController
 
 	private boolean optionalFieldsMatch(final BackendServiceResponseBody postResponse, final ProductUpsertRequestBody postRequest)
 	{
-		return ofNullable(postResponse.getName()).equals(ofNullable(postRequest.getName())) &&
+		return stringsMatch(postRequest.getName(), postResponse.getName()) &&
 		       ofNullable(postResponse.getProductType()).equals(ofNullable(postRequest.getProductType())) &&
 		       ofNullable(postResponse.getCostInCents()).equals(ofNullable(postRequest.getCostInCents())) &&
 		       ofNullable(postResponse.getDescription()).equals(ofNullable(postRequest.getDescription())) &&
@@ -263,6 +263,7 @@ public class ProductController
 		try
 		{
 			validatePutRequest(putRequest);
+			putRequest.setName(putRequest.getName().strip().toUpperCase());
 			putRequest.setClientProductId(id); // And from now on the request has the ID in the body for the rest of its journey! :)
 			final BackendServiceResponseBody backendResponse = backendService.putProduct(putRequest);
 			validatePutResponse(backendResponse, putRequest);
@@ -287,7 +288,6 @@ public class ProductController
 		{
 			throw new InconsistentRequestException("Request had no version ID.");
 		}
-		putRequest.setName(putRequest.getName().strip().toUpperCase());
 	}
 
 	private void validatePutResponse(final BackendServiceResponseBody putResponse, final ProductUpsertRequestBody putRequest)

@@ -58,7 +58,7 @@ public class ControllerPostTests
 														.name("Culeothesis Necrosis")
 														.productType("Flower")
 														.clientProductId("#RANDOM_ID")
-														.costInCents(10000L) // 'L for long literal
+														.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
 														.description("Will eat your face.")
 														.labelColor("7FFFD4")
 														.upc("RANDOM_UPC")
@@ -67,7 +67,7 @@ public class ControllerPostTests
 
 		final BackendServiceResponseBody preparedResponse = BackendServiceResponseBody
 														.builder()
-                                                        .name(postRequest.getName().strip().toUpperCase())
+                                                        .name(postRequest.getName())
                                                         .clientProductId(postRequest.getClientProductId())
 														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
                                                         .productType(postRequest.getProductType())
@@ -78,7 +78,7 @@ public class ControllerPostTests
 														.upc(postRequest.getUpc())
 														.description(postRequest.getDescription())
 														.labelColor(postRequest.getLabelColor())
-														.version(10000L)    // Random Long
+														.version(DEFAULT_VERSION_FOR_TESTS)    // Random Long
 														.build();
 
 		when(backendService.postProduct(postRequest)).thenReturn(preparedResponse);

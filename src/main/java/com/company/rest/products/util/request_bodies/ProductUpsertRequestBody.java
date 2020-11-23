@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
+import static com.company.rest.products.util.Util.DEFAULT_VERSION_FOR_TESTS;
 import static lombok.AccessLevel.PUBLIC;
 
 /**
@@ -45,7 +46,7 @@ public class ProductUpsertRequestBody implements Serializable
 		                                                    .productType(productType)
 		                                                    .clientProductId(clientProductId)
 		                                                    .costInCents(costInCents)
-		                                                    .version(10000L) // Random Long
+		                                                    .version(DEFAULT_VERSION_FOR_TESTS)
 		                                                    .squareItemId("SOME_RANDOM_SQUARE_ID")
 		                                                    .build())
 									.build();
@@ -66,7 +67,8 @@ public class ProductUpsertRequestBody implements Serializable
 		                                                    .productType(productType)
 		                                                    .clientProductId(clientProductId)
 		                                                    .costInCents(costInCents)
-		                                                    .version(version)
+		                                                    .version(DEFAULT_VERSION_FOR_TESTS)
+		                                                    .squareItemId("SOME_RANDOM_SQUARE_ID")
 		                                                    .build())
 		                            .build();
 	}

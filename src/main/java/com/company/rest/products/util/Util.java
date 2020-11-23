@@ -1,4 +1,5 @@
 package com.company.rest.products.util;
+import com.squareup.square.models.CatalogObject;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,13 +10,19 @@ import lombok.extern.slf4j.Slf4j;
 public class Util
 {
 	/**
+	 * A project-wide constant to assist with mocked tests that need to see a version field in various responses.
+	 * @see CatalogObject#getVersion()
+	 */
+	public static final Long DEFAULT_VERSION_FOR_TESTS = 1000000L;
+
+	/**
 	 * Examines if a provided {@link String} could represent a valid product name.
 	 * @param productName A {@link String} that may or may not be a valid product name.
 	 * @return {@literal true} if {@code productName} is a valid product name, {@literal false} otherwise.
 	 */
 	public static boolean isValidProductName(@NonNull final String productName)
 	{
-		return  productName.length() > 0 && productName.chars().allMatch(Character::isUpperCase);
+		return  productName.length() > 0; // && productName.chars().allMatch(Character::isUpperCase);
 	}
 
 	/**
@@ -81,5 +88,33 @@ public class Util
 	public static boolean nullOrFalse(final Boolean val)
 	{
 		return val == null || val == Boolean.FALSE;
+	}
+
+	/**
+	 * Simple helper to determine if two {@link String}s match, ignoring case, and checking for {@literal null}s.
+	 *
+	 * @param name1  A {@link String} name.
+	 * @param name2  A {@link String} name.
+	 *
+	 * @return {@literal true} if the names are both null or if they match by ignoring case.
+	 */
+	public static boolean stringsMatch(final String name1, final String name2)
+	{
+		if(name1 == null && name2 == null)
+		{
+			return true;
+		}
+		else if(name1 == null)
+		{
+			return  false;
+		}
+		else if(name2 == null)
+		{
+			return false;
+		}
+		else
+		{
+			return name1.equalsIgnoreCase(name2);
+		}
 	}
 }

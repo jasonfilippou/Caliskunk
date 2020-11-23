@@ -65,7 +65,7 @@ public class EndToEndPostTests
 													.name("Ramses V")
 													.productType("topical")
 													.clientProductId("#RANDOM_ID")
-													.costInCents(10000L) // 'L for long literal
+													.costInCents(DEFAULT_COST_IN_CENTS)
 													.description("Will challenge his father for the throne")
 													.labelColor("7FAAD4")
 													.upc("RANDOM_UPC")

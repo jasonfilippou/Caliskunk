@@ -90,7 +90,7 @@ public class BackendServicePutTests
 					.name("Culeothesis Necrosis")
 					.productType("Flower")
 					.clientProductId("#RANDOM_ID")
-					.costInCents(10000L) // 'L for long literal
+					.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
 					.description("Will eat your face.")
 					.labelColor("7FFFD4")
 					.upc("RANDOM_UPC")

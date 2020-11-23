@@ -65,7 +65,7 @@ public class LiteProduct
 			this.productName = productName.strip().toUpperCase();
 			this.squareItemId = squareItemId;
 			this.costInCents = costInCents;
-			this.productType = productType;
+			this.productType = productType.strip().toUpperCase();
 			this.version = version;
 		}
 	}

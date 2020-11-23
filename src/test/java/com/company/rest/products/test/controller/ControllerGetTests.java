@@ -74,7 +74,7 @@ public class ControllerGetTests
 		// Define mocked answer
 		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
 				.builder()
-				.name(postRequest.getName().strip().toUpperCase())
+				.name(postRequest.getName())
 				.clientProductId(postRequest.getClientProductId())
 				.squareItemId("#RANDOM_SQUARE_ITEM_ID")
 				.updatedAt(DEFAULT_UPDATED_AT_STRING)

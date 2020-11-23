@@ -101,20 +101,19 @@ public class BackendService
 
 	private void validatePostRequest(final ProductUpsertRequestBody postRequest)
 	{
-		assertAndIfNotLogAndThrow(postRequest.getClientProductId() != null &&
-		                          isValidProductName(postRequest.getName()),
+		assertAndIfNotLogAndThrow(postRequest.getClientProductId() != null,
 		                          "Bad POST request.");
 	}
 
 	private void validatePostResponse(final SquareServiceResponseBody squareServiceResponse, final ProductUpsertRequestBody clientPostRequest)
 	{
 		assertAndIfNotLogAndThrow(nullOrFalse(squareServiceResponse.getIsDeleted()) &&
+		                           stringsMatch(squareServiceResponse.getName(), clientPostRequest.getName()) &&
+		                           stringsMatch(squareServiceResponse.getProductType(), clientPostRequest.getProductType()) &&
 		                           squareServiceResponse.getUpdatedAt() != null &&
 		                           squareServiceResponse.getVersion() != null &&
 		                           squareServiceResponse.getSquareItemId() != null &&
-		                           squareServiceResponse.getProductType().equals(clientPostRequest.getProductType()) &&
 		                           squareServiceResponse.getClientProductId().equals(clientPostRequest.getClientProductId()) &&
-								   squareServiceResponse.getName().equals(clientPostRequest.getName()) &&
 		                           optionalFieldsMatch(squareServiceResponse, clientPostRequest),
 		                          "Bad Upsert Response from Square Service layer.");
 	}
@@ -187,10 +186,11 @@ public class BackendService
 
 	private boolean optionalFieldsMatch(final SquareServiceResponseBody getResponse, final ProductGetRequestBody getRequest)
 	{
-		return ofNullable(getResponse.getName()).equals(ofNullable(getRequest.getLiteProduct().getProductName())) &&
+		return stringsMatch(getResponse.getName(), getRequest.getLiteProduct().getProductName()) &&
+		       stringsMatch(getResponse.getProductType(), getRequest.getLiteProduct().getProductType()) &&
 		       ofNullable(getResponse.getCostInCents()).equals(ofNullable(getRequest.getLiteProduct().getCostInCents())) &&
-		       ofNullable(getResponse.getSquareItemId()).equals(ofNullable(getRequest.getLiteProduct().getSquareItemId())) &&
-			   ofNullable(getResponse.getProductType()).equals(ofNullable(getRequest.getLiteProduct().getProductType()));
+		       ofNullable(getResponse.getSquareItemId()).equals(ofNullable(getRequest.getLiteProduct().getSquareItemId()));
+
 	}
 
 	private void expandGetRequest(final ProductGetRequestBody getRequest, final LiteProduct liteProduct)
@@ -292,9 +292,7 @@ public class BackendService
 	private void validatePutRequest(final ProductUpsertRequestBody putRequest)
 	{
 		assertAndIfNotLogAndThrow(putRequest.getVersion() != null &&
-		                          putRequest.getClientProductId() != null &&
-		                          putRequest.getSquareProductId() == null && // Shouldn't know anything about Square just yet!
-		                          putRequest.getName() == null || isValidProductName(putRequest.getName()),"Bad PUT request."); // Might not update name
+		                          putRequest.getClientProductId() != null, "Bad PUT request");
 	}
 
 	private void validatePutResponse(final SquareServiceResponseBody putResponse, final ProductUpsertRequestBody putRequest)
@@ -363,10 +361,10 @@ public class BackendService
 	private void validateDeleteResponse(final SquareServiceResponseBody squareServiceResponse, final ProductDeleteRequestBody deleteRequest)
 	{
 		assertAndIfNotLogAndThrow(squareServiceResponse.getClientProductId().equals(deleteRequest.getClientProductId()) &&
-		                          squareServiceResponse.getProductType().equals(deleteRequest.getLiteProduct().getProductType()) &&
+		                          stringsMatch(squareServiceResponse.getName(), deleteRequest.getLiteProduct().getProductName()) &&
+		                          stringsMatch(squareServiceResponse.getProductType(), deleteRequest.getLiteProduct().getProductType()) &&
 		                          squareServiceResponse.getSquareItemId().equals(deleteRequest.getLiteProduct().getSquareItemId()) &&
 		                          squareServiceResponse.getCostInCents().equals(deleteRequest.getLiteProduct().getCostInCents()) &&
-		                          squareServiceResponse.getName().equals(deleteRequest.getLiteProduct().getProductName()) &&
 		                          squareServiceResponse.getIsDeleted() && squareServiceResponse.getUpdatedAt() != null,
 								  "Bad DELETE response");   // Remember; no version information for DELETE provided by Square.
 	}

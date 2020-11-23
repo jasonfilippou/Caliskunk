@@ -66,7 +66,7 @@ public class ControllerPutTests
 													.name("Culeothesis Necrosis")
 													.productType("Flower")
 													.clientProductId(id)
-													.costInCents(10000L) // 'L for long literal
+													.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
 													.description("Will eat your face.")
 													.labelColor("7FFFD4")
 													.upc("RANDOM_UPC")
@@ -88,7 +88,7 @@ public class ControllerPutTests
 		// Prepare mocked backend layer responses.
 		final BackendServiceResponseBody preparedPostResponse = BackendServiceResponseBody
 														.builder()
-                                                        .name(postRequest.getName().strip().toUpperCase())
+                                                        .name(postRequest.getName())
                                                         .clientProductId(id)
 														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
                                                         .productType(postRequest.getProductType())
@@ -104,7 +104,7 @@ public class ControllerPutTests
 
 		final BackendServiceResponseBody preparedPutResponse = BackendServiceResponseBody
 														.builder()
-                                                        .name(putRequest.getName().strip().toUpperCase())
+                                                        .name(putRequest.getName())
                                                         .clientProductId(id)
 														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
                                                         .productType(putRequest.getProductType())

@@ -39,7 +39,7 @@ public class MockedSquareServicePutResponses
 		return SquareServiceResponseBody.builder()
 		                                .name(request.getName().strip().toUpperCase())
 		                                .clientProductId(relevantPostId)
-		                                .productType(request.getProductType())
+		                                .productType(request.getProductType().strip().toUpperCase())
 		                                .squareItemId("random_item_id")
 		                                .isDeleted(false)
 		                                .costInCents(request.getCostInCents())

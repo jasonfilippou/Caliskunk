@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
@@ -74,36 +75,39 @@ public class BackendServicePostTests
 	@Test
 	public void testOnePost()
 	{
-		final ProductUpsertRequestBody request = ProductUpsertRequestBody
-													.builder()
-													.name("Culeothesis Necrosis")
-													.productType("Flower")
-													.clientProductId("#RANDOM_ID")
-													.costInCents(10000L) // 'L for long literal
-													.description("Will eat your face.")
-													.labelColor("7FFFD4")
-													.upc("RANDOM_UPC")
-													.sku("RANDOM_SKU")
-													.build();
+		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
+														.builder()
+														.name("Culeothesis Necrosis")
+														.productType("Flower")
+														.clientProductId("#RANDOM_ID")
+														.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
+														.description("Will eat your face.")
+														.labelColor("7FFFD4")
+														.upc("RANDOM_UPC")
+														.sku("RANDOM_SKU")
+														.build();
 
 		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
 																.builder()
-			                                                    .name(request.getName())
-														        .clientProductId(request.getClientProductId())
-															    .productType(request.getProductType())
+			                                                    .name(postRequest.getName())
+														        .clientProductId(postRequest.getClientProductId())
+															    .productType(postRequest.getProductType())
 			                                                    .squareItemId("#RANDOM_ITEM_ID")
-			                                                    .costInCents(request.getCostInCents())
+			                                                    .costInCents(postRequest.getCostInCents())
 			                                                    .isDeleted(false)
-																.description(request.getDescription())
-																.labelColor(request.getLabelColor())
+																.updatedAt(DEFAULT_UPDATED_AT_STRING)
+																.description(postRequest.getDescription())
+																.labelColor(postRequest.getLabelColor())
 														        .version(DEFAULT_VERSION_FOR_TESTS)
+																.sku(postRequest.getSku())
+																.upc(postRequest.getUpc())
                                                                 .build();
 
 		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(preparedResponse);
 		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
-		final BackendServiceResponseBody response = backendService.postProduct(request);
-		assertTrue("Request did not match response", responseMatchesUpsertRequest(request, response, POST));
+		final BackendServiceResponseBody response = backendService.postProduct(postRequest);
+		assertTrue("Request did not match response", responseMatchesUpsertRequest(postRequest, response, POST));
 	}
 
 	@Test
@@ -114,6 +118,7 @@ public class BackendServicePostTests
 		{
 			// Mock
 			when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
+			when(repository.save(any(LiteProduct.class))).thenReturn(LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i]));
 
 			// Call backend service
 			final BackendServiceResponseBody response = backendService.postProduct(GOOD_POSTS[i]);

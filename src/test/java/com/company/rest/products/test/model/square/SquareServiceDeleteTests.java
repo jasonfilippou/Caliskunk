@@ -1,11 +1,10 @@
 package com.company.rest.products.test.model.square;
-
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.CatalogWrapper;
 import com.company.rest.products.model.SquareService;
+import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
-import com.squareup.square.models.DeleteCatalogObjectResponse;
 import com.squareup.square.models.UpsertCatalogObjectRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -18,12 +17,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
-import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
-import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
 import static com.company.rest.products.test.requests_responses.delete.GoodDeleteRequests.GOOD_DELETES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
@@ -45,15 +40,6 @@ import static org.mockito.Mockito.when;
 @ComponentScan(basePackages = {"com.company.rest.products"})
 public class SquareServiceDeleteTests
 {
-
-	private DeleteCatalogObjectResponse buildMockedDeleteResponse(final String squareItemId, final String squareItemVariationId)
-	{
-		return new DeleteCatalogObjectResponse.Builder()
-													.deletedObjectIds(Arrays.asList(squareItemId, squareItemVariationId))
-													.deletedAt(LocalDateTime.now().toString())
-												.build();
-	}
-
 	@InjectMocks
 	private SquareService squareService; // The class we are testing
 
@@ -64,34 +50,21 @@ public class SquareServiceDeleteTests
 	public void setUp() throws ExecutionException, InterruptedException
 	{
 
-		// Prepare CatalogWrapper respone for POST (on which subsequent DELETEs are based)
+		// Prepare CatalogWrapper response for POST (on which subsequent DELETEs are based)
 		when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
-				.then(
-						invocation -> {
-							final UpsertCatalogObjectRequest request = invocation.getArgument(0);
-							if(request.getObject().getType().equals(CODE_FOR_CATALOG_ITEMS))
-							{
-								return buildItemResponseOutOfRequest(request);
-							}
-							else if(request.getObject().getType().equals(CODE_FOR_CATALOG_ITEM_VARIATIONS))
-							{
-								return buildItemVariationResponseOutOfRequest(request);
-							}
-							else
-							{
-								throw new AssertionError("Bad upsert request: type was " +
-								                         request.getObject().getType());
-							}
-
-						}
-				     );
+				.then(invocation ->
+				      {
+					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
+					      final Long version = request.getObject().getVersion() != null ?
+					                           request.getObject().getVersion() : DEFAULT_VERSION_FOR_TESTS;
+					      return buildItemResponseOutOfRequest(request, version);
+				      });
 
 		// Prepare CatalogWrapper response for DELETE
-		when(catalogWrapper.deleteObject(any(String.class)))
-				.then(
-						invocation ->
+		when(catalogWrapper.deleteObject(any(ProductDeleteRequestBody.class)))
+				.then(invocation ->
 						{
-							return buildMockedDeleteResponse(invocation.getArgument(0), "SOME_RANDOM_ITEM_VARIATION_ID"); // Square ID is the only real important argument here
+							return buildMockedDeleteResponseOutOfRequest(invocation.getArgument(0)); // Square ID is the only real important argument here
 						}
 				     );
 
@@ -106,7 +79,7 @@ public class SquareServiceDeleteTests
 				.name("Culeothesis Necrosis")
 				.productType("Flower")
 				.clientProductId("#RANDOM_ITEM_ID")
-				.costInCents(10000L) // 'L for long literal
+				.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
 				.description("Will eat your face.")
 				.labelColor("7FFFD4")
 				.upc("RANDOM_UPC")

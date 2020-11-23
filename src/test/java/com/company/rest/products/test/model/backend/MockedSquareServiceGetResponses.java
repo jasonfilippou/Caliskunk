@@ -47,7 +47,7 @@ public class MockedSquareServiceGetResponses
 		                                 .name(request.getName().strip().toUpperCase())
 	                                     .clientProductId(request.getClientProductId())
 		                                 .squareItemId("random_item_id")
-	                                     .productType(request.getProductType())
+	                                     .productType(request.getProductType().strip().toUpperCase())
 		                                 .isDeleted(false)
 		                                 .costInCents(request.getCostInCents())
 		                                 .labelColor(request.getLabelColor())

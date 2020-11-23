@@ -6,7 +6,7 @@ import com.company.rest.products.model.SquareService;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
-import com.squareup.square.models.*;
+import com.squareup.square.models.UpsertCatalogObjectRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,13 +18,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEMS;
-import static com.company.rest.products.model.SquareService.CODE_FOR_CATALOG_ITEM_VARIATIONS;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
-import static com.company.rest.products.test.util.TestUtil.responseMatchesGetRequest;
+import static com.company.rest.products.test.util.TestUtil.*;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -50,30 +47,6 @@ public class SquareServiceGetTests
 	private CatalogWrapper catalogWrapper;     // Class that will be mocked
 
 
-    private UpsertCatalogObjectResponse buildItemResponseOutOfUpsertRequest(final UpsertCatalogObjectRequest request)
-    {
-    	final CatalogItem item = Optional.of(request.getObject().getItemData())
-	                                     .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItem"));
-    	final CatalogObject itemWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, "RANDOM_ITEM_ID")
-		                                                        .itemData(item)
-		                                                    .build();
-    	return new UpsertCatalogObjectResponse.Builder()
-			                                        .catalogObject(itemWrapper)
-			                                    .build();
-    }
-
-    private UpsertCatalogObjectResponse buildItemVariationResponseOutOfUpsertRequest(final UpsertCatalogObjectRequest request)
-    {
-		final CatalogItemVariation itemVariation = Optional.of(request.getObject().getItemVariationData())
-		                                                   .orElseThrow(() -> new AssertionError("Upsert request not for CatalogItemVariation"));
-    	final CatalogObject itemVariationWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS, "RANDOM_ITEM_VAR_ID")
-		                                                                 .itemVariationData(itemVariation)
-	                                                                 .build();
-    	return new UpsertCatalogObjectResponse.Builder()
-			                                        .catalogObject(itemVariationWrapper)
-			                                    .build();
-    }
-
 	@Before
     public void setUp() throws ExecutionException, InterruptedException
 	{
@@ -83,54 +56,27 @@ public class SquareServiceGetTests
 		/////////////////////////////////////////////
 
 		// Response for an Upsert (POST, PUT) request
-        when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
-            .then(
-		        invocation -> {
-		            final UpsertCatalogObjectRequest request = invocation.getArgument(0);
-		            if(request.getObject().getType().equals(CODE_FOR_CATALOG_ITEMS))
-			        {
-			            return buildItemResponseOutOfUpsertRequest(request);
-			        }
-		            else if(request.getObject().getType().equals(CODE_FOR_CATALOG_ITEM_VARIATIONS))
-			        {
-			            return buildItemVariationResponseOutOfUpsertRequest(request);
-			        }
-			        else
-			        {
-			            throw new AssertionError("Bad upsert request: type was " +
-				                                 request.getObject().getType());
-			        }
-
-		        }
-	        );
+		when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
+				.then(invocation ->
+				      {
+					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
+					      final Long version = request.getObject().getVersion() != null ?
+					                             request.getObject().getVersion() : DEFAULT_VERSION_FOR_TESTS;
+					      return buildItemResponseOutOfRequest(request, version);
+				      });
 
         // Response for a Batch Retrieve (GET, GET ALL) request
-        when(catalogWrapper.retrieveObject(any(String.class)))
+        when(catalogWrapper.retrieveObject(any(ProductGetRequestBody.class)))
             .then(
 		        invocation ->
 		        {
-		            final String id = invocation.getArgument(0);
-		            return buildResponseOutOfRetrieveRequest(id);
+		            final ProductGetRequestBody getRequest = invocation.getArgument(0);
+		            return buildResponseOutOfRetrieveRequest(getRequest);
 		        }
 	        );
     }
 
-    private RetrieveCatalogObjectResponse buildResponseOutOfRetrieveRequest(final String id)
-    {
-    	return new RetrieveCatalogObjectResponse.Builder()
-			                                        .object(buildObjectForRetrieveResponse(id))
-			                                        .build();
-    }
 
-    private CatalogObject buildObjectForRetrieveResponse(final String id)
-    {
-        return new CatalogObject
-					.Builder(CODE_FOR_CATALOG_ITEMS, id)
-			        .itemData(new CatalogItem.Builder()
-					                  .name("RANDOM_ITEM_NAME")
-								      .build())
-					.build();    // Yo dawg I heard you like builders :(
-	 }
 
 	@Test
 	public void testOneGet()
@@ -138,10 +84,10 @@ public class SquareServiceGetTests
 		// Prepare request
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-													.name("Culeothesis Necrosis")
+													.name(DEFAULT_PRODUCT_NAME)
 													.productType("Flower")
 													.clientProductId("#RANDOM_ITEM_ID")
-													.costInCents(10000L) // 'L for long literal
+													.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
 													.description("Will eat your face.")
 													.labelColor("7FFFD4")
 													.upc("RANDOM_UPC")

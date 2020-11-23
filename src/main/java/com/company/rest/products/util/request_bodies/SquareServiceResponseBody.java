@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NonNull;
 
 import java.io.Serializable;
-
 /**
  * Information about the run of the {@link SquareService} routine that was called.
  *
@@ -63,20 +62,29 @@ public class SquareServiceResponseBody implements Serializable
 		final CatalogObject catalogObject = squareUpsertResponse.getCatalogObject();
 		final CatalogItem catalogItem = catalogObject.getItemData();
 		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
-		return SquareServiceResponseBody.builder()
-		                                .clientProductId(clientUpsertRequest.getClientProductId())
-		                                .name(catalogItem.getName())
-		                                .costInCents(catalogItemVariation.getPriceMoney().getAmount())
-		                                .productType(clientUpsertRequest.getProductType())
-		                                .squareItemId(catalogObject.getId())
-		                                .description(catalogItem.getDescription())
-		                                .labelColor(catalogItem.getLabelColor())
-		                                .sku(catalogItemVariation.getSku())
-		                                .upc(catalogItemVariation.getUpc())
-		                                .version(catalogObject.getVersion())
-		                                .isDeleted(catalogObject.getIsDeleted())
-		                                .updatedAt(catalogObject.getUpdatedAt())
-		                                .build();
+		final SquareServiceResponseBody retVal =  SquareServiceResponseBody
+													.builder()
+					                                .clientProductId(clientUpsertRequest.getClientProductId())
+					                                .name(catalogItem.getName().strip().toUpperCase())
+					                                .isDeleted(catalogObject.getIsDeleted())
+					                                .updatedAt(catalogObject.getUpdatedAt())
+					                                .squareItemId(catalogObject.getId())
+					                                .version(catalogObject.getVersion())
+					                                .build();
+		updateWithOptionalFields(retVal, clientUpsertRequest, catalogItem, catalogItemVariation);
+		return retVal;
+	}
+
+	private static void updateWithOptionalFields(final SquareServiceResponseBody squareServiceResponse,
+	                                             final ProductUpsertRequestBody clientUpsertRequest,
+	                                             final CatalogItem item, final CatalogItemVariation itemVariation)
+	{
+		if(clientUpsertRequest.getProductType() != null) squareServiceResponse.setProductType(clientUpsertRequest.getProductType());
+		if(itemVariation.getPriceMoney() != null) squareServiceResponse.setCostInCents(itemVariation.getPriceMoney().getAmount());
+		if(item.getDescription() != null) squareServiceResponse.setDescription(item.getDescription());
+		if(clientUpsertRequest.getLabelColor() != null) squareServiceResponse.setLabelColor(clientUpsertRequest.getLabelColor());
+		if(clientUpsertRequest.getSku() != null) squareServiceResponse.setSku(clientUpsertRequest.getSku());
+		if(clientUpsertRequest.getUpc() != null) squareServiceResponse.setUpc(clientUpsertRequest.getUpc());
 	}
 	/**
 	 * Build a {@link SquareServiceResponseBody} out of a {@link ProductGetRequestBody} and a {@link RetrieveCatalogObjectResponse}.
@@ -92,9 +100,9 @@ public class SquareServiceResponseBody implements Serializable
 		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
 		return SquareServiceResponseBody.builder()
 		                                .clientProductId(clientGetRequest.getClientProductId())
-		                                .name(catalogItem.getName())
+		                                .name(catalogItem.getName().strip().toUpperCase())
 		                                .costInCents(catalogItemVariation.getPriceMoney().getAmount())
-		                                .productType(clientGetRequest.getLiteProduct().getProductType())
+		                                .productType(clientGetRequest.getLiteProduct().getProductType().strip().toUpperCase())
 		                                .squareItemId(catalogObject.getId())
 		                                .description(catalogItem.getDescription())
 		                                .labelColor(catalogItem.getLabelColor())
@@ -118,9 +126,9 @@ public class SquareServiceResponseBody implements Serializable
 
 		return SquareServiceResponseBody.builder()
 		                                .clientProductId(clientDeleteRequest.getClientProductId())
-		                                .name(clientDeleteRequest.getLiteProduct().getProductName())
+		                                .name(clientDeleteRequest.getLiteProduct().getProductName().strip().toUpperCase())
 		                                .costInCents(clientDeleteRequest.getLiteProduct().getCostInCents())
-		                                .productType(clientDeleteRequest.getLiteProduct().getProductType())
+		                                .productType(clientDeleteRequest.getLiteProduct().getProductType().strip().toUpperCase())
 		                                .squareItemId(clientDeleteRequest.getLiteProduct().getSquareItemId())
 		                                .isDeleted(true)
 		                                .updatedAt(squareDeleteResponse.getDeletedAt())

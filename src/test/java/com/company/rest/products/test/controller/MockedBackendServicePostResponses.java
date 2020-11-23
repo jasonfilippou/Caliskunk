@@ -36,7 +36,7 @@ public class MockedBackendServicePostResponses
 	private static BackendServiceResponseBody mockedResponse(final ProductUpsertRequestBody request)
 	{
 		return BackendServiceResponseBody.builder()
-		                                 .name(request.getName().strip().toUpperCase())
+		                                 .name(request.getName())
 		                                 .clientProductId(request.getClientProductId())
 		                                 .squareItemId("random_item_id")
 		                                 .isDeleted(false)
