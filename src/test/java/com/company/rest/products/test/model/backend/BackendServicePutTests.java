@@ -22,7 +22,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Optional;
 
 import static com.company.rest.products.model.liteproduct.LiteProduct.buildLiteProductFromSquareResponse;
-import static com.company.rest.products.test.model.backend.MockedSquareServiceDeleteResponses.MOCKED_SQUARE_DELETE_RESPONSES;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePutResponses.MOCKED_SQUARE_PUT_RESPONSES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
@@ -95,9 +94,6 @@ public class BackendServicePutTests
 					.labelColor("7FFFD4")
 					.upc("RANDOM_UPC")
 					.sku("RANDOM_SKU")
-
-
-
 				.build();
 
 		final SquareServiceResponseBody mockedSquarePostResponse = SquareServiceResponseBody
@@ -108,7 +104,12 @@ public class BackendServicePutTests
 					.squareItemId("#RANDOM_ITEM_ID")
 					.costInCents(postRequest.getCostInCents())
 					.isDeleted(false)
+					.updatedAt(DEFAULT_UPDATED_AT_STRING)
 					.version(DEFAULT_VERSION_FOR_TESTS)
+					.description(postRequest.getDescription())
+					.upc(postRequest.getUpc())
+					.sku(postRequest.getSku())
+					.labelColor(postRequest.getLabelColor())
 				.build();
 
 		// In this putRequest, we will change some fields and keep some others. Since PUT does NOT
@@ -124,17 +125,23 @@ public class BackendServicePutTests
 					.upc("RANDOM_UPC")
 					.sku("RANDOM_SKU")
                     .version(mockedSquarePostResponse.getVersion()) // Simulating a realistic PUT call
+                    .clientProductId(postRequest.getClientProductId())    // Just for testing
 				.build();
 
 		final SquareServiceResponseBody mockedSquarePutResponse = SquareServiceResponseBody
 				.builder()
 					.name(putRequest.getName())
-					.clientProductId(postRequest.getClientProductId())
-					.productType(postRequest.getProductType())
+					.clientProductId(putRequest.getClientProductId())
+					.productType(putRequest.getProductType())
 					.squareItemId("#RANDOM_ITEM_ID")
-					.costInCents(postRequest.getCostInCents())
+					.costInCents(putRequest.getCostInCents())
 					.isDeleted(false)
 					.version(DEFAULT_VERSION_FOR_TESTS)
+					.updatedAt(DEFAULT_UPDATED_AT_STRING)
+					.description(putRequest.getDescription())
+					.upc(putRequest.getUpc())
+					.sku(putRequest.getSku())
+					.labelColor(putRequest.getLabelColor())
 				.build();
 
 		///////////
@@ -202,7 +209,7 @@ public class BackendServicePutTests
 
 			// Mock the Square service upsert call and the repo SEARCH, SAVE and DEL calls.
 			// GOOD_PUTS[i].setClientProductId(GOOD_POSTS[i].getClientProductId());    // Recall: The Square service
-			when(squareService.putProduct(GOOD_PUTS[i])).thenReturn(MOCKED_SQUARE_DELETE_RESPONSES[i]);
+			when(squareService.putProduct(GOOD_PUTS[i])).thenReturn(MOCKED_SQUARE_PUT_RESPONSES[i]);
 			when(repository.findByClientProductId(GOOD_POSTS[i].getClientProductId())).thenReturn(Optional.of(buildLiteProductFromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i])));
 			doNothing().when(repository).deleteByClientProductId(any(String.class));
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
