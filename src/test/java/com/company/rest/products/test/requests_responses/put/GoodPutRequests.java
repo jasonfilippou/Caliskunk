@@ -449,7 +449,6 @@ public class GoodPutRequests
 			                            .version(DEFAULT_VERSION_FOR_TESTS)
 			                            .productType("pet")
 			                            .costInCents(3000L)
-			                            
 									.build(),
 
 			ProductUpsertRequestBody.builder()
@@ -540,7 +539,6 @@ public class GoodPutRequests
 			                            .costInCents(4000L)
 			                            .labelColor("106B0C")
 										.description("Not combine-able with other offers...")
-                                    
 									.build(),
 
 			ProductUpsertRequestBody.builder() // Full gamut of fields except for ID
@@ -552,9 +550,6 @@ public class GoodPutRequests
 										.description("Biggest value for money yet!")
 										.upc("MY_UPC")
 										.sku("MY_SKU")
-
-
-                                    
 									.build(),
 
 			ProductUpsertRequestBody.builder()
@@ -567,7 +562,6 @@ public class GoodPutRequests
 										.sku("C761BB2211")
 			                            .upc("042100005264")
 										.upc("DDECA0FBBA3F")        // Overwrite should be allowed
-                                        
 									.build()
 	};
 

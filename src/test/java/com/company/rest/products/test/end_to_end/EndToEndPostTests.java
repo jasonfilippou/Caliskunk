@@ -70,9 +70,6 @@ public class EndToEndPostTests
 													.labelColor("7FAAD4")
 													.upc("RANDOM_UPC")
 													.sku("RANDOM_SKU")
-
-
-
 													.build();
 		final ResponseEntity<ResponseMessage> responseEntity = controller.postProduct(request);
 		final ProductResponseBody response = checkEntityStatusAndFetchResponse(responseEntity, HttpStatus.CREATED);

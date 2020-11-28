@@ -82,7 +82,9 @@ public class SquareService
 
 	private void validatePostRequest(final ProductUpsertRequestBody postRequest)
 	{
-		assertAndIfNotLogAndThrow(postRequest.getClientProductId() != null && postRequest.getVersion() == null,
+		assertAndIfNotLogAndThrow(postRequest.getClientProductId() != null
+		                          && postRequest.getVersion() == null
+								  && postRequest.getCostInCents() != null,  // Square won't allow you to put in an item without a cost value.
 		                          "Bad POST request");
 	}
 
@@ -123,11 +125,21 @@ public class SquareService
 		return new CatalogItemVariation.Builder()
 				.name(postRequest.getName().strip().toUpperCase() + DEFAULT_ITEM_VARIATION_NAME_SUFFIX)
 				.itemId(postRequest.getClientProductId())       // When in the same Upsert request, we should refer to the client - provided ID.
-				.pricingType(PRICE_MODEL)
-				.priceMoney(new Money(postRequest.getCostInCents(), CURRENCY))
+				.pricingType(getPricingTypeOrNull(postRequest))
+				.priceMoney(getMoneyOrNull(postRequest))
 				.sku(postRequest.getSku())
 				.upc(postRequest.getUpc())
 				.build();
+	}
+
+	private String getPricingTypeOrNull(final ProductUpsertRequestBody postRequest)
+	{
+		return postRequest.getCostInCents() == null ? null : PRICE_MODEL;
+	}
+
+	private Money getMoneyOrNull(final ProductUpsertRequestBody postRequest)
+	{
+		return postRequest.getCostInCents() == null ? null : new Money(postRequest.getCostInCents(), CURRENCY);
 	}
 
 	private void validatePostResponse(final UpsertCatalogObjectResponse postResponse, final ProductUpsertRequestBody postRequest)
@@ -140,13 +152,14 @@ public class SquareService
 		assertAndIfNotLogAndThrow(noErrorsInResponse(postResponse) &&
 		                          catalogObject.getType().equals(CODE_FOR_CATALOG_ITEMS) &&
 		                          nullOrFalse(catalogObject.getIsDeleted()) &&
+		                          postResponse.getIdMappings().size() == 2 &&
 		                          postResponse.getIdMappings()
 		                                      .stream()
 		                                      .map(CatalogIdMapping::getClientObjectId)
 		                                      .collect(Collectors.toList())
 		                                      .containsAll(Arrays.asList(postRequest.getClientProductId(),
 		                                                                 postRequest.getClientProductId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX)) &&
-		                          postResponse.getIdMappings().size() == 2 &&
+
 		                          nullOrProvidedStatus(postResponse.getContext(), HttpStatus.OK) &&
 		                          catalogItemVariation.getItemId().equals(catalogObject.getId()) &&
 		                          catalogItemVariation.getPriceMoney().getCurrency().equals(CURRENCY) &&
@@ -206,15 +219,10 @@ public class SquareService
 	{
 		assertAndIfNotLogAndThrow(putRequest.getClientProductId() != null &&
 		                                    putRequest.getSquareProductId() != null &&
-		                                    putRequest.getVersion() != null,
+		                                    putRequest.getVersion() != null &&
+		                                    putRequest.getCostInCents() != null ,   // Every PUT on Square needs this!
 		                          "Need valid IDs for PUT request");
 	}
-	
-	private void validatePutResponse(final UpsertCatalogObjectResponse putResponse, final ProductUpsertRequestBody putRequest)
-	{
-		validatePostResponse(putResponse, putRequest);  // same logic
-	}
-
 
 	private UpsertCatalogObjectRequest prepareCatalogPutRequest(final ProductUpsertRequestBody putRequest)
 	{
@@ -223,12 +231,69 @@ public class SquareService
 
 	private CatalogObject prepareCatalogObjectForPut(final ProductUpsertRequestBody putRequest)
 	{
-		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, putRequest.getClientProductId()) // Instead of the clientProductId!
-				.itemData(prepareCatalogItemFieldForPost(putRequest))                             // Identical logic.
+		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, putRequest.getSquareProductId()) // Instead of the clientProductId!
+				.itemData(prepareCatalogItemFieldForPut(putRequest))                             // Identical logic.
 				.version(putRequest.getVersion())                                                 // Alongside the right ID above, necessary for the PUT to succeed.
 				.build();
 	}
-	
+
+	private CatalogItem prepareCatalogItemFieldForPut(final ProductUpsertRequestBody putRequest)
+	{
+		final CatalogObject variation = prepareCatalogItemVariationForPut(putRequest);
+		return new CatalogItem.Builder()
+				.name(putRequest.getName().strip().toUpperCase())
+				.abbreviation(abbreviate(putRequest.getName().strip().toUpperCase(), ABBRV_CHARS))
+				.description(putRequest.getDescription())
+				.labelColor(putRequest.getLabelColor())
+				.variations(Collections.singletonList(variation))
+				.build();
+	}
+
+	private CatalogObject prepareCatalogItemVariationForPut(final ProductUpsertRequestBody putRequest)
+	{
+		return new CatalogObject.Builder(CODE_FOR_CATALOG_ITEM_VARIATIONS,
+		                                 ensureFirstCharIs(putRequest.getSquareProductId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX, '#')) // Careful to refer to Square ID.
+				                .itemVariationData(prepareCatalogItemVariationFieldForPut(putRequest))
+                                .version(putRequest.getVersion())
+				                .build();
+	}
+
+
+	private CatalogItemVariation prepareCatalogItemVariationFieldForPut(final ProductUpsertRequestBody putRequest)
+	{
+		return new CatalogItemVariation.Builder()
+				.name(putRequest.getName().strip().toUpperCase() + DEFAULT_ITEM_VARIATION_NAME_SUFFIX)
+				.itemId(putRequest.getSquareProductId())       // Careful to refer to Square ID.
+				.pricingType(PRICE_MODEL)
+				.priceMoney(new Money(putRequest.getCostInCents(), CURRENCY))
+				.sku(putRequest.getSku())
+				.upc(putRequest.getUpc())
+				.build();
+	}
+
+	private void validatePutResponse(final UpsertCatalogObjectResponse putResponse, final ProductUpsertRequestBody putRequest)
+	{
+		final CatalogObject catalogObject = putResponse.getCatalogObject();
+		final CatalogItem catalogItem = catalogObject.getItemData();
+		assertAndIfNotLogAndThrow(catalogItem.getVariations() != null && catalogItem.getVariations().size() == 1,
+		                          "Square API should have returned one CatalogItem and one CatalogItemVariation.");
+		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
+		assertAndIfNotLogAndThrow(noErrorsInResponse(putResponse) &&
+		                          catalogObject.getType().equals(CODE_FOR_CATALOG_ITEMS) &&
+		                          nullOrFalse(catalogObject.getIsDeleted()) &&
+		                          putResponse.getIdMappings().size() == 2 &&
+		                          putResponse.getIdMappings() == null &&
+		                          nullOrProvidedStatus(putResponse.getContext(), HttpStatus.OK) &&
+		                          catalogItemVariation.getItemId().equals(catalogObject.getId()) &&
+		                          catalogItemVariation.getPriceMoney().getCurrency().equals(CURRENCY) &&
+		                          stringsMatch(catalogItem.getName(), putRequest.getName()) &&    // This subsumes abbreviation test
+		                          stringsMatch(catalogItemVariation.getName(), catalogItem.getName() + DEFAULT_ITEM_VARIATION_NAME_SUFFIX) &&
+		                          optionalFieldsMatch(catalogItem, catalogItemVariation, putRequest),
+		                          "Bad Upsert response from Square API"
+		                         );
+	}
+
+
 	/**
 	 * Send a GET request for a specific product.
 	 *
@@ -350,9 +415,7 @@ public class SquareService
 		                          nullOrProvidedStatus(deleteResponse.getContext(), HttpStatus.OK) &&
 		                          deleteResponse.getDeletedObjectIds() != null &&
 		                          deleteResponse.getDeletedObjectIds().size() == 2 &&
-		                          deleteResponse.getDeletedObjectIds().containsAll(Arrays.asList(deleteRequest.getLiteProduct().getSquareItemId(),
-		                                                                                         deleteRequest.getLiteProduct().getSquareItemId()
-		                                                                                                        + DEFAULT_ITEM_VARIATION_ID_SUFFIX)) &&
+		                          deleteResponse.getDeletedObjectIds().contains(deleteRequest.getLiteProduct().getSquareItemId()) &&
 		                          deleteResponse.getDeletedAt() != null,
 		                          "Bad DELETE response from Square API"
 		                         );

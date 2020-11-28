@@ -13,14 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import static com.company.rest.products.model.SquareService.*;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
-import static com.company.rest.products.util.Util.nullOrFalse;
-import static com.company.rest.products.util.Util.stringsMatch;
+import static com.company.rest.products.util.Util.*;
 import static java.util.Optional.ofNullable;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 /**
@@ -91,7 +92,9 @@ public class TestUtil
 	 */
 	public static void checkEntityStatus(final ResponseEntity<ResponseMessage> responseEntity, final HttpStatus status)
 	{
-		assertEquals(status, responseEntity.getStatusCode());
+		assertAndIfNotLogAndThrow(status.equals(responseEntity.getStatusCode()), "Status was " +
+		                                                                         responseEntity.getStatusCode() +
+		                                                                         " instead of " + status.value());
 	}
 
 
@@ -149,17 +152,14 @@ public class TestUtil
 		// Build POST request body
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-														.name("Pengolin's Revenge")
-														.productType("Vaporizer")
-														.clientProductId(clientProductId)
-														.costInCents(13000L) // 'L for long literal
-														.description("We're done.")
-														.labelColor("7FFFD4")
-														.upc("RANDOM_UPC")
-														.sku("RANDOM_SKU")
-
-
-
+													.name("Pengolin's Revenge")
+													.productType("Vaporizer")
+													.clientProductId(clientProductId)
+													.costInCents(13000L) // 'L for long literal
+													.description("We're done.")
+													.labelColor("7FFFD4")
+													.upc("RANDOM_UPC")
+													.sku("RANDOM_SKU")
 													.build();
 		// Define mocked answer
 		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
