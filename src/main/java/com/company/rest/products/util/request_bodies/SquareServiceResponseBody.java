@@ -29,9 +29,12 @@ public class SquareServiceResponseBody implements Serializable
 	private Long costInCents;
 	@JsonProperty("product_type")
 	private String productType;
-	@JsonProperty("product_backend_id")
+	@JsonProperty("square_item_id")
 	@NonNull
 	private String squareItemId;    // Provided by Square.
+	@JsonProperty("square_item_variation_id")
+	@NonNull
+	private String squareItemVariationId;    // Provided by Square.
 	@JsonProperty("description")
 	private String description;
 	@JsonProperty("label_color")
@@ -43,7 +46,7 @@ public class SquareServiceResponseBody implements Serializable
 	@JsonProperty("version")
 	private Long version;                       // Essential field for PUT requests.
 	@JsonProperty("is_deleted")
-	private Boolean isDeleted;              // Boolean flag implementing soft deletion.
+	private Boolean isDeleted;                  // Boolean flag implementing soft deletion.
 	@JsonProperty("updated_at")
 	private String updatedAt;
 
@@ -59,22 +62,25 @@ public class SquareServiceResponseBody implements Serializable
 	public static SquareServiceResponseBody fromUpsertRequestAndResponse(@NonNull final ProductUpsertRequestBody clientUpsertRequest,
 	                                                                     @NonNull final UpsertCatalogObjectResponse squareUpsertResponse)
 	{
-		final CatalogObject catalogObject = squareUpsertResponse.getCatalogObject();
-		final CatalogItem catalogItem = catalogObject.getItemData();
-		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
+		final CatalogObject catalogItemObjectWrapper = squareUpsertResponse.getCatalogObject();
+		final CatalogItem catalogItem = catalogItemObjectWrapper.getItemData();
+		final CatalogObject catalogItemVariationWrapper = catalogItem.getVariations().get(0);
+		final CatalogItemVariation catalogItemVariation = catalogItemVariationWrapper.getItemVariationData();
 		final SquareServiceResponseBody retVal =  SquareServiceResponseBody
 													.builder()
 					                                .clientProductId(clientUpsertRequest.getClientProductId())
 					                                .name(catalogItem.getName().strip().toUpperCase())
-					                                .isDeleted(catalogObject.getIsDeleted())
-					                                .updatedAt(catalogObject.getUpdatedAt())
-					                                .squareItemId(catalogObject.getId())
-					                                .version(catalogObject.getVersion())
+					                                .isDeleted(catalogItemObjectWrapper.getIsDeleted())
+					                                .updatedAt(catalogItemObjectWrapper.getUpdatedAt())
+					                                .squareItemId(catalogItemObjectWrapper.getId())
+													.squareItemVariationId(catalogItemVariationWrapper.getId())
+					                                .version(catalogItemObjectWrapper.getVersion())
 					                                .build();
 		updateWithOptionalFields(retVal, clientUpsertRequest, catalogItem, catalogItemVariation);
 		return retVal;
 	}
 
+	// TODO: Do I really need this extra method?
 	private static void updateWithOptionalFields(final SquareServiceResponseBody squareServiceResponse,
 	                                             final ProductUpsertRequestBody clientUpsertRequest,
 	                                             final CatalogItem item, final CatalogItemVariation itemVariation)
@@ -95,22 +101,24 @@ public class SquareServiceResponseBody implements Serializable
 	public static SquareServiceResponseBody fromGetRequestAndResponse(@NonNull final ProductGetRequestBody clientGetRequest,
 	                                                                  @NonNull final RetrieveCatalogObjectResponse squareGetResponse)
 	{
-		final CatalogObject catalogObject = squareGetResponse.getObject();
-		final CatalogItem catalogItem = catalogObject.getItemData();
-		final CatalogItemVariation catalogItemVariation = catalogItem.getVariations().get(0).getItemVariationData();
+		final CatalogObject catalogItemObjectWrapper = squareGetResponse.getObject();
+		final CatalogItem catalogItem = catalogItemObjectWrapper.getItemData();
+		final CatalogObject catalogItemVariationWrapper = catalogItem.getVariations().get(0);
+		final CatalogItemVariation catalogItemVariation = catalogItemVariationWrapper.getItemVariationData();
 		return SquareServiceResponseBody.builder()
 		                                .clientProductId(clientGetRequest.getClientProductId())
 		                                .name(catalogItem.getName().strip().toUpperCase())
 		                                .costInCents(catalogItemVariation.getPriceMoney().getAmount())
 		                                .productType(clientGetRequest.getLiteProduct().getProductType().strip().toUpperCase())
-		                                .squareItemId(catalogObject.getId())
+		                                .squareItemId(catalogItemObjectWrapper.getId())
+		                                .squareItemVariationId(catalogItemVariationWrapper.getId())
 		                                .description(catalogItem.getDescription())
 		                                .labelColor(catalogItem.getLabelColor())
 		                                .sku(catalogItemVariation.getSku())
 		                                .upc(catalogItemVariation.getUpc())
-		                                .version(catalogObject.getVersion())
-		                                .isDeleted(catalogObject.getIsDeleted())
-		                                .updatedAt(catalogObject.getUpdatedAt())
+		                                .version(catalogItemObjectWrapper.getVersion())
+		                                .isDeleted(catalogItemObjectWrapper.getIsDeleted())
+		                                .updatedAt(catalogItemObjectWrapper.getUpdatedAt())
 		                                .build();
 	}
 
@@ -130,6 +138,7 @@ public class SquareServiceResponseBody implements Serializable
 		                                .costInCents(clientDeleteRequest.getLiteProduct().getCostInCents())
 		                                .productType(clientDeleteRequest.getLiteProduct().getProductType().strip().toUpperCase())
 		                                .squareItemId(clientDeleteRequest.getLiteProduct().getSquareItemId())
+		                                .squareItemVariationId(clientDeleteRequest.getLiteProduct().getSquareItemVariationId())
 		                                .isDeleted(true)
 		                                .updatedAt(squareDeleteResponse.getDeletedAt())
 		                                .build();

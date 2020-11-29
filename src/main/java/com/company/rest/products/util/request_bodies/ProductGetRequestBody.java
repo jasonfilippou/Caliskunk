@@ -22,6 +22,12 @@ public class ProductGetRequestBody implements Serializable
 	@JsonProperty("id") @NonNull private String clientProductId;
 	private LiteProduct liteProduct;      // Will be populated later as we go down the API.
 
+	/**
+	 * ID-based constructor.
+	 *
+	 * @param id The client-based ID to populate {@literal this} with. Needs to be unique in application.
+	 * @see com.company.rest.products.util.exceptions.ResourceAlreadyCreatedException
+	 */
 	public ProductGetRequestBody(final String id)
 	{
 		clientProductId = id;

@@ -253,6 +253,7 @@ public class ProductController
 	/**
 	 * Entry point for a PUT(id) request.
 	 * @param putRequest the new JSON data to replace the product with.
+	 * @param id The unique ID of the product to update.
 	 * @return an appropriate JSON response.
 	 * @see BackendService#putProduct(ProductUpsertRequestBody)
 	 */

@@ -21,16 +21,17 @@ import static lombok.AccessLevel.PUBLIC;
 @AllArgsConstructor
 public class ProductUpsertRequestBody implements Serializable
 {
-	@JsonProperty("id") public String clientProductId;          // Not asserted @NonNull, since PUT and PATCH give them separately in URI.
-	@JsonProperty("name")  public String name;
-	@JsonProperty("product_type") public String productType;
-	@JsonProperty("cost_in_cents") public Long costInCents;
-	@JsonProperty("description")  public String description;
-	@JsonProperty("label_color") public String labelColor;
-	@JsonProperty("sku") public String sku;
-	@JsonProperty("upc") public String upc;
-	public String squareProductId;   // Useful for Square Service - level queries. Never given by the user.
-	public Long version;                // A field used by Square for UPDATEs. Will never be given by user.
+	@JsonProperty("id") private String clientProductId;          // Not asserted @NonNull, since PUT and PATCH give them separately in URI.
+	@JsonProperty("name")  private String name;
+	@JsonProperty("product_type") private String productType;
+	@JsonProperty("cost_in_cents") private Long costInCents;
+	@JsonProperty("description")  private String description;
+	@JsonProperty("label_color") private String labelColor;
+	@JsonProperty("sku") private String sku;
+	@JsonProperty("upc") private String upc;
+	private String squareItemId;                             // Useful for Square Service - level queries. Never given by the user.
+	private String squareItemVariationId;                   // Same
+	private Long version;                                   // Same
 
 	/**
 	 * Projects the fields of {@code this} that correspond to {@link ProductGetRequestBody} and returns such an instance.
@@ -47,7 +48,8 @@ public class ProductUpsertRequestBody implements Serializable
 		                                                    .clientProductId(clientProductId)
 		                                                    .costInCents(costInCents)
 		                                                    .version(DEFAULT_VERSION_FOR_TESTS)
-		                                                    .squareItemId("SOME_RANDOM_SQUARE_ID")
+		                                                    .squareItemId("SOME_RANDOM_ITEM_ID")
+		                                                    .squareItemVariationId("SOME_RANDOM_ITEM_VAR_ID")
 		                                                    .build())
 									.build();
 	}
@@ -68,7 +70,8 @@ public class ProductUpsertRequestBody implements Serializable
 		                                                    .clientProductId(clientProductId)
 		                                                    .costInCents(costInCents)
 		                                                    .version(DEFAULT_VERSION_FOR_TESTS)
-		                                                    .squareItemId("SOME_RANDOM_SQUARE_ID")
+		                                                    .squareItemId("SOME_RANDOM_ITEM_ID")
+		                                                    .squareItemVariationId("SOME_RANDOM_ITEM_VARIATION_ID")
 		                                                    .build())
 		                            .build();
 	}

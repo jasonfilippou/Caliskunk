@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.requests_responses.put.GoodPutRequests.GOOD_PUTS;
 import static com.company.rest.products.test.util.TestUtil.*;
+import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.PUT;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,14 +50,20 @@ public class SquareServicePutTests
 	public void setUp() throws ExecutionException, InterruptedException
 	{
 
-		// Prepare CatalogWrapper response for Upserts
-		when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
+		// Prepare CatalogWrapper response for POST...
+		when(catalogWrapper.postObject(any(UpsertCatalogObjectRequest.class)))
 				.then(invocation ->
 				      {
 					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
-					      final Long version = request.getObject().getVersion() != null ?
-					                           request.getObject().getVersion() : DEFAULT_VERSION_FOR_TESTS;
-					      return buildItemResponseOutOfRequest(request, version);
+					      return buildItemResponseOutOfRequest(request, DEFAULT_VERSION_FOR_TESTS, POST);
+				      });
+
+		// ... and PUT.
+		when(catalogWrapper.putObject(any(UpsertCatalogObjectRequest.class)))
+				.then(invocation ->
+				      {
+					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
+					      return buildItemResponseOutOfRequest(request, request.getObject().getVersion(), PUT);
 				      });
 	}
 
@@ -81,14 +88,16 @@ public class SquareServicePutTests
 		final SquareServiceResponseBody postResponse = squareService.postProduct(postRequest);
 
 		final ProductUpsertRequestBody putRequest = ProductUpsertRequestBody.builder()
-	                                                                        .name("Culeothesis Necrosis OG")
+		                                                                    .name("Culeothesis Necrosis OG")
 		                                                                    .clientProductId(postResponse.getClientProductId())
-	                                                                        .labelColor("AB8235")
-	                                                                        .upc("RANDOM_UPC")  // Not quite updating, but still valid to have set
-	                                                                        .sku("RANDOM_UPDATED_SKU")
-		                                                                    .squareProductId("SOME_RANDOM_SQUARE_ID")    // Needed to be supplied here because Square service assumes it.
-	                                                                        .version(postResponse.getVersion())
-	                                                                        .build();
+		                                                                    .labelColor("AB8235")
+		                                                                    .upc("RANDOM_UPC")  // Not quite updating, but still valid to have set
+		                                                                    .sku("RANDOM_UPDATED_SKU")
+		                                                                    .squareItemId("SOME_RANDOM_ITEM_ID")    // Needed to be supplied here because Square service assumes it.
+		                                                                    .squareItemVariationId("SOME_RANDOM_ITEM_VAR_ID")
+		                                                                    .version(postResponse.getVersion())
+		                                                                    .costInCents(2 * DEFAULT_COST_IN_CENTS)
+		                                                                    .build();
 
 		// Make the Square Service PUT call and test it.
 		final SquareServiceResponseBody putResponse = squareService.putProduct(putRequest);
@@ -108,7 +117,8 @@ public class SquareServicePutTests
 
 			// Perform PUT and assess it.
 			GOOD_PUTS[i].setClientProductId(postResponse.getClientProductId()); // For the test that follows
-			GOOD_PUTS[i].setSquareProductId("RANDOM_SQUARE_ITEM_ID");
+			GOOD_PUTS[i].setSquareItemId("RANDOM_SQUARE_ITEM_ID");
+			GOOD_PUTS[i].setSquareItemVariationId("RANDOM_SQUARE_ITEM_VAR_ID");
 			final SquareServiceResponseBody putResponse = squareService.putProduct(GOOD_PUTS[i]);
 			assertTrue("Bad PUT response from Square service", responseMatchesUpsertRequest(GOOD_PUTS[i], putResponse, PUT));
 		}

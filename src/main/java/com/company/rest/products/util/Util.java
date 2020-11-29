@@ -1,8 +1,11 @@
 package com.company.rest.products.util;
+import com.squareup.square.http.client.HttpContext;
 import com.squareup.square.models.CatalogObject;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
+import java.util.Collection;
 /**
  * A class of utilities that can be used project-wide.
  */
@@ -48,6 +51,8 @@ public class Util
 	 *
 	 * @throws AssertionError if {@code idx} is less than 1, or if {@code str} has zero length.
 	 * @see String#substring(int, int)
+	 *
+	 * @return {@code str}, appropriately abbreviated.
 	 */
 	public static String abbreviate(@NonNull final String str, @NonNull Integer idx) throws AssertionError
 	{
@@ -91,6 +96,27 @@ public class Util
 	}
 
 	/**
+	 * Assesses if the provided {@link Collection} is {@literal null} or empty.
+	 * @param collection A {@link Collection}.
+	 * @return {@literal true} if the param is {@literal null}  or an empty collection.
+	 */
+	public static boolean nullOrEmpty(final Collection<?> collection)
+	{
+		return collection == null || collection.isEmpty();
+	}
+	/**
+	 * Examines if the provided {@link HttpContext} is of the provided {@link HttpStatus}.
+	 * @param httpContext An {@link HttpContext} instance.
+	 * @param  target An {@link HttpStatus} instance.
+	 * @return {@literal true} if {@code target} is the HTTP status of {@code httpContext}, {@literal false}
+	 * otherwise.
+	 */
+	public static boolean nullOrProvidedStatus(final HttpContext httpContext, final HttpStatus target)
+	{
+		return httpContext == null || httpContext.getResponse().getStatusCode() == target.value();
+	}
+
+	/**
 	 * Simple helper to determine if two {@link String}s match, ignoring case, and checking for {@literal null}s.
 	 *
 	 * @param name1  A {@link String} name.
@@ -104,17 +130,13 @@ public class Util
 		{
 			return true;
 		}
-		else if(name1 == null)
+		else if(name1 != null && name2 != null)
 		{
-			return  false;
-		}
-		else if(name2 == null)
-		{
-			return false;
+			return name1.equalsIgnoreCase(name2);
 		}
 		else
 		{
-			return name1.equalsIgnoreCase(name2);
+			return false;
 		}
 	}
 }

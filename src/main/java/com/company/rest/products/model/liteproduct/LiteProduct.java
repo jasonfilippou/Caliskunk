@@ -25,12 +25,13 @@ import java.util.Set;
 public class LiteProduct
 {
 	@Id
-	private String clientProductId;                  // Provided by user
-	private String squareItemId;	                // Provided by Square, guaranteed unique across all products.
+	private String clientProductId;                         // Provided by user
+	private String squareItemId;	                        // Provided by Square, guaranteed unique across all objects.
+	private String squareItemVariationId;	                // Provided by Square, guaranteed unique across all objects. Useful for PUT.
 	private String productName;
 	private String productType;
 	private Long costInCents;
-	private Long version;                           // Used by Square for updates.
+	private Long version;                                    // Used by Square for updates.
 
 	/**
 	 * Our accepted product types. Implemented as a {@link HashSet} in case the types become many and we
@@ -47,9 +48,13 @@ public class LiteProduct
 	 * @param productType The type of the product. See {@link #PRODUCT_TYPES} for an acceptable set of such types.
 	 * @param squareItemId  The ID for the {@link com.squareup.square.models.CatalogItem} component of our product,
 	 *                         provided to us  by the Square API.
-	 * @param version   A {@link Long} provided to us by Square, essential for PUT queries to the API.
+	 * @param squareItemVariationId  The ID for the {@link com.squareup.square.models.CatalogItemVariation} component of our product,
+	 *                         provided to us  by the Square API.
+	 * @param version  A {@link Long} provided to us by Square, essential for PUT queries to the API. Common for both the item
+	 *                 and its variation, since we create both at the same API call.
 	 */
 	public LiteProduct(@NonNull final String clientProductId, @NonNull final String squareItemId,
+	                   @NonNull final String squareItemVariationId,
 	                   @NonNull final String productName, @NonNull final String productType,
 	                   @NonNull final Long costInCents, @NonNull final Long version)
 	{
@@ -64,6 +69,7 @@ public class LiteProduct
 			this.clientProductId = clientProductId;
 			this.productName = productName.strip().toUpperCase();
 			this.squareItemId = squareItemId;
+			this.squareItemVariationId = squareItemVariationId;
 			this.costInCents = costInCents;
 			this.productType = productType.strip().toUpperCase();
 			this.version = version;
@@ -84,14 +90,15 @@ public class LiteProduct
 	 */
 	public static LiteProduct buildLiteProductFromSquareResponse(@NonNull final SquareServiceResponseBody response)
 	{
-			return LiteProduct.builder()
-			                    .clientProductId(response.getClientProductId())
-								.squareItemId(response.getSquareItemId())
-								.productName(response.getName().trim().toUpperCase()) // Uppercasing name to make it case-insensitive
-								.productType(response.getProductType().trim().toUpperCase()) // Similar approach
-								.costInCents(response.getCostInCents())
-			                    .version(response.getVersion())
-                              .build();
+		return LiteProduct.builder()
+		                  .clientProductId(response.getClientProductId())
+					      .squareItemId(response.getSquareItemId())
+					      .squareItemVariationId(response.getSquareItemVariationId())
+					      .productName(response.getName().trim().toUpperCase()) // Uppercasing name to make it case-insensitive
+					      .productType(response.getProductType().trim().toUpperCase()) // Similar approach
+					      .costInCents(response.getCostInCents())
+					      .version(response.getVersion())
+	                      .build();
 	}
 
 	/**

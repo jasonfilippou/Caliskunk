@@ -138,6 +138,7 @@ public class BackendService
    	 * @throws ProductNotFoundException if the resource is not available.
 	 *
 	 * @see ProductController#getProduct(String)
+	 * @see SquareService#getProduct(ProductGetRequestBody)
 	 */
 	public BackendServiceResponseBody getProduct(final ProductGetRequestBody getRequest) throws BackendServiceException, ProductNotFoundException
 	{
@@ -250,6 +251,7 @@ public class BackendService
 	 * @param putRequest The request body.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @see ProductController#putProduct(ProductUpsertRequestBody, String)
+	 * @see SquareService#putProduct(ProductUpsertRequestBody)
 	 */
 	public BackendServiceResponseBody putProduct(@NonNull final ProductUpsertRequestBody putRequest)
 													throws ProductNotFoundException, BackendServiceException
@@ -269,7 +271,8 @@ public class BackendService
 			else
 			{
 				putRequest.setVersion(cachedProduct.get().getVersion());      // The PUT request needs the previous version information.
-				putRequest.setSquareProductId(cachedProduct.get().getSquareItemId());
+				putRequest.setSquareItemId(cachedProduct.get().getSquareItemId());
+				putRequest.setSquareItemVariationId(cachedProduct.get().getSquareItemVariationId());
 				final SquareServiceResponseBody squareServiceResponse = squareService.putProduct(putRequest);
 				validatePutResponse(squareServiceResponse, putRequest);
 				localRepo.deleteByClientProductId(id);                      // Since we PUT, we have to replace entirely. TODO: would it be faster to execute an HDL-assisted SQL UPDATE query for LiteProductRepository?
@@ -303,6 +306,7 @@ public class BackendService
 	/**
 	 * Send a PATCH request for a specific product.
 	 * @param request The fields to update.
+	 * @param id The unique ID of the field to patch.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @see ProductController#patchProduct(ProductUpsertRequestBody, String)
 	 * @see SquareService#patchProduct(ProductUpsertRequestBody, String)
@@ -314,6 +318,7 @@ public class BackendService
 
 	/**
 	 * Send a DELETE request for a specific product.
+	 * @param deleteRequest The body of the DELETE request prepared by the client.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @see ProductController#deleteProduct(String)
 	 * @see SquareService#deleteProduct(ProductDeleteRequestBody)

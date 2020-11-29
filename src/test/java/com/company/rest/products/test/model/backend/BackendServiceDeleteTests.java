@@ -99,6 +99,7 @@ public class BackendServiceDeleteTests
 															.clientProductId(postRequest.getClientProductId())
 															.productType(postRequest.getProductType())
 															.squareItemId("#RANDOM_ITEM_ID")
+															.squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 															.costInCents(postRequest.getCostInCents())
 															.version(DEFAULT_VERSION_FOR_TESTS)
 															.updatedAt(DEFAULT_UPDATED_AT_STRING)

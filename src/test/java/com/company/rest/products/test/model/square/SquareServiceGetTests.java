@@ -55,14 +55,14 @@ public class SquareServiceGetTests
 		// Prepare CatalogWrapper mocked responses //
 		/////////////////////////////////////////////
 
-		// Response for an Upsert (POST, PUT) request
-		when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
+		// Response for a POST request
+		when(catalogWrapper.postObject(any(UpsertCatalogObjectRequest.class)))
 				.then(invocation ->
 				      {
 					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
 					      final Long version = request.getObject().getVersion() != null ?
 					                             request.getObject().getVersion() : DEFAULT_VERSION_FOR_TESTS;
-					      return buildItemResponseOutOfRequest(request, version);
+					      return buildItemResponseOutOfRequest(request, version, UpsertType.POST);
 				      });
 
         // Response for a Batch Retrieve (GET, GET ALL) request

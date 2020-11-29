@@ -59,13 +59,13 @@ public class SquareServicePostTests
 		//  I need a way to return different kinds of expected responses depending on the arguments
 		// of the methods that are being mocked. The following trick owed to:
 		// https://stackoverflow.com/questions/22338536/mockito-return-value-based-on-property-of-a-parameter
-		when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
+		when(catalogWrapper.postObject(any(UpsertCatalogObjectRequest.class)))
 				.then(invocation ->
 				      {
 					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
 					      final Long version = request.getObject().getVersion() != null ?
 					                           request.getObject().getVersion() : DEFAULT_VERSION_FOR_TESTS;
-					      return buildItemResponseOutOfRequest(request, version);
+					      return buildItemResponseOutOfRequest(request, version, POST);
 				      });
     }
 

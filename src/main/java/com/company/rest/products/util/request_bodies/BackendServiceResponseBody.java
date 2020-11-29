@@ -21,7 +21,7 @@ import java.io.Serializable;
 public class BackendServiceResponseBody implements Serializable
 {
 	@JsonProperty("id") @NonNull private String clientProductId;    // Provided by client.
-	@JsonProperty("product_backend_id") @NonNull private String squareItemId;    // Provided by Square.
+	@JsonProperty("square_item_id") @NonNull private String squareItemId;    // Provided by Square.
 	@JsonProperty("name")  @NonNull	private String name;
 	@JsonProperty("product_type") @NonNull private String productType;
 	@JsonProperty("cost")  @NonNull private Long costInCents;
@@ -33,23 +33,30 @@ public class BackendServiceResponseBody implements Serializable
 	@JsonProperty("is_deleted") private Boolean isDeleted;
 	@JsonProperty("updated_at") private String updatedAt;
 
-
+	/**
+	 * Prepare a {@link BackendServiceResponseBody} to be consumed by {@link com.company.rest.products.controller.ProductController},
+	 * based on information mined from the {@link com.company.rest.products.model.SquareService} layer.
+	 *
+	 * @param squareServiceResponse The response of the {@link com.company.rest.products.model.SquareService} layer.
+	 *
+	 * @return An instance of {@link BackendServiceResponseBody}.
+	 */
 	public static BackendServiceResponseBody fromSquareResponse(@NonNull final SquareServiceResponseBody squareServiceResponse)
 	{
 		return builder()
-			.name(squareServiceResponse.getName().strip().toUpperCase())
-			.version(squareServiceResponse.getVersion())
-			.squareItemId(squareServiceResponse.getSquareItemId())
-			.isDeleted(squareServiceResponse.getIsDeleted())
-			.clientProductId(squareServiceResponse.getClientProductId())
-			.costInCents(squareServiceResponse.getCostInCents())
-			.labelColor(squareServiceResponse.getLabelColor())
-			.upc(squareServiceResponse.getUpc())
-			.sku(squareServiceResponse.getSku())
-			.productType(squareServiceResponse.getProductType())
-			.updatedAt(squareServiceResponse.getUpdatedAt())
-			.description(squareServiceResponse.getDescription())
-			.build();
+				.name(squareServiceResponse.getName().strip().toUpperCase())
+				.version(squareServiceResponse.getVersion())
+				.squareItemId(squareServiceResponse.getSquareItemId())
+				.isDeleted(squareServiceResponse.getIsDeleted())
+				.clientProductId(squareServiceResponse.getClientProductId())
+				.costInCents(squareServiceResponse.getCostInCents())
+				.labelColor(squareServiceResponse.getLabelColor())
+				.upc(squareServiceResponse.getUpc())
+				.sku(squareServiceResponse.getSku())
+				.productType(squareServiceResponse.getProductType())
+				.updatedAt(squareServiceResponse.getUpdatedAt())
+				.description(squareServiceResponse.getDescription())
+				.build();
 	}
 
 	/**
@@ -61,12 +68,12 @@ public class BackendServiceResponseBody implements Serializable
 	public static BackendServiceResponseBody fromLiteProduct(@NonNull final LiteProduct product)
 	{
 		return builder()
-					.name(product.getProductName().strip().toUpperCase())
-					.costInCents(product.getCostInCents())
-					.clientProductId(product.getClientProductId())
-					.squareItemId(product.getSquareItemId())
-					.productType(product.getProductType().strip().toUpperCase())
-					.version(product.getVersion())
+				.name(product.getProductName().strip().toUpperCase())
+				.costInCents(product.getCostInCents())
+				.clientProductId(product.getClientProductId())
+				.squareItemId(product.getSquareItemId())
+				.productType(product.getProductType().strip().toUpperCase())
+				.version(product.getVersion())
 				.build();
 	}
 

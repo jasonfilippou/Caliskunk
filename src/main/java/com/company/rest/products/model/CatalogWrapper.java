@@ -1,4 +1,5 @@
 package com.company.rest.products.model;
+import com.company.rest.products.util.exceptions.UnimplementedMethodPlaceholder;
 import com.company.rest.products.util.request_bodies.ProductDeleteRequestBody;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.squareup.square.SquareClient;
@@ -37,7 +38,7 @@ public class CatalogWrapper
 	}
 
 	/**
-	 * Sends an upsert (POST, PUT or PATCH) request to the Square API.
+	 * Sends a POST request to the Square API.
 	 * @param request An {@link UpsertCatalogObjectRequest} instance containing the request data.
 	 * @throws ExecutionException if Square throws it to us.
 	 * @throws InterruptedException if Square throws it to us.
@@ -45,11 +46,43 @@ public class CatalogWrapper
 	 * @see UpsertCatalogObjectResponse
 	 * @return an instance of {@link UpsertCatalogObjectResponse} containing the Square server's response.
 	 */
-	public UpsertCatalogObjectResponse upsertObject(@NonNull final UpsertCatalogObjectRequest request)
+	public UpsertCatalogObjectResponse postObject(@NonNull final UpsertCatalogObjectRequest request)
 															throws ExecutionException, InterruptedException
 	{
 	    return catalog.upsertCatalogObjectAsync(request).get();
 	}
+
+	/**
+	 * Sends a PUT request to the Square API.
+	 * @param request An {@link UpsertCatalogObjectRequest} instance containing the request data.
+	 * @throws ExecutionException if Square throws it to us.
+	 * @throws InterruptedException if Square throws it to us.
+	 * @see UpsertCatalogObjectRequest
+	 * @see UpsertCatalogObjectResponse
+	 * @return an instance of {@link UpsertCatalogObjectResponse} containing the Square server's response.
+	 */
+	public UpsertCatalogObjectResponse putObject(@NonNull final UpsertCatalogObjectRequest request)
+			throws ExecutionException, InterruptedException
+	{
+		return catalog.upsertCatalogObjectAsync(request).get();
+	}
+
+
+	/**
+	 * Sends a PATCH request to the Square API.
+	 * @param request An {@link UpsertCatalogObjectRequest} instance containing the request data.
+	 * @throws ExecutionException if Square throws it to us.
+	 * @throws InterruptedException if Square throws it to us.
+	 * @see UpsertCatalogObjectRequest
+	 * @see UpsertCatalogObjectResponse
+	 * @return an instance of {@link UpsertCatalogObjectResponse} containing the Square server's response.
+	 */
+	public UpsertCatalogObjectResponse patchObject(@NonNull final UpsertCatalogObjectRequest request)
+			throws ExecutionException, InterruptedException
+	{
+		throw new UnimplementedMethodPlaceholder();
+	}
+
 
 
 	/**

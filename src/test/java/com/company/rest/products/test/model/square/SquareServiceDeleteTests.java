@@ -51,13 +51,11 @@ public class SquareServiceDeleteTests
 	{
 
 		// Prepare CatalogWrapper response for POST (on which subsequent DELETEs are based)
-		when(catalogWrapper.upsertObject(any(UpsertCatalogObjectRequest.class)))
+		when(catalogWrapper.postObject(any(UpsertCatalogObjectRequest.class)))
 				.then(invocation ->
 				      {
 					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
-					      final Long version = request.getObject().getVersion() != null ?
-					                           request.getObject().getVersion() : DEFAULT_VERSION_FOR_TESTS;
-					      return buildItemResponseOutOfRequest(request, version);
+					      return buildItemResponseOutOfRequest(request, DEFAULT_VERSION_FOR_TESTS, UpsertType.POST);
 				      });
 
 		// Prepare CatalogWrapper response for DELETE

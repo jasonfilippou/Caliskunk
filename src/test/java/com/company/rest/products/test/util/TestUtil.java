@@ -20,6 +20,7 @@ import java.util.Objects;
 
 import static com.company.rest.products.model.SquareService.*;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
+import static com.company.rest.products.test.util.TestUtil.UpsertType.PUT;
 import static com.company.rest.products.util.Util.*;
 import static java.util.Optional.ofNullable;
 import static org.mockito.Mockito.when;
@@ -217,7 +218,9 @@ public class TestUtil
 
 	/**
 	 * Examines if the fields of the provided {@link ProductResponseBody} match those of the provided {@link ProductUpsertRequestBody}
-	 *
+	 * @param upsertRequestBody The {@code POST}, {@code PUT} or {@code PATCH} request information provided by the client.
+	 * @param responseBody An instance of {@link ProductResponseBody} containing information from the {@link ProductController} layer's runtime.
+	 * @param upsertType Can be one of {@link UpsertType#POST}, {@link UpsertType#PUT} or {@link UpsertType#PATCH}.
 	 * @return {@literal true} if the fields match, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesUpsertRequest(@NonNull final ProductUpsertRequestBody upsertRequestBody,
@@ -231,7 +234,9 @@ public class TestUtil
 
 	/**
 	 * Examines if the fields of the provided {@link ProductResponseBody} match those of the provided {@link BackendServiceResponseBody}
-	 *
+	 * @param upsertRequestBody The {@code POST}, {@code PUT} or {@code PATCH} request information provided by the client.
+	 * @param responseBody An instance of {@link BackendServiceResponseBody} containing information from the {@link BackendService} layer's runtime.
+	 * @param upsertType Can be one of {@link UpsertType#POST}, {@link UpsertType#PUT} or {@link UpsertType#PATCH}.
 	 * @return {@literal true} if the fields match, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesUpsertRequest(@NonNull final ProductUpsertRequestBody upsertRequestBody,
@@ -245,7 +250,9 @@ public class TestUtil
 
 	/**
 	 * Examines if the fields of the provided {@link ProductResponseBody} match those of the provided {@link SquareServiceResponseBody}
-	 *
+	 * @param upsertRequestBody The {@code POST}, {@code PUT} or {@code PATCH} request information provided by the client.
+	 * @param responseBody An instance of {@link SquareServiceResponseBody} containing information from the {@link SquareService} layer's runtime.
+	 * @param upsertType Can be one of {@link UpsertType#POST}, {@link UpsertType#PUT} or {@link UpsertType#PATCH}.
 	 * @return {@literal true} if the fields match, {@literal false} otherwise.
 	 */
 	public static boolean responseMatchesUpsertRequest(@NonNull final ProductUpsertRequestBody upsertRequestBody,
@@ -496,7 +503,9 @@ public class TestUtil
 	 *
 	 *
 	 * @param request An {@link UpsertCatalogObjectRequest} containing the information given to {@link com.company.rest.products.model.CatalogWrapper}.
-	 *
+	 * @param version The &quot; version &quot; of the {@link CatalogItem} of interest. Essential for UPDATE queries.
+	 * @param type An {@link UpsertType} meant to tell us if we need to include id mapping information in the returned
+	 * {@link UpsertCatalogObjectResponse}. The field {@code id_mappings} of that response class is only set for POST requests.
 	 * @return An instance of {@link UpsertCatalogObjectResponse}, usually appropriately formed based on the argument
 	 * in order to successfully mock a {@link com.company.rest.products.model.CatalogWrapper} call in testing.
 	 *
@@ -504,7 +513,7 @@ public class TestUtil
 	 * @see BackendServiceDeleteTests
 	 */
 	public static UpsertCatalogObjectResponse buildItemResponseOutOfRequest(@NonNull final UpsertCatalogObjectRequest request,
-	                                                                       @NonNull final Long version)
+	                                                                       @NonNull final Long version, @NonNull UpsertType type)
 	{
 		final CatalogObject itemWrapper = new CatalogObject.Builder(CODE_FOR_CATALOG_ITEMS, request.getObject().getId())
 															.itemData(request.getObject().getItemData())
@@ -516,34 +525,34 @@ public class TestUtil
 		final CatalogObject variationWrapper = item.getVariations().get(0);
 		return new UpsertCatalogObjectResponse.Builder()
 				.catalogObject(itemWrapper)
-				.idMappings(createCatalogMappings(request, itemWrapper, variationWrapper))
+				.idMappings(createCatalogMappings(request, itemWrapper, variationWrapper, type))
 				.build();
 	}
 
 	private static List<CatalogIdMapping> createCatalogMappings(final UpsertCatalogObjectRequest request, final CatalogObject itemWrapper,
-	                                                            final CatalogObject itemVariationWrapper)
+	                                                            final CatalogObject itemVariationWrapper, final UpsertType type)
 	{
-		return Arrays.asList(
-				new CatalogIdMapping.Builder()
-						.clientObjectId(request.getObject().getId())
-						.objectId("RANDOM_SQUARE_ID")
-						.build(),
-
-				new CatalogIdMapping.Builder()
-						.clientObjectId(itemVariationWrapper.getId())
-						.objectId("RANDOM_SQUARE_ID" + DEFAULT_ITEM_VARIATION_ID_SUFFIX)
-						.build()
-		                    );
+		return type == PUT ? null : Arrays.asList(new CatalogIdMapping.Builder()
+												.clientObjectId(request.getObject().getId())
+												.objectId("RANDOM_SQUARE_ID")
+												.build(),
+												new CatalogIdMapping.Builder()
+												.clientObjectId(itemVariationWrapper.getId())
+												.objectId("RANDOM_SQUARE_ID" + DEFAULT_ITEM_VARIATION_ID_SUFFIX)
+												.build());
 	}
 
-	/**
+	/** Prepare a mocked {@link RetrieveCatalogObjectResponse} instance given information from a {@link ProductGetRequestBody} instance.
 	 *
+	 * @param getRequest A {@link ProductGetRequestBody} instance.
+	 *
+	 * @return An instance of {@link RetrieveCatalogObjectResponse}.
 	 */
 	public static RetrieveCatalogObjectResponse buildResponseOutOfRetrieveRequest(final ProductGetRequestBody getRequest)
 	{
 		return new RetrieveCatalogObjectResponse.Builder()
-				.object(buildObjectForRetrieveResponse(getRequest))
-				.build();
+												.object(buildObjectForRetrieveResponse(getRequest))
+												.build();
 	}
 
 	private static CatalogObject buildObjectForRetrieveResponse(final ProductGetRequestBody getRequest)
@@ -583,13 +592,15 @@ public class TestUtil
 		return Collections.singletonList(variationWrapper);
 	}
 	/**
-	 *
+	 * Prepare a mocked {@link DeleteCatalogObjectResponse} given information mined from a {@link ProductDeleteRequestBody}. Useful for tests.
+	 * @param deleteRequest The {@link ProductDeleteRequestBody} instance provided by the user.
+	 * @return An instance of {@link DeleteCatalogObjectResponse}.
 	 */
 	public static DeleteCatalogObjectResponse buildMockedDeleteResponseOutOfRequest(@NonNull final ProductDeleteRequestBody deleteRequest)
 	{
 		return new DeleteCatalogObjectResponse.Builder()
 				.deletedObjectIds(Arrays.asList(deleteRequest.getLiteProduct().getSquareItemId(),
-				                                deleteRequest.getLiteProduct().getSquareItemId() + DEFAULT_ITEM_VARIATION_ID_SUFFIX))
+				                                deleteRequest.getLiteProduct().getSquareItemVariationId()))
 				.deletedAt(LocalDateTime.now().toString())
 				.build();
 	}
