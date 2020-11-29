@@ -4,6 +4,8 @@ import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.requests_responses.put.GoodPutRequests.GOOD_PUTS;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_UPDATED_AT_STRING;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION_FOR_TESTS;
 public class MockedBackendServicePutResponses
 {
 	/** An array of prepared {@link BackendServiceResponseBody} instances.
@@ -24,21 +26,18 @@ public class MockedBackendServicePutResponses
 	private static BackendServiceResponseBody mockedResponse(final ProductUpsertRequestBody putRequest, final String idFromPostRequest)
 	{
 		return BackendServiceResponseBody.builder()
-			                                 .name(putRequest.getName())
+		                                     .name(putRequest.getName())
 			                                 .clientProductId(idFromPostRequest)
 			                                 .squareItemId("random_item_id")
-			                                 .squareItemVariationId("random_item_var_id")
 			                                 .isDeleted(false)
 			                                 .costInCents(putRequest.getCostInCents())
 			                                 .labelColor(putRequest.getLabelColor())
-			                                 .presentAtAllLocations(true)
-			                                 .availableElectronically(putRequest.getAvailableElectronically())
-			                                 .availableForPickup(putRequest.getAvailableForPickup())
-			                                 .availableOnline(putRequest.getAvailableOnline())
 			                                 .description(putRequest.getDescription())
 			                                 .productType(putRequest.getProductType())
 			                                 .sku(putRequest.getSku())
 			                                 .upc(putRequest.getUpc())
+		                                     .updatedAt(DEFAULT_UPDATED_AT_STRING)
+			                                 .version(DEFAULT_VERSION_FOR_TESTS)
 		                                 .build();
 	}
 	/**

@@ -5,6 +5,8 @@ import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_UPDATED_AT_STRING;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION_FOR_TESTS;
 /**
  * A class that contains prepared responses of {@link SquareService} towards
  * {@link BackendService}. These responses are useful for mocked unit tests.
@@ -42,21 +44,19 @@ public class MockedSquareServiceGetResponses
 	private static SquareServiceResponseBody mockedResponse(final ProductUpsertRequestBody request)
 	{
 		return SquareServiceResponseBody.builder()
-			                                 .name(request.getName())
-		                                     .clientProductId(request.getClientProductId())
-			                                 .squareItemId("random_item_id")
-			                                 .squareItemVariationId("random_item_var_id")
-		                                     .productType(request.getProductType())
-			                                 .isDeleted(false)
-			                                 .costInCents(request.getCostInCents())
-			                                 .labelColor(request.getLabelColor())
-			                                 .presentAtAllLocations(true)
-			                                 .availableElectronically(request.getAvailableElectronically())
-			                                 .availableForPickup(request.getAvailableForPickup())
-			                                 .availableOnline(request.getAvailableOnline())
-			                                 .description(request.getDescription())
-			                                 .sku(request.getSku())
-			                                 .upc(request.getUpc())
+		                                 .name(request.getName().strip().toUpperCase())
+	                                     .clientProductId(request.getClientProductId())
+		                                 .squareItemId("RANDOM_ITEM_ID")
+		                                 .squareItemVariationId("RANDOM_ITEM_VAR_ID")
+	                                     .productType(request.getProductType().strip().toUpperCase())
+		                                 .isDeleted(false)
+		                                 .costInCents(request.getCostInCents())
+		                                 .labelColor(request.getLabelColor())
+		                                 .description(request.getDescription())
+		                                 .sku(request.getSku())
+		                                 .upc(request.getUpc())
+	                                     .updatedAt(DEFAULT_UPDATED_AT_STRING)
+		                                 .version(DEFAULT_VERSION_FOR_TESTS)
 		                                 .build();
 	}
 	/**
