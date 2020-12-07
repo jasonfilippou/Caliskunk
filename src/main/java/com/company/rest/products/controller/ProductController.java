@@ -42,28 +42,25 @@ public class ProductController
 	}
 
 	/* *************************************************************************************** */
-	/* ********************   UTILITIES FOR INPUT VALIDATION  ******************************** */
-	/* *************************************************************************************** */
-
-
-
-
-	/* *************************************************************************************** */
 	/* ********************   UTILITIES FOR RESPONDING TO CLIENT ***************************** */
 	/* *************************************************************************************** */
+
 	private ResponseEntity<ResponseMessage> response(final String requestStatus, final String message,
 	                                                 final Object data, final HttpStatus httpStatus)
 	{
 		return new ResponseEntity<>(new ResponseMessage(requestStatus, message, data), httpStatus);
 	}
+
 	private ResponseEntity<ResponseMessage> failure(final String message, final HttpStatus httpStatus)
 	{
 		return response(ResponseMessage.FAILURE, message, null, httpStatus);
 	}
+
 	private ResponseEntity<ResponseMessage> failure(final Throwable thrown, final HttpStatus httpStatus)
 	{
 		return failure(thrown.getMessage(), httpStatus);
 	}
+
 	private ResponseEntity<ResponseMessage> success(final String message, final Object data,
 	                                                final HttpStatus statusToReport)
 	{
@@ -300,7 +297,6 @@ public class ProductController
 		                          putResponseMatchesRequest(putResponse, putRequest),
 		                          "Upsert Request did not match response");
 	}
-
 
 	private boolean putResponseMatchesRequest(final BackendServiceResponseBody putResponse, final ProductUpsertRequestBody putRequest)
 	{

@@ -7,6 +7,7 @@ import com.squareup.square.api.CatalogApi;
 import com.squareup.square.models.*;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutionException;
@@ -29,11 +30,11 @@ public class CatalogWrapper
 	 * {@code @Autowired} default constructor. Opens connection to Square by using stored access token.
 	 */
 	@Autowired
-	public CatalogWrapper()
+	public CatalogWrapper(@Value("square.sandbox.accesstoken") String accessToken)
 	{
 		final SquareClient client = new SquareClient.Builder().environment(com.squareup.square.Environment.SANDBOX)
-											.accessToken(System.getenv("SQUARE_SANDBOX_ACCESS_TOKEN"))
-									.build();
+		                                                      .accessToken(accessToken)
+		                                                      .build();
 		catalog  = client.getCatalogApi();
 	}
 

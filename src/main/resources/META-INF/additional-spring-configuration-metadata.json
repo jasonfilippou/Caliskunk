@@ -1,28 +1,29 @@
 {
   "properties": [
     {
-      "name": "SQUARE_SANDBOX_ACCESS_TOKEN",
+      "name": "square.appname",
       "type": "java.lang.String",
-      "description": "Description for SQUARE_SANDBOX_ACCESS_TOKEN."
+      "description": "Application name on Square."
     },
     {
-      "name": "SQUARE_SANDBOX_APPLICATION_ID",
+      "name": "square.sandbox.appid",
       "type": "java.lang.String",
-      "description": "Description for SQUARE_SANDBOX_APPLICATION_ID."
+      "description": "Square Sandbox environment ID."
     },
     {
-      "name": "SQUARE_PRODUCTION_APPLICATION_ID",
+      "name": "square.sandbox.accesstoken",
       "type": "java.lang.String",
-      "description": "Description for SQUARE_PRODUCTION_APPLICATION_ID."
+      "description": "Square Sandbox access token."
     },
     {
-      "name": "SQUARE_PRODUCTION_ACCESS_TOKEN",
+      "name": "square.production.appid",
       "type": "java.lang.String",
-      "description": "Description for SQUARE_PRODUCTION_ACCESS_TOKEN."
+      "description": "Square Production environment ID."
     },
     {
-      "name": "SQUARE_APPLICATION_NAME",
+      "name": "square.production.accesstoken",
       "type": "java.lang.String",
-      "description": "Description for SQUARE_APPLICATION_NAME."
+      "description": "Square Production environment access token."
     }
-  ] }
+  ]
+}
