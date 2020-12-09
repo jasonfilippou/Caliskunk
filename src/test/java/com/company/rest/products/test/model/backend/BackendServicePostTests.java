@@ -77,7 +77,7 @@ public class BackendServicePostTests
 	{
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 														.builder()
-														.name("Culeothesis Necrosis")
+														.productName("Culeothesis Necrosis")
 														.productType("Flower")
 														.clientProductId("#RANDOM_ID")
 														.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
@@ -89,7 +89,7 @@ public class BackendServicePostTests
 
 		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
 																.builder()
-			                                                    .name(postRequest.getName())
+			                                                    .name(postRequest.getProductName())
 														        .clientProductId(postRequest.getClientProductId())
 															    .productType(postRequest.getProductType())
 			                                                    .squareItemId("#RANDOM_ITEM_ID")
@@ -99,7 +99,7 @@ public class BackendServicePostTests
 																.updatedAt(DEFAULT_UPDATED_AT_STRING)
 																.description(postRequest.getDescription())
 																.labelColor(postRequest.getLabelColor())
-														        .version(DEFAULT_VERSION_FOR_TESTS)
+														        .version(DEFAULT_VERSION)
 																.sku(postRequest.getSku())
 																.upc(postRequest.getUpc())
                                                                 .build();

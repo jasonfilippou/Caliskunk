@@ -83,7 +83,7 @@ public class BackendServiceDeleteTests
 		//////////////////////////////////////////////////////
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
+														.productName("Culeothesis Necrosis")
 														.productType("Flower")
 														.clientProductId("#RANDOM_ID")
 														.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
@@ -95,13 +95,13 @@ public class BackendServiceDeleteTests
 
 		final SquareServiceResponseBody mockedSquaredResponse = SquareServiceResponseBody
 															.builder()
-															.name(postRequest.getName())
+															.name(postRequest.getProductName())
 															.clientProductId(postRequest.getClientProductId())
 															.productType(postRequest.getProductType())
 															.squareItemId("#RANDOM_ITEM_ID")
 															.squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 															.costInCents(postRequest.getCostInCents())
-															.version(DEFAULT_VERSION_FOR_TESTS)
+															.version(DEFAULT_VERSION)
 															.updatedAt(DEFAULT_UPDATED_AT_STRING)
 															.description(postRequest.getDescription())
 															.labelColor(postRequest.getLabelColor())

@@ -1,6 +1,7 @@
 package com.company.rest.products.test.controller;
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
+import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.test.model.backend.BackendServiceGetTests;
 import com.company.rest.products.test.model.square.SquareServiceGetTests;
 import com.company.rest.products.util.ResponseMessage;
@@ -13,15 +14,21 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.company.rest.products.test.controller.MockedBackendServiceGetResponses.MOCKED_BACKEND_GET_RESPONSES;
 import static com.company.rest.products.test.controller.MockedBackendServicePostResponses.MOCKED_BACKEND_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.get.GoodGetRequests.GOOD_GETS;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -61,7 +68,7 @@ public class ControllerGetTests
 		final String productId = "#TEST_ITEM_FOR_GET_ID";
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 				.builder()
-				.name("Pengolin's Revenge")
+				.productName("Pengolin's Revenge")
 				.productType("Vaporizer")
 				.clientProductId(productId)
 				.costInCents(13000L) // 'L for long literal
@@ -74,7 +81,7 @@ public class ControllerGetTests
 		// Define mocked answer
 		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
 				.builder()
-				.name(postRequest.getName())
+				.name(postRequest.getProductName())
 				.clientProductId(postRequest.getClientProductId())
 				.squareItemId("#RANDOM_SQUARE_ITEM_ID")
 				.updatedAt(DEFAULT_UPDATED_AT_STRING)
@@ -85,7 +92,7 @@ public class ControllerGetTests
 				.upc(postRequest.getUpc())
 				.description(postRequest.getDescription())
 				.labelColor(postRequest.getLabelColor())
-				.version(DEFAULT_VERSION_FOR_TESTS)
+				.version(DEFAULT_VERSION)
 				.build();
 
 		// Mock the call to the backend service
@@ -107,7 +114,6 @@ public class ControllerGetTests
 	@Test
 	public void testManyGets()
 	{
-
 		assert GOOD_GETS.length == GOOD_POSTS.length : "Mismatch between GET Request array length and POST Request array length.";
 		final int numRequests = GOOD_POSTS.length;
 		for(int i = 0; i <  numRequests; i++)
@@ -140,4 +146,50 @@ public class ControllerGetTests
 		}
 	}
 
+	@Test
+	public void testGetAll()
+	{
+		final int DEFAULT_NUM_PAGES = 10;
+		final long totalElements = GOOD_POSTS.length;
+		final int totalPages  = Math.min(DEFAULT_NUM_PAGES, GOOD_POSTS.length);
+		final String sortBy = "costInCents";    // TODO: vary this
+		final Map<String, Comparator<ProductUpsertRequestBody>> sortingStrategies = createSortingStrategies();
+		Arrays.sort(GOOD_POSTS, sortingStrategies.get(sortBy)); // Sorts in place.
+		for(int i = 0; i < totalPages; i++)
+		{
+			final int expectedNumElementsInPage = getNumElementsInPage(i, totalPages, totalElements);
+			// Mock backend GET ALL call
+			when(backendService.getAllProducts(i, expectedNumElementsInPage, sortBy)).thenReturn(mockedPage(i * expectedNumElementsInPage, expectedNumElementsInPage, GOOD_POSTS));
+			@SuppressWarnings("unchecked")
+			final Page<LiteProduct> page = (Page<LiteProduct>) Objects.requireNonNull(controller.getAll(i, expectedNumElementsInPage, sortBy).getBody()).getData();
+			// Evaluate response
+			assertEquals("Unexpected number of elements in returned page", page.getNumberOfElements(), expectedNumElementsInPage);
+			assertTrue("Page did not return the appropriate posted elements." , pageMatchesPostedElements(page, i*expectedNumElementsInPage, GOOD_POSTS));
+			assertTrue("Page has correct successor page information", checkPageSuccessor(i, totalPages, page));
+		}
+	}
+
+	private int getNumElementsInPage(final int pageIdx, final int totalPages, final long totalElements)
+	{
+		return (int) (pageIdx < totalPages - 1 ? totalElements / totalPages : totalElements % totalPages);
+	}
+
+	private Page<LiteProduct> mockedPage(final int startElementIdx, final int elementsInPage, final ProductUpsertRequestBody[] sortedRequests)
+	{
+		final List<LiteProduct> transformedRequests = Arrays.stream(sortedRequests).map(this::toyLiteProduct).collect(Collectors.toList());
+		return new PageImpl<>(transformedRequests.subList(startElementIdx, elementsInPage));
+	}
+
+	private LiteProduct toyLiteProduct(final ProductUpsertRequestBody request)
+	{
+		return LiteProduct.builder()
+		                  .clientProductId(Optional.of(request.getClientProductId()).orElseThrow(() -> new IllegalArgumentException("Request did not have client product ID")))
+		                  .productName(Optional.of(request.getProductName()).orElse(DEFAULT_PRODUCT_NAME))
+		                  .productType(Optional.of(request.getProductType()).orElse(DEFAULT_PRODUCT_TYPE))
+		                  .costInCents(Optional.of(request.getCostInCents()).orElse(DEFAULT_COST_IN_CENTS))
+		                  .squareItemId(Optional.of(request.getSquareItemId()).orElse(DEFAULT_SQUARE_ITEM_ID))
+		                  .squareItemVariationId(Optional.of(request.getSquareItemVariationId()).orElse(DEFAULT_SQUARE_ITEM_VARIATION_ID))
+		                  .version(Optional.of(request.getVersion()).orElse(DEFAULT_VERSION))
+		                  .build();
+	}
 }

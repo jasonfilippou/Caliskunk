@@ -22,7 +22,7 @@ import static lombok.AccessLevel.PUBLIC;
 public class ProductUpsertRequestBody implements Serializable
 {
 	@JsonProperty("id") private String clientProductId;          // Not asserted @NonNull, since PUT and PATCH give them separately in URI.
-	@JsonProperty("name")  private String name;
+	@JsonProperty("product_name")  private String productName;
 	@JsonProperty("product_type") private String productType;
 	@JsonProperty("cost_in_cents") private Long costInCents;
 	@JsonProperty("description")  private String description;
@@ -43,7 +43,7 @@ public class ProductUpsertRequestBody implements Serializable
 		return ProductGetRequestBody.builder()
 		                            .clientProductId(clientProductId)
 		                            .liteProduct(LiteProduct.builder()
-		                                                    .productName(name)
+		                                                    .productName(productName)
 		                                                    .productType(productType)
 		                                                    .clientProductId(clientProductId)
 		                                                    .costInCents(costInCents)
@@ -65,7 +65,7 @@ public class ProductUpsertRequestBody implements Serializable
 		return ProductDeleteRequestBody.builder()
 		                            .clientProductId(clientProductId)
 		                            .liteProduct(LiteProduct.builder()
-		                                                    .productName(name)
+		                                                    .productName(productName)
 		                                                    .productType(productType)
 		                                                    .clientProductId(clientProductId)
 		                                                    .costInCents(costInCents)

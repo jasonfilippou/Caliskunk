@@ -61,7 +61,7 @@ public class SquareServiceGetTests
 				      {
 					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
 					      final Long version = request.getObject().getVersion() != null ?
-					                             request.getObject().getVersion() : DEFAULT_VERSION_FOR_TESTS;
+					                           request.getObject().getVersion() : DEFAULT_VERSION;
 					      return buildItemResponseOutOfRequest(request, version, UpsertType.POST);
 				      });
 
@@ -84,7 +84,7 @@ public class SquareServiceGetTests
 		// Prepare request
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-													.name(DEFAULT_PRODUCT_NAME)
+													.productName(DEFAULT_PRODUCT_NAME)
 													.productType("Flower")
 													.clientProductId("#RANDOM_ITEM_ID")
 													.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal

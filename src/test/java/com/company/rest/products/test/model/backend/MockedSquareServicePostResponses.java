@@ -8,7 +8,7 @@ import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.DEFAULT_UPDATED_AT_STRING;
-import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION_FOR_TESTS;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION;
 /**
  * A class that contains prepared responses of {@link SquareService} towards
  * {@link BackendService}. These responses are useful for mocked unit tests.
@@ -38,7 +38,7 @@ public class MockedSquareServicePostResponses
 	private static SquareServiceResponseBody mockedResponse(final ProductUpsertRequestBody request)
 	{
 		return SquareServiceResponseBody.builder()
-		                            .name(request.getName().strip().toUpperCase())
+		                            .name(request.getProductName().strip().toUpperCase())
 	                                .clientProductId(request.getClientProductId())
 	                                .productType(request.getProductType().strip().toUpperCase())
 	                                .squareItemId("RANDOM_ITEM_ID")
@@ -49,7 +49,7 @@ public class MockedSquareServicePostResponses
 		                            .description(request.getDescription())
 		                            .sku(request.getSku())
 		                            .upc(request.getUpc())
-	                                .version(DEFAULT_VERSION_FOR_TESTS)
+	                                .version(DEFAULT_VERSION)
                                     .updatedAt(DEFAULT_UPDATED_AT_STRING)
 		                          .build();
 	}

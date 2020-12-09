@@ -62,7 +62,7 @@ public class EndToEndPostTests
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-													.name("Ramses V")
+													.productName("Ramses V")
 													.productType("topical")
 													.clientProductId("#RANDOM_ID")
 													.costInCents(DEFAULT_COST_IN_CENTS)

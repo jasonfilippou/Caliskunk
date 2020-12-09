@@ -55,7 +55,7 @@ public class ControllerPostTests
 	{
 		final ProductUpsertRequestBody postRequest  = ProductUpsertRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
+														.productName("Culeothesis Necrosis")
 														.productType("Flower")
 														.clientProductId("#RANDOM_ID")
 														.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
@@ -66,20 +66,20 @@ public class ControllerPostTests
 													.build();
 
 		final BackendServiceResponseBody preparedResponse = BackendServiceResponseBody
-														.builder()
-                                                        .name(postRequest.getName())
-                                                        .clientProductId(postRequest.getClientProductId())
-														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
-                                                        .productType(postRequest.getProductType())
-                                                        .costInCents(postRequest.getCostInCents())
-														.isDeleted(false)
-														.updatedAt(DEFAULT_UPDATED_AT_STRING)
-														.sku(postRequest.getSku())
-														.upc(postRequest.getUpc())
-														.description(postRequest.getDescription())
-														.labelColor(postRequest.getLabelColor())
-														.version(DEFAULT_VERSION_FOR_TESTS)    // Random Long
-														.build();
+				.builder()
+				.name(postRequest.getProductName())
+				.clientProductId(postRequest.getClientProductId())
+				.squareItemId("#RANDOM_SQUARE_ITEM_ID")
+				.productType(postRequest.getProductType())
+				.costInCents(postRequest.getCostInCents())
+				.isDeleted(false)
+				.updatedAt(DEFAULT_UPDATED_AT_STRING)
+				.sku(postRequest.getSku())
+				.upc(postRequest.getUpc())
+				.description(postRequest.getDescription())
+				.labelColor(postRequest.getLabelColor())
+				.version(DEFAULT_VERSION)    // Random Long
+				.build();
 
 		when(backendService.postProduct(postRequest)).thenReturn(preparedResponse);
 		final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(postRequest);

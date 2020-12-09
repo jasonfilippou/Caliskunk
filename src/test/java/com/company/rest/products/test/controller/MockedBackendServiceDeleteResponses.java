@@ -6,7 +6,7 @@ import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.DEFAULT_UPDATED_AT_STRING;
-import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION_FOR_TESTS;
+import static com.company.rest.products.test.util.TestUtil.DEFAULT_VERSION;
 /**
  * A class that contains prepared responses of {@link BackendService} towards
  * {@link ProductController}. These responses are useful for mocked unit tests.
@@ -46,7 +46,7 @@ public class MockedBackendServiceDeleteResponses
 	private static BackendServiceResponseBody mockedResponse(final ProductUpsertRequestBody request)
 	{
 		return BackendServiceResponseBody.builder()
-		                                     .name(request.getName())
+		                                     .name(request.getProductName())
 			                                 .clientProductId(request.getClientProductId())
 			                                 .squareItemId("random_item_id")
 			                                 .isDeleted(false)
@@ -57,7 +57,7 @@ public class MockedBackendServiceDeleteResponses
 			                                 .sku(request.getSku())
 			                                 .updatedAt(DEFAULT_UPDATED_AT_STRING)
 			                                 .upc(request.getUpc())
-			                                 .version(DEFAULT_VERSION_FOR_TESTS)
+			                                 .version(DEFAULT_VERSION)
 		                                 .build();
 	}
 

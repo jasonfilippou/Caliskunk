@@ -1,5 +1,4 @@
 package com.company.rest.products.test.model.backend;
-
 import com.company.rest.products.CaliSkunkApplication;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
@@ -17,16 +16,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Optional;
+import java.util.*;
 
 import static com.company.rest.products.test.model.backend.MockedSquareServiceGetResponses.MOCKED_SQUARE_GET_RESPONSES;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.get.GoodGetRequests.GOOD_GETS;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -87,7 +89,7 @@ public class BackendServiceGetTests
 
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 													.builder()
-														.name("Culeothesis Necrosis")
+														.productName("Culeothesis Necrosis")
 														.productType("flower")
 														.clientProductId("#RANDOM_ID")
 														.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
@@ -99,13 +101,13 @@ public class BackendServiceGetTests
 
 		final SquareServiceResponseBody preparedResponse = SquareServiceResponseBody
 																	.builder()
-					                                                  .name(postRequest.getName())
+					                                                  .name(postRequest.getProductName())
 																	  .clientProductId(postRequest.getClientProductId())
 																	  .productType(postRequest.getProductType())
 					                                                  .squareItemId("#RANDOM_ITEM_ID")
 																	  .squareItemVariationId("#RANDOM_ITEM_VAR_ID")
 					                                                  .costInCents(postRequest.getCostInCents())
-																	  .version(DEFAULT_VERSION_FOR_TESTS)
+																	  .version(DEFAULT_VERSION)
 					                                                  .isDeleted(false)
 																	  .updatedAt(DEFAULT_UPDATED_AT_STRING)
 																	  .upc(postRequest.getUpc())
@@ -176,6 +178,28 @@ public class BackendServiceGetTests
 			assertTrue("Request did not match response", responseMatchesGetRequest(new ProductGetRequestBody
 				                                                                            (GOOD_GETS[i].getClientProductId(), cachedMiniProduct),
 		                                                                                        getResponse));  // Need a new get request with the liteProduct component to compare with the square call.
+		}
+	}
+
+	@Test
+	public void testGetAll()
+	{
+		final int DEFAULT_NUM_PAGES = 10;
+		final long totalElements = GOOD_POSTS.length;
+		final int totalPages  = Math.min(DEFAULT_NUM_PAGES, GOOD_POSTS.length);
+		final String sortBy = "costInCents";    // TODO: vary this
+		final Map<String, Comparator<ProductUpsertRequestBody>> sortingStrategies = createSortingStrategies();
+		Arrays.sort(GOOD_POSTS, sortingStrategies.get(sortBy)); // Sorts in place.
+		for(int i = 0; i < totalPages; i++)
+		{
+			final int expectedNumElementsInPage = getNumElementsInPage(i, totalPages, totalElements);
+			// Mock backend GET ALL call
+			when(repository.findAll(any(Pageable.class))).thenReturn(mockedPage(i * expectedNumElementsInPage, expectedNumElementsInPage, GOOD_POSTS));
+			final Page<LiteProduct> page = backendService.getAllProducts(i, expectedNumElementsInPage, sortBy);
+			// Evaluate response
+			assertEquals("Unexpected number of elements in returned page", page.getNumberOfElements(), expectedNumElementsInPage);
+			assertTrue("Page did not return the appropriate posted elements." , pageMatchesPostedElements(page, i*expectedNumElementsInPage, GOOD_POSTS));
+			assertTrue("Page has correct successor page information", checkPageSuccessor(i, totalPages, page));
 		}
 	}
 }

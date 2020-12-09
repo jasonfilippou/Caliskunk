@@ -65,7 +65,7 @@ public class EndToEndPutTests
 		final String productId = "#TEST_ITEM_FOR_PUT_ID";
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 				.builder()
-				.name("Pengolin's Revenge")
+				.productName("Pengolin's Revenge")
 				.productType("Vaporizer")
 				.clientProductId(productId)
 				.costInCents(13000L) // 'L for long literal
@@ -82,7 +82,7 @@ public class EndToEndPutTests
 		assertNotNull(postResponse.getVersion(), "After POST-ing, response did not include a version number.");
 		final ProductUpsertRequestBody putRequest = ProductUpsertRequestBody    // Some fields different, but not all
 		                                                                        .builder()
-		                                                                        .name("Pengolin's Revenge II")
+		                                                                        .productName("Pengolin's Revenge II")
 		                                                                        .clientProductId(productId)
 		                                                                        .productType("Topical")
 		                                                                        .description("Now in topical form!")

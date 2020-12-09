@@ -2,21 +2,25 @@ package com.company.rest.products.test.util;
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
+import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
+import com.company.rest.products.test.controller.ControllerGetTests;
+import com.company.rest.products.test.end_to_end.EndToEndGetTests;
 import com.company.rest.products.test.model.backend.BackendServiceDeleteTests;
+import com.company.rest.products.test.model.backend.BackendServiceGetTests;
 import com.company.rest.products.util.ResponseMessage;
 import com.company.rest.products.util.request_bodies.*;
 import com.squareup.square.models.*;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.company.rest.products.model.SquareService.*;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
@@ -45,7 +49,7 @@ public class TestUtil
 	 * A test-wide constant to assist with mocked tests that need to see a version field in various responses.
 	 * @see CatalogObject#getVersion()
 	 */
-	public static final Long DEFAULT_VERSION_FOR_TESTS = 1000000L;
+	public static final Long DEFAULT_VERSION = 1000000L;
 
 	/**
 	 * A test-wide constant to assist with mocked tests that need to see a stringified date field in various responses.
@@ -64,9 +68,19 @@ public class TestUtil
 	public static final Long DEFAULT_COST_IN_CENTS = 10000L;
 
 	/**
-	 * A default "type" field for {@link CatalogObject} instances. Required by Square.
+	 * A default product type to use in tests.
 	 */
-	public static final String DEFAULT_CATALOG_OBJECT_TYPE = "REGULAR";
+	public static final String DEFAULT_PRODUCT_TYPE = "FLOWER";
+
+	/**
+	 * A default {@link CatalogItem} id to use in tests.
+	 */
+	public static final String DEFAULT_SQUARE_ITEM_ID = "RANDOM_SQUARE_ITEM_ID";
+
+	/**
+	 * A default {@link CatalogItemVariation} to use in tests.
+	 */
+	public static final String DEFAULT_SQUARE_ITEM_VARIATION_ID = "RANDOM_SQUARE_ITEM_VAR_ID";
 
 	/**
 	 * A default product name for our tests.
@@ -153,7 +167,7 @@ public class TestUtil
 		// Build POST request body
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-													.name("Pengolin's Revenge")
+													.productName("Pengolin's Revenge")
 													.productType("Vaporizer")
 													.clientProductId(clientProductId)
 													.costInCents(13000L) // 'L for long literal
@@ -165,7 +179,7 @@ public class TestUtil
 		// Define mocked answer
 		final BackendServiceResponseBody mockedResponse = BackendServiceResponseBody
 														.builder()
-                                                        .name(request.getName().strip().toUpperCase())
+                                                        .name(request.getProductName().strip().toUpperCase())
                                                         .clientProductId(request.getClientProductId())
 														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
 														.updatedAt(DEFAULT_UPDATED_AT_STRING)
@@ -176,7 +190,7 @@ public class TestUtil
 														.upc(request.getUpc())
 														.description(request.getDescription())
 														.labelColor(request.getLabelColor())
-														.version(DEFAULT_VERSION_FOR_TESTS)
+														.version(DEFAULT_VERSION)
                                                         .build();
 		// Mock the call to the backend service
 		when(backendService.postProduct(request)).thenReturn(mockedResponse);
@@ -196,7 +210,7 @@ public class TestUtil
 	{
 		final ProductUpsertRequestBody request = ProductUpsertRequestBody
 													.builder()
-													.name("Pengolin's Revenge")
+													.productName("Pengolin's Revenge")
 													.productType("Vaporizer")
 													.clientProductId(id)
 													.costInCents(13000L) // 'L for long literal
@@ -204,9 +218,6 @@ public class TestUtil
 													.labelColor("7FFFD4")
 													.upc("RANDOM_UPC")
 													.sku("RANDOM_SKU")
-
-
-
 													.build();
 		return controller.postProduct(request);
 	}
@@ -603,5 +614,120 @@ public class TestUtil
 				                                deleteRequest.getLiteProduct().getSquareItemVariationId()))
 				.deletedAt(LocalDateTime.now().toString())
 				.build();
+	}
+
+	/* ************************************************************************ */
+	/* ********************** UTILITIES FOR GET ALL TESTS ********************* */
+	/* ************************************************************************ */
+	/**
+	 * Defines sorting strategies to test pagination.
+	 * @see LiteProduct
+	 * @see ControllerGetTests#testGetAll()
+	 * @see BackendServiceGetTests#testGetAll()
+	 * @see EndToEndGetTests#testGetAll()
+	 * @return A {@link Map} that associates fields with appropriate sorting strategies for their type.
+	 */
+	public static Map<String, Comparator<ProductUpsertRequestBody>> createSortingStrategies()
+	{
+		return new HashMap<>()
+		{
+			{
+				put("productName", Comparator.comparing(ProductUpsertRequestBody::getProductName));
+				put("clientProductId", Comparator.comparing(ProductUpsertRequestBody::getClientProductId));
+				put("productType", Comparator.comparing(ProductUpsertRequestBody::getProductType));
+				put("costInCents", Comparator.comparingLong(ProductUpsertRequestBody::getCostInCents));
+			}
+		};
+	}
+	/**
+	 * @see ControllerGetTests#testGetAll()
+	 * @see BackendServiceGetTests#testGetAll()
+	 * @see EndToEndGetTests#testGetAll()
+	 */
+	public static boolean checkPageSuccessor(final int pageIdx, final int totalPages, @NonNull final Page<?> page)
+	{
+		return (pageIdx < totalPages - 1) == page.hasNext();
+	}
+
+	/**
+	 * @see ControllerGetTests#testGetAll()
+	 * @see BackendServiceGetTests#testGetAll()
+	 * @see EndToEndGetTests#testGetAll()
+	 */
+	public static boolean pageMatchesPostedElements(@NonNull final Page<LiteProduct> page, int startRequestIdx, @NonNull final ProductUpsertRequestBody[] upsertRequests)
+	{
+		final int numElements = page.getNumberOfElements();
+		if(numElements == 0)
+		{
+			return upsertRequests.length == 0;
+		}
+		else
+		{
+			final ProductUpsertRequestBody[] requestsInSlice = Arrays.copyOfRange(upsertRequests, startRequestIdx, numElements + startRequestIdx);
+			// TODO: Compare the following two lines after testing.
+			// return page.stream().map(LiteProduct::getClientProductId).allMatch(p-> Arrays.stream(requestsInSlice).map(ProductUpsertRequestBody::getClientProductId).collect(Collectors.toList()).contains(p));
+			return pageMatchesPostedElements(page, requestsInSlice);
+		}
+	}
+
+	private static boolean pageMatchesPostedElements(@NonNull final Page<LiteProduct> page,@NonNull  final ProductUpsertRequestBody[] requests)
+	{
+		if(page.getNumberOfElements() != requests.length || !page.hasNext())
+		{
+			return false;
+		}
+		else
+		{
+			final Iterator<LiteProduct> it = page.iterator();
+			for (ProductUpsertRequestBody request : requests)
+			{
+				if(!it.hasNext())
+				{
+					return false;
+				}
+				else if (!it.next().getClientProductId().equals(request.getClientProductId()))  // it.next() advances iterator
+				{
+					return false;
+				}
+			}
+			return !it.hasNext();      // Should have exhausted the elements.
+		}
+	}
+	/**
+	 * Returns the expected number of elements in the current page.
+	 * @param pageIdx The zero-based index of the current page.
+	 * @param totalPages The total number of pages in the paginated data.
+	 * @param totalElements The total number of data elements.
+	 * @return The expected number of elements in the current page.
+	 */
+	public static int getNumElementsInPage(final int pageIdx, final int totalPages, final long totalElements)
+	{
+		return (int) (pageIdx < totalPages - 1 ? totalElements / totalPages : totalElements % totalPages);
+	}
+
+	/**
+	 * Mocks a {@link BackendService} or {@link LiteProductRepository} call to return a pre-defined {@link Page}.
+	 *
+	 * @param startElementIdx The index into the original collection of the element that should begin the {@link Page}.
+	 * @param elementsInPage The elements that the returned {@link Page} should contain.
+	 * @param requests The requests to snatch a page from.
+	 */
+	public static Page<LiteProduct> mockedPage(final int startElementIdx, final int elementsInPage, final ProductUpsertRequestBody[] requests)
+	{
+		final List<LiteProduct> transformedRequests = Arrays.stream(requests).map(TestUtil::toyLiteProduct).collect(Collectors.toList());
+		return new PageImpl<>(transformedRequests.subList(startElementIdx, elementsInPage));
+	}
+
+	private static LiteProduct toyLiteProduct(final ProductUpsertRequestBody request)
+	{
+		return LiteProduct.builder()
+		                  .clientProductId(Optional.of(request.getClientProductId()).orElseThrow(() -> new IllegalArgumentException("Request did not have client product ID")))
+		                  .productName(Optional.of(request.getProductName()).orElse(DEFAULT_PRODUCT_NAME))
+		                  .productType(Optional.of(request.getProductType()).orElse(DEFAULT_PRODUCT_TYPE))
+		                  .costInCents(Optional.of(request.getCostInCents()).orElse(DEFAULT_COST_IN_CENTS))
+		                  .squareItemId(Optional.of(request.getSquareItemId()).orElse(DEFAULT_SQUARE_ITEM_ID))
+		                  .squareItemVariationId(Optional.of(request.getSquareItemVariationId()).orElse(DEFAULT_SQUARE_ITEM_VARIATION_ID))
+		                  .version(Optional.of(request.getVersion()).orElse(DEFAULT_VERSION))
+		                  .build();
 	}
 }

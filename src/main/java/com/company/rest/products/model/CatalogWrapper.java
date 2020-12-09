@@ -30,7 +30,7 @@ public class CatalogWrapper
 	 * {@code @Autowired} default constructor. Opens connection to Square by using stored access token.
 	 */
 	@Autowired
-	public CatalogWrapper(@Value("square.sandbox.accesstoken") String accessToken)
+	public CatalogWrapper(@Value("${square.sandbox.accesstoken}") String accessToken)
 	{
 		final SquareClient client = new SquareClient.Builder().environment(com.squareup.square.Environment.SANDBOX)
 		                                                      .accessToken(accessToken)

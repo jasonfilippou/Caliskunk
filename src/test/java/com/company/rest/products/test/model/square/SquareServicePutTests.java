@@ -55,7 +55,7 @@ public class SquareServicePutTests
 				.then(invocation ->
 				      {
 					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
-					      return buildItemResponseOutOfRequest(request, DEFAULT_VERSION_FOR_TESTS, POST);
+					      return buildItemResponseOutOfRequest(request, DEFAULT_VERSION, POST);
 				      });
 
 		// ... and PUT.
@@ -74,7 +74,7 @@ public class SquareServicePutTests
 		// Prepare requests
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 				.builder()
-				.name("Culeothesis Necrosis")
+				.productName("Culeothesis Necrosis")
 				.productType("Flower")
 				.clientProductId("#RANDOM_ITEM_ID")
 				.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
@@ -88,7 +88,7 @@ public class SquareServicePutTests
 		final SquareServiceResponseBody postResponse = squareService.postProduct(postRequest);
 
 		final ProductUpsertRequestBody putRequest = ProductUpsertRequestBody.builder()
-		                                                                    .name("Culeothesis Necrosis OG")
+		                                                                    .productName("Culeothesis Necrosis OG")
 		                                                                    .clientProductId(postResponse.getClientProductId())
 		                                                                    .labelColor("AB8235")
 		                                                                    .upc("RANDOM_UPC")  // Not quite updating, but still valid to have set

@@ -40,6 +40,7 @@ public class LiteProduct
 	public final static Set<String> PRODUCT_TYPES = new HashSet<>
 			 (Arrays.asList("FLOWER", "TOPICAL", "VAPORIZER", "EDIBLE", "PREROLL", "CONCENTRATE",
 			                "TINCTURE", "PET", "ACCESSORY", "OTHER"));
+
 	/**
 	 * All-args constructor.
 	 * @param clientProductId The unique ID the client wishes to provide our application.
@@ -117,7 +118,7 @@ public class LiteProduct
 	{
 		return LiteProduct.builder()
 		                  .clientProductId(postRequest.getClientProductId())
-		                  .productName(Optional.of(putRequest.getName()).orElse(postRequest.getName()))
+		                  .productName(Optional.of(putRequest.getProductName()).orElse(postRequest.getProductName()))
 		                  .productType(Optional.of(putRequest.getProductType()).orElse(postRequest.getProductType()))
 		                  .costInCents(Optional.of(putRequest.getCostInCents()).orElse(postRequest.getCostInCents()))
 		                  .version(putRequest.getVersion())

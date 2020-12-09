@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import java.util.stream.Collectors;
 
 import static com.company.rest.products.util.Util.*;
 import static java.util.Optional.ofNullable;
@@ -97,10 +96,7 @@ public class ProductController
 			try
 			{
 				return success("Successfully retrieved all products!",
-				               backendService.getAllProducts(pageIdx, itemsInPage, sortBy)
-				                             .parallelStream()
-				                             .map(ProductResponseBody::fromBackendResponseBody)
-				                             .collect(Collectors.toList()), HttpStatus.OK);
+				               backendService.getAllProducts(pageIdx, itemsInPage, sortBy), HttpStatus.OK);
 			}
 			catch (BackendServiceException exc)
 			{
@@ -122,7 +118,7 @@ public class ProductController
 		try
 		{
 			validatePostRequest(postRequest);
-			postRequest.setName(postRequest.getName().strip().toUpperCase());// Enable in end-to-end
+			postRequest.setProductName(postRequest.getProductName().strip().toUpperCase());// Enable in end-to-end
 			final BackendServiceResponseBody backendResponse = backendService.postProduct(postRequest);
 			validatePostResponse(backendResponse, postRequest);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse); // TODO: change these static methods to class - specific ones.
@@ -144,6 +140,7 @@ public class ProductController
 			return failure(exc, exc.getStatus());
 		}
 	}
+
 	private void validatePostRequest(final ProductUpsertRequestBody postRequest) throws InconsistentRequestException
 	{
 		// Ensure that product ID, name, type, and cost values are appropriate.
@@ -152,21 +149,25 @@ public class ProductController
 			throw new InconsistentRequestException("Bad POST request supplied.");
 		}
 	}
+
 	private boolean crucialFieldsOk(final ProductUpsertRequestBody upsertRequest)
 	{
 		return idFieldPresent(upsertRequest) && nameCostAndProductTypeOk(upsertRequest);
 	}
+
 	private boolean idFieldPresent(final ProductUpsertRequestBody upsertRequest)
 	{
 		return upsertRequest.getClientProductId() != null && upsertRequest.getClientProductId().length() >= 1;
 	}
+
 	private boolean nameCostAndProductTypeOk(final ProductUpsertRequestBody upsertRequest)
 	{
 		// Ensure that name, type, and cost values are appropriate.
 		return (upsertRequest.getCostInCents() != null && upsertRequest.getCostInCents() > 0L) &&
 		       (upsertRequest.getProductType() != null && acceptedProductType(upsertRequest.getProductType())) &&
-		       (isValidProductName(upsertRequest.getName()));
+		       (isValidProductName(upsertRequest.getProductName()));
 	}
+
 	private boolean acceptedProductType(final String productType)
 	{
 		return LiteProduct.PRODUCT_TYPES.contains(productType.trim().toUpperCase());
@@ -190,7 +191,7 @@ public class ProductController
 
 	private boolean optionalFieldsMatch(final BackendServiceResponseBody postResponse, final ProductUpsertRequestBody postRequest)
 	{
-		return stringsMatch(postRequest.getName(), postResponse.getName()) &&
+		return stringsMatch(postRequest.getProductName(), postResponse.getName()) &&
 		       ofNullable(postResponse.getProductType()).equals(ofNullable(postRequest.getProductType())) &&
 		       ofNullable(postResponse.getCostInCents()).equals(ofNullable(postRequest.getCostInCents())) &&
 		       ofNullable(postResponse.getDescription()).equals(ofNullable(postRequest.getDescription())) &&
@@ -261,7 +262,7 @@ public class ProductController
 		try
 		{
 			validatePutRequest(putRequest);
-			putRequest.setName(putRequest.getName().strip().toUpperCase());
+			putRequest.setProductName(putRequest.getProductName().strip().toUpperCase());
 			putRequest.setClientProductId(id); // And from now on the request has the ID in the body for the rest of its journey! :)
 			final BackendServiceResponseBody backendResponse = backendService.putProduct(putRequest);
 			validatePutResponse(backendResponse, putRequest);

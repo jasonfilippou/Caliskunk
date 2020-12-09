@@ -1,5 +1,4 @@
 package com.company.rest.products.model;
-
 import com.company.rest.products.controller.ProductController;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
@@ -8,6 +7,7 @@ import com.company.rest.products.util.request_bodies.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,9 +15,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.company.rest.products.util.Util.*;
 import static java.util.Optional.ofNullable;
@@ -108,13 +107,13 @@ public class BackendService
 	private void validatePostResponse(final SquareServiceResponseBody squareServiceResponse, final ProductUpsertRequestBody clientPostRequest)
 	{
 		assertAndIfNotLogAndThrow(nullOrFalse(squareServiceResponse.getIsDeleted()) &&
-		                           stringsMatch(squareServiceResponse.getName(), clientPostRequest.getName()) &&
-		                           stringsMatch(squareServiceResponse.getProductType(), clientPostRequest.getProductType()) &&
+		                          stringsMatch(squareServiceResponse.getName(), clientPostRequest.getProductName()) &&
+		                          stringsMatch(squareServiceResponse.getProductType(), clientPostRequest.getProductType()) &&
 		                           squareServiceResponse.getUpdatedAt() != null &&
 		                           squareServiceResponse.getVersion() != null &&
 		                           squareServiceResponse.getSquareItemId() != null &&
-		                           squareServiceResponse.getClientProductId().equals(clientPostRequest.getClientProductId()) &&
-		                           optionalFieldsMatch(squareServiceResponse, clientPostRequest),
+		                          squareServiceResponse.getClientProductId().equals(clientPostRequest.getClientProductId()) &&
+		                          optionalFieldsMatch(squareServiceResponse, clientPostRequest),
 		                          "Bad Upsert Response from Square Service layer.");
 	}
 
@@ -215,36 +214,33 @@ public class BackendService
 	 * @see LiteProductRepository#findAll()
 	 * @see JpaRepository#findAll(Pageable)
 	 */
-	public List<BackendServiceResponseBody> getAllProducts(@NonNull final Integer pageIdx,
+	public Page<LiteProduct> getAllProducts(@NonNull final Integer pageIdx,
 	                                                       @NonNull final Integer itemsInPage,
 	                                                       @NonNull final String sortBy)
 	{
-		// Paginated and sorted output whether it is on Square or the cache.
-		try
+		if(!sortingFieldOk(sortBy))
 		{
-			/* The way Chris usually does his pagination is by using something like this
-
-				public Page<Employee> findByDept(String deptName, Pageable pageable);
-
-				In our JPARepository type.
-
-				Pageable pageable = PageRequest.of(0, 3, Sort.by("salary")); is one of the calls that he makes
-
-				// Check the resource: https://www.logicbig.com/tutorials/spring-framework/spring-data/pagination-returning-page.html
-
-			 */
-			return localRepo.findAll(PageRequest.of(pageIdx, itemsInPage, Sort.by(sortBy).ascending()))
-			                .stream().parallel()
-			                .map(BackendServiceResponseBody::fromLiteProduct)
-			                .collect(Collectors.toList());
+			throw new BackendServiceException("Bad sorting field \"" + sortBy + "\" specified", HttpStatus.BAD_REQUEST);
 		}
-		catch(Throwable t)
+		else
 		{
-			logException(t, this.getClass().getName() + "::getAllProducts");
-            throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
+			try
+			{
+				// Paginated and sorted output from the cache.
+				return localRepo.findAll(PageRequest.of(pageIdx, itemsInPage, Sort.by(sortBy).ascending()));
+			}
+			catch (Throwable t)
+			{
+				logException(t, this.getClass().getName() + "::getAllProducts");
+				throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 		}
 	}
 
+	private boolean sortingFieldOk(final String sortBy)
+	{
+		return Arrays.asList("costInCents", "name", "clientProductId", "productType").contains(sortBy);
+	}
 
 	/**
 	 * Send a PUT request for a specific product.

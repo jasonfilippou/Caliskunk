@@ -63,7 +63,7 @@ public class ControllerPutTests
 		final String id = "#RANDOM_ID";
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 													.builder()
-													.name("Culeothesis Necrosis")
+													.productName("Culeothesis Necrosis")
 													.productType("Flower")
 													.clientProductId(id)
 													.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
@@ -75,20 +75,20 @@ public class ControllerPutTests
 
 		final ProductUpsertRequestBody putRequest = ProductUpsertRequestBody // No client ID, since we give that separately
 													.builder()
-													.name("Geez Louise OG")
+													.productName("Geez Louise OG")
 													.productType("Vaporizer")
 													.costInCents(15000L) // 'L for long literal
 													.description("Will also eat your face.")
 													.labelColor("8AFA94")
 													.upc("NEW_RANDOM_UPC")
-													.version(DEFAULT_VERSION_FOR_TESTS)
+													.version(DEFAULT_VERSION)
 													.sku("NEW_RANDOM_SKU")
 													.build();
 
 		// Prepare mocked backend layer responses.
 		final BackendServiceResponseBody preparedPostResponse = BackendServiceResponseBody
 														.builder()
-                                                        .name(postRequest.getName())
+                                                        .name(postRequest.getProductName())
                                                         .clientProductId(id)
 														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
                                                         .productType(postRequest.getProductType())
@@ -99,12 +99,12 @@ public class ControllerPutTests
 														.updatedAt(DEFAULT_UPDATED_AT_STRING)
 														.description(postRequest.getDescription())
 														.labelColor(postRequest.getLabelColor())
-														.version(DEFAULT_VERSION_FOR_TESTS)
+														.version(DEFAULT_VERSION)
                                                         .build();
 
 		final BackendServiceResponseBody preparedPutResponse = BackendServiceResponseBody
 														.builder()
-                                                        .name(putRequest.getName())
+                                                        .name(putRequest.getProductName())
                                                         .clientProductId(id)
 														.squareItemId("#RANDOM_SQUARE_ITEM_ID")
                                                         .productType(putRequest.getProductType())
@@ -115,7 +115,7 @@ public class ControllerPutTests
 														.upc(putRequest.getUpc())
 														.description(putRequest.getDescription())
 														.labelColor(putRequest.getLabelColor())
-														.version(DEFAULT_VERSION_FOR_TESTS)
+														.version(DEFAULT_VERSION)
                                                         .build();
 
 		// Mock backend layer calls appropriately.

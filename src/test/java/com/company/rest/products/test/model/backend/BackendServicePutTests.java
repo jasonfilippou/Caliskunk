@@ -86,7 +86,7 @@ public class BackendServicePutTests
 		//////////////////////////////////////////////////////
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 				.builder()
-					.name("Culeothesis Necrosis")
+					.productName("Culeothesis Necrosis")
 					.productType("Flower")
 					.clientProductId("#RANDOM_ID")
 					.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
@@ -98,7 +98,7 @@ public class BackendServicePutTests
 
 		final SquareServiceResponseBody mockedSquarePostResponse = SquareServiceResponseBody
 				.builder()
-					.name(postRequest.getName())
+					.name(postRequest.getProductName())
 					.clientProductId(postRequest.getClientProductId())
 					.productType(postRequest.getProductType())
 					.squareItemId("#RANDOM_ITEM_ID")
@@ -106,7 +106,7 @@ public class BackendServicePutTests
 					.costInCents(postRequest.getCostInCents())
 					.isDeleted(false)
 					.updatedAt(DEFAULT_UPDATED_AT_STRING)
-					.version(DEFAULT_VERSION_FOR_TESTS)
+					.version(DEFAULT_VERSION)
 					.description(postRequest.getDescription())
 					.upc(postRequest.getUpc())
 					.sku(postRequest.getSku())
@@ -118,7 +118,7 @@ public class BackendServicePutTests
 		// have an ID field to ensure this functionality works as asserted.
 		final ProductUpsertRequestBody putRequest = ProductUpsertRequestBody.
 				builder()
-					.name("Culeothesis Necrosis")
+					.productName("Culeothesis Necrosis")
 					.productType("Vaporizer")
 					.costInCents(15000L)
 					.description("Will eat your face.")
@@ -131,14 +131,14 @@ public class BackendServicePutTests
 
 		final SquareServiceResponseBody mockedSquarePutResponse = SquareServiceResponseBody
 				.builder()
-					.name(putRequest.getName())
+					.name(putRequest.getProductName())
 					.clientProductId(putRequest.getClientProductId())
 					.productType(putRequest.getProductType())
 					.squareItemId("#RANDOM_ITEM_ID")
 					.squareItemVariationId("RANDOM_ITEM_VAR_ID")
 					.costInCents(putRequest.getCostInCents())
 					.isDeleted(false)
-					.version(DEFAULT_VERSION_FOR_TESTS)
+					.version(DEFAULT_VERSION)
 					.updatedAt(DEFAULT_UPDATED_AT_STRING)
 					.description(putRequest.getDescription())
 					.upc(putRequest.getUpc())

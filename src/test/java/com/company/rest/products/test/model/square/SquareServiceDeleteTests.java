@@ -55,7 +55,7 @@ public class SquareServiceDeleteTests
 				.then(invocation ->
 				      {
 					      final UpsertCatalogObjectRequest request = invocation.getArgument(0);
-					      return buildItemResponseOutOfRequest(request, DEFAULT_VERSION_FOR_TESTS, UpsertType.POST);
+					      return buildItemResponseOutOfRequest(request, DEFAULT_VERSION, UpsertType.POST);
 				      });
 
 		// Prepare CatalogWrapper response for DELETE
@@ -74,7 +74,7 @@ public class SquareServiceDeleteTests
 		// Prepare request
 		final ProductUpsertRequestBody postRequest = ProductUpsertRequestBody
 				.builder()
-				.name("Culeothesis Necrosis")
+				.productName("Culeothesis Necrosis")
 				.productType("Flower")
 				.clientProductId("#RANDOM_ITEM_ID")
 				.costInCents(DEFAULT_COST_IN_CENTS) // 'L for long literal
