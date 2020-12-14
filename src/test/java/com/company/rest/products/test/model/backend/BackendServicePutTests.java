@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
-import static com.company.rest.products.model.liteproduct.LiteProduct.buildLiteProductFromSquareResponse;
+import static com.company.rest.products.model.liteproduct.LiteProduct.fromSquareResponse;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePutResponses.MOCKED_SQUARE_PUT_RESPONSES;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
@@ -149,7 +149,7 @@ public class BackendServicePutTests
 		///////////
 		// Mocks //
 		///////////
-		final LiteProduct cachedMiniProduct = buildLiteProductFromSquareResponse(mockedSquarePostResponse);
+		final LiteProduct cachedMiniProduct = fromSquareResponse(mockedSquarePostResponse);
 		when(repository.findByClientProductId(postRequest.getClientProductId())).thenReturn(Optional.empty());
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		when(squareService.postProduct(postRequest)).thenReturn(mockedSquarePostResponse);
@@ -189,7 +189,7 @@ public class BackendServicePutTests
 			/////////////////////////////////////////////////////////////
 			// Prepare LiteProduct to be returned by some mocked calls //
 			/////////////////////////////////////////////////////////////
-			final LiteProduct cachedMiniProduct = buildLiteProductFromSquareResponse(MOCKED_SQUARE_PUT_RESPONSES[i]);
+			final LiteProduct cachedMiniProduct = fromSquareResponse(MOCKED_SQUARE_PUT_RESPONSES[i]);
 
 			////////////////////////
 			// POST request first //
@@ -212,7 +212,7 @@ public class BackendServicePutTests
 			// Mock the Square service upsert call and the repo SEARCH, SAVE and DEL calls.
 			// GOOD_PUTS[i].setClientProductId(GOOD_POSTS[i].getClientProductId());    // Recall: The Square service
 			when(squareService.putProduct(GOOD_PUTS[i])).thenReturn(MOCKED_SQUARE_PUT_RESPONSES[i]);
-			when(repository.findByClientProductId(GOOD_POSTS[i].getClientProductId())).thenReturn(Optional.of(buildLiteProductFromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i])));
+			when(repository.findByClientProductId(GOOD_POSTS[i].getClientProductId())).thenReturn(Optional.of(fromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i])));
 			doNothing().when(repository).deleteByClientProductId(any(String.class));
 			when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 

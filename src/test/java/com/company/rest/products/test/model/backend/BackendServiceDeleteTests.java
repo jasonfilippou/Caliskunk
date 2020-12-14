@@ -115,7 +115,7 @@ public class BackendServiceDeleteTests
 		/////////////////////////////////////////////////////////////////////////
 
 		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(mockedSquaredResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(mockedSquaredResponse);
+		final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(mockedSquaredResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(postRequest);
 
@@ -151,7 +151,7 @@ public class BackendServiceDeleteTests
 			/////////////////////////////////////////////////////////////////
 			// Prepare LiteProduct to be returned by mocked deletion calls //
 			/////////////////////////////////////////////////////////////////
-			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_DELETE_RESPONSES[i]);
+			final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(MOCKED_SQUARE_DELETE_RESPONSES[i]);
 
 			////////////////////////
 			// POST request first //

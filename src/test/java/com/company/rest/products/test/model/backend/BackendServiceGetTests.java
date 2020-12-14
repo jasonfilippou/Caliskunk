@@ -4,6 +4,7 @@ import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.SquareService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.model.liteproduct.LiteProductRepository;
+import com.company.rest.products.test.util.TestUtil;
 import com.company.rest.products.util.request_bodies.BackendServiceResponseBody;
 import com.company.rest.products.util.request_bodies.ProductGetRequestBody;
 import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
@@ -22,12 +23,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.company.rest.products.test.model.backend.MockedSquareServiceGetResponses.MOCKED_SQUARE_GET_RESPONSES;
 import static com.company.rest.products.test.model.backend.MockedSquareServicePostResponses.MOCKED_SQUARE_POST_RESPONSES;
 import static com.company.rest.products.test.requests_responses.get.GoodGetRequests.GOOD_GETS;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
+import static com.company.rest.products.test.util.TestUtil.SortingOrder.ASC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -122,7 +125,7 @@ public class BackendServiceGetTests
 		/////////////////////////////////////////////////////////////////////////
 
 		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(preparedResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse);
+		final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(preparedResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody postResponse = backendService.postProduct(postRequest);
 
@@ -170,7 +173,7 @@ public class BackendServiceGetTests
 			when(squareService.getProduct(any(ProductGetRequestBody.class))).thenReturn(MOCKED_SQUARE_GET_RESPONSES[i]);
 
 			// And the repo call
-			final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_GET_RESPONSES[i]);
+			final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(MOCKED_SQUARE_GET_RESPONSES[i]);
 			when(repository.findByClientProductId(GOOD_POSTS[i].getClientProductId())).thenReturn(Optional.of(cachedMiniProduct));
 
 			// Perform and check the GET
@@ -187,19 +190,21 @@ public class BackendServiceGetTests
 		final int DEFAULT_NUM_PAGES = 10;
 		final long totalElements = GOOD_POSTS.length;
 		final int totalPages  = Math.min(DEFAULT_NUM_PAGES, GOOD_POSTS.length);
-		final String sortBy = "costInCents";    // TODO: vary this
-		final Map<String, Comparator<ProductUpsertRequestBody>> sortingStrategies = createSortingStrategies();
-		Arrays.sort(GOOD_POSTS, sortingStrategies.get(sortBy)); // Sorts in place.
+		final String sortBy = "productName";    // TODO: vary this
+		final Map<String, Comparator<LiteProduct>> sortingStrategies = createSortingStrategies();
+		final List<LiteProduct> goodPostsAsLiteProducts = Arrays.stream(GOOD_POSTS)
+		                                                        .map(TestUtil::toyLiteProduct)
+		                                                        .sorted(sortingStrategies.get(sortBy))
+		                                                        .collect(Collectors.toList());
 		for(int i = 0; i < totalPages; i++)
 		{
 			final int expectedNumElementsInPage = getNumElementsInPage(i, totalPages, totalElements);
 			// Mock backend GET ALL call
-			when(repository.findAll(any(Pageable.class))).thenReturn(mockedPage(i * expectedNumElementsInPage, expectedNumElementsInPage, GOOD_POSTS));
+			when(repository.findAll(any(Pageable.class))).thenReturn(mockedPage(i * expectedNumElementsInPage, expectedNumElementsInPage, goodPostsAsLiteProducts));
 			final Page<LiteProduct> page = backendService.getAllProducts(i, expectedNumElementsInPage, sortBy);
 			// Evaluate response
 			assertEquals("Unexpected number of elements in returned page", page.getNumberOfElements(), expectedNumElementsInPage);
-			assertTrue("Page did not return the appropriate posted elements." , pageMatchesPostedElements(page, i*expectedNumElementsInPage, GOOD_POSTS));
-			assertTrue("Page has correct successor page information", checkPageSuccessor(i, totalPages, page));
+			assertTrue("Page did not return appropriately sorted elements." , fieldMonotonic(page, sortBy, ASC));
 		}
 	}
 }

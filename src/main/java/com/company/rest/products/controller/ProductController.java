@@ -1,5 +1,4 @@
 package com.company.rest.products.controller;
-
 import com.company.rest.products.model.BackendService;
 import com.company.rest.products.model.liteproduct.LiteProduct;
 import com.company.rest.products.util.ResponseMessage;
@@ -10,6 +9,7 @@ import com.company.rest.products.util.exceptions.ResourceAlreadyCreatedException
 import com.company.rest.products.util.request_bodies.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -95,8 +95,9 @@ public class ProductController
 		{
 			try
 			{
+				final Page<LiteProduct> retVal = backendService.getAllProducts(pageIdx, itemsInPage, sortBy);
 				return success("Successfully retrieved all products!",
-				               backendService.getAllProducts(pageIdx, itemsInPage, sortBy), HttpStatus.OK);
+				               retVal, HttpStatus.OK);
 			}
 			catch (BackendServiceException exc)
 			{

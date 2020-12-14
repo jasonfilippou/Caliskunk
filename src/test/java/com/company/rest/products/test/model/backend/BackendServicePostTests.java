@@ -105,7 +105,7 @@ public class BackendServicePostTests
                                                                 .build();
 
 		when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(preparedResponse);
-		final LiteProduct cachedMiniProduct = LiteProduct.buildLiteProductFromSquareResponse(preparedResponse);
+		final LiteProduct cachedMiniProduct = LiteProduct.fromSquareResponse(preparedResponse);
 		when(repository.save(any(LiteProduct.class))).thenReturn(cachedMiniProduct);
 		final BackendServiceResponseBody response = backendService.postProduct(postRequest);
 		assertTrue("Request did not match response", responseMatchesUpsertRequest(postRequest, response, POST));
@@ -119,7 +119,7 @@ public class BackendServicePostTests
 		{
 			// Mock
 			when(squareService.postProduct(any(ProductUpsertRequestBody.class))).thenReturn(MOCKED_SQUARE_POST_RESPONSES[i]);
-			when(repository.save(any(LiteProduct.class))).thenReturn(LiteProduct.buildLiteProductFromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i]));
+			when(repository.save(any(LiteProduct.class))).thenReturn(LiteProduct.fromSquareResponse(MOCKED_SQUARE_POST_RESPONSES[i]));
 
 			// Call backend service
 			final BackendServiceResponseBody response = backendService.postProduct(GOOD_POSTS[i]);

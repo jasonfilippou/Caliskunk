@@ -36,19 +36,31 @@ public class ProductControllerLogger
 		       ((args.length() == 0) ? "" : args.substring(1, args.length() - 1)) + ")";
 	}
 
-	/* GET */
-	@Before("execution(* com.company.rest.products.controller.ProductController.get*(..))")
+	/* GET (id) */
+	@Before("execution(* com.company.rest.products.controller.ProductController.getProduct(..))")
 	public void beforeGetRequests(final JoinPoint jp)
 	{
-		log.info(msg("GET", LOC.BEGIN, jp));
+		log.info(msg("GET(id)", LOC.BEGIN, jp));
 	}
 
-	@After("execution(* com.company.rest.products.controller.ProductController.get*(..))")
+	@After("execution(* com.company.rest.products.controller.ProductController.getProduct(..))")
 	public void afterGetRequests(final JoinPoint jp)
 	{
-		log.info(msg("GET", LOC.END, jp));
+		log.info(msg("GET(id)", LOC.END, jp));
 	}
 
+	/* GET ALL */
+	@Before("execution(* com.company.rest.products.controller.ProductController.getAll(..))")
+	public void beforeGetAllRequests(final JoinPoint jp)
+	{
+		log.info(msg("GET ALL", LOC.BEGIN, jp));
+	}
+
+	@After("execution(* com.company.rest.products.controller.ProductController.getAll(..))")
+	public void afterGetAllRequests(final JoinPoint jp)
+	{
+		log.info(msg("GET ALL", LOC.END, jp));
+	}
 	/* POST */
 	@Before("execution(* com.company.rest.products.controller.ProductController.post*(..))")
 	public void beforePostRequests(final JoinPoint jp)

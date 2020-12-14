@@ -20,9 +20,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.company.rest.products.model.SquareService.*;
+import static com.company.rest.products.test.util.TestUtil.SortingOrder.ASC;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.PUT;
 import static com.company.rest.products.util.Util.*;
@@ -45,6 +45,14 @@ public class TestUtil
 	{
 		POST, PUT, PATCH
 	}
+	/**
+	 * An enum encoding ascending or descending sorting order.
+	 */
+	public enum SortingOrder
+	{
+		DESC, ASC;
+	}
+
 	/**
 	 * A test-wide constant to assist with mocked tests that need to see a version field in various responses.
 	 * @see CatalogObject#getVersion()
@@ -627,72 +635,100 @@ public class TestUtil
 	 * @see EndToEndGetTests#testGetAll()
 	 * @return A {@link Map} that associates fields with appropriate sorting strategies for their type.
 	 */
-	public static Map<String, Comparator<ProductUpsertRequestBody>> createSortingStrategies()
+	public static Map<String, Comparator<LiteProduct>> createSortingStrategies()
 	{
 		return new HashMap<>()
 		{
-			{
-				put("productName", Comparator.comparing(ProductUpsertRequestBody::getProductName));
-				put("clientProductId", Comparator.comparing(ProductUpsertRequestBody::getClientProductId));
-				put("productType", Comparator.comparing(ProductUpsertRequestBody::getProductType));
-				put("costInCents", Comparator.comparingLong(ProductUpsertRequestBody::getCostInCents));
+			{   // The following 4 fields are the only accepted ones for sorting reasons.
+				put("clientProductId", Comparator.comparing(LiteProduct::getClientProductId));
+				put("productName", Comparator.comparing(LiteProduct::getProductName));
+				put("productType", Comparator.comparing(LiteProduct::getProductType));
+				put("costInCents", Comparator.comparingLong(LiteProduct::getCostInCents));
 			}
 		};
 	}
 	/**
-	 * @see ControllerGetTests#testGetAll()
-	 * @see BackendServiceGetTests#testGetAll()
+	 * Checks if the provided {@link Page}'s successor flag is the expected one.
+	 * @param page An instance of {@link Page}.
+	 * @param pageIdx The zero-based index of the provided {@link Page} in the collection of {@link Page}s that paginated the data.
+	 * @param totalPages The total number of pages in the pagination.
+	 * @return {@literal true} if the successor flag is of the expected state, {@literal false} otherwise. An &quot;expected&quot;
+	 * state is one that is {@literal true} when there <b>should</b> be a successor flag, {@literal false} otherwise.
 	 * @see EndToEndGetTests#testGetAll()
 	 */
 	public static boolean checkPageSuccessor(final int pageIdx, final int totalPages, @NonNull final Page<?> page)
 	{
-		return (pageIdx < totalPages - 1) == page.hasNext();
+		return (pageIdx <= totalPages - 1) == page.hasNext();
 	}
 
 	/**
+	 * Examines if the field provided is monotonically increasing or decreasing.
+	 * @param page An instance of {@link Page} .
+	 * @param sorterField The field of {@link LiteProduct} that will be used to sort the elements of {@code liteProducts}
+	 * @param sortingOrder An instance of {@link SortingOrder} which will determine if the sorting based on {@code sorterField}
+	 *      is in ascending or descending order.
+	 * @return  {@literal true} if the {@link Page}'s elements match the provided array's elements 1 - by - 1, {@literal false} otherwise.
 	 * @see ControllerGetTests#testGetAll()
 	 * @see BackendServiceGetTests#testGetAll()
 	 * @see EndToEndGetTests#testGetAll()
+	 *
 	 */
-	public static boolean pageMatchesPostedElements(@NonNull final Page<LiteProduct> page, int startRequestIdx, @NonNull final ProductUpsertRequestBody[] upsertRequests)
+	public static boolean fieldMonotonic(final Page<LiteProduct> page, final String sorterField, final SortingOrder sortingOrder)
 	{
-		final int numElements = page.getNumberOfElements();
-		if(numElements == 0)
+		if(page.getNumberOfElements() >=  2)
 		{
-			return upsertRequests.length == 0;
+			final Iterator<LiteProduct> itBack = page.iterator(), itFront = page.iterator();
+			itFront.next();     // The "front" iterator needs to advance to second position before the loop.
+			do
+			{
+				final LiteProduct lpFront = itFront.next(), lpBack = itBack.next();
+				if (!gtOrLt(lpFront, lpBack, sorterField, sortingOrder))
+				{
+					return false;
+				}
+			} while (itFront.hasNext());
 		}
-		else
+		return true;                        // Either exhausted the page, or it was too small to begin with.
+	}
+
+	private static boolean gtOrLt(final LiteProduct lpFront, final LiteProduct lpBack, final String sorterField, final SortingOrder sortingOrder)
+	{
+		// TODO: try to fix this with reflection and type inference
+		switch (sorterField)
 		{
-			final ProductUpsertRequestBody[] requestsInSlice = Arrays.copyOfRange(upsertRequests, startRequestIdx, numElements + startRequestIdx);
-			// TODO: Compare the following two lines after testing.
-			// return page.stream().map(LiteProduct::getClientProductId).allMatch(p-> Arrays.stream(requestsInSlice).map(ProductUpsertRequestBody::getClientProductId).collect(Collectors.toList()).contains(p));
-			return pageMatchesPostedElements(page, requestsInSlice);
+			case "clientProductId":
+			{
+				return gtOrLt(lpFront.getClientProductId(), lpBack.getClientProductId(), sortingOrder);
+			}
+			case "productName":
+			{
+				return gtOrLt(lpFront.getProductName(), lpBack.getProductName(), sortingOrder);
+			}
+			case "productType":
+			{
+				return gtOrLt(lpFront.getProductType(), lpBack.getProductType(), sortingOrder);
+			}
+			case "costInCents":
+			{
+				return gtOrLt(lpFront.getCostInCents(), lpBack.getCostInCents(), sortingOrder);
+			}
+			default:
+			{
+				throw new IllegalArgumentException("Sorter Field " + sorterField + " either non-existant or not appropriate for client-side sorting.");
+			}
 		}
 	}
 
-	private static boolean pageMatchesPostedElements(@NonNull final Page<LiteProduct> page,@NonNull  final ProductUpsertRequestBody[] requests)
+	private static boolean gtOrLt(final String valFront, final String valBack, final SortingOrder sortingOrder)
 	{
-		if(page.getNumberOfElements() != requests.length || !page.hasNext())
-		{
-			return false;
-		}
-		else
-		{
-			final Iterator<LiteProduct> it = page.iterator();
-			for (ProductUpsertRequestBody request : requests)
-			{
-				if(!it.hasNext())
-				{
-					return false;
-				}
-				else if (!it.next().getClientProductId().equals(request.getClientProductId()))  // it.next() advances iterator
-				{
-					return false;
-				}
-			}
-			return !it.hasNext();      // Should have exhausted the elements.
-		}
+		return sortingOrder.equals(ASC) ? valFront.compareTo(valBack) >= 0 : valFront.compareTo(valBack) <= 0;
 	}
+
+	private static boolean gtOrLt(final Long valFront, final Long valBack, final SortingOrder sortingOrder)
+	{
+		return sortingOrder.equals(ASC) ? valFront.compareTo(valBack) >= 0 : valFront.compareTo(valBack) <= 0;
+	}
+
 	/**
 	 * Returns the expected number of elements in the current page.
 	 * @param pageIdx The zero-based index of the current page.
@@ -710,24 +746,32 @@ public class TestUtil
 	 *
 	 * @param startElementIdx The index into the original collection of the element that should begin the {@link Page}.
 	 * @param elementsInPage The elements that the returned {@link Page} should contain.
-	 * @param requests The requests to snatch a page from.
+	 * @param liteProducts The requests to snatch a page from, transformed from instances of {@link ProductUpsertRequestBody}
+	 *                     into {@link LiteProduct} instances.
+	 *
+	 * @return  A mocked {@link Page}.
 	 */
-	public static Page<LiteProduct> mockedPage(final int startElementIdx, final int elementsInPage, final ProductUpsertRequestBody[] requests)
+	public static Page<LiteProduct> mockedPage(final int startElementIdx, final int elementsInPage, final List<LiteProduct> liteProducts)
 	{
-		final List<LiteProduct> transformedRequests = Arrays.stream(requests).map(TestUtil::toyLiteProduct).collect(Collectors.toList());
-		return new PageImpl<>(transformedRequests.subList(startElementIdx, elementsInPage));
+		return new PageImpl<>(liteProducts.subList(startElementIdx, startElementIdx + elementsInPage));
 	}
 
-	private static LiteProduct toyLiteProduct(final ProductUpsertRequestBody request)
+	/**
+	 * Transform a {@link ProductUpsertRequestBody} instance into a {@link LiteProduct} instance. Used extensively by
+	 * GET ALL tests.
+	 * @param request An instance of {@link ProductUpsertRequestBody}
+	 * @return An instance of {@link LiteProduct}
+	 */
+	public static LiteProduct toyLiteProduct(final ProductUpsertRequestBody request)
 	{
 		return LiteProduct.builder()
-		                  .clientProductId(Optional.of(request.getClientProductId()).orElseThrow(() -> new IllegalArgumentException("Request did not have client product ID")))
-		                  .productName(Optional.of(request.getProductName()).orElse(DEFAULT_PRODUCT_NAME))
-		                  .productType(Optional.of(request.getProductType()).orElse(DEFAULT_PRODUCT_TYPE))
-		                  .costInCents(Optional.of(request.getCostInCents()).orElse(DEFAULT_COST_IN_CENTS))
-		                  .squareItemId(Optional.of(request.getSquareItemId()).orElse(DEFAULT_SQUARE_ITEM_ID))
-		                  .squareItemVariationId(Optional.of(request.getSquareItemVariationId()).orElse(DEFAULT_SQUARE_ITEM_VARIATION_ID))
-		                  .version(Optional.of(request.getVersion()).orElse(DEFAULT_VERSION))
+		                  .clientProductId(Optional.ofNullable(request.getClientProductId()).orElseThrow(() -> new IllegalArgumentException("Request did not have client product ID")))
+		                  .productName(Optional.ofNullable(request.getProductName()).orElse(DEFAULT_PRODUCT_NAME))
+		                  .productType(Optional.ofNullable(request.getProductType()).orElse(DEFAULT_PRODUCT_TYPE))
+		                  .costInCents(Optional.ofNullable(request.getCostInCents()).orElse(DEFAULT_COST_IN_CENTS))
+		                  .squareItemId(Optional.ofNullable(request.getSquareItemId()).orElse(DEFAULT_SQUARE_ITEM_ID))
+		                  .squareItemVariationId(Optional.ofNullable(request.getSquareItemVariationId()).orElse(DEFAULT_SQUARE_ITEM_VARIATION_ID))
+		                  .version(Optional.ofNullable(request.getVersion()).orElse(DEFAULT_VERSION))
 		                  .build();
 	}
 }

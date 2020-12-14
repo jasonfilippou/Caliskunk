@@ -1,7 +1,6 @@
 package com.company.rest.products.model.liteproduct;
 import com.company.rest.products.util.Util;
 import com.company.rest.products.util.exceptions.InvalidProductTypeException;
-import com.company.rest.products.util.request_bodies.ProductUpsertRequestBody;
 import com.company.rest.products.util.request_bodies.SquareServiceResponseBody;
 import lombok.*;
 
@@ -9,7 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 /**
  * {@link LiteProduct} is a cached version of products, with only a subset of the fields a user might provide.
@@ -24,6 +22,9 @@ import java.util.Set;
 @NoArgsConstructor // Required for Entities
 public class LiteProduct
 {
+	/* If you rename, add or remove any one of these fields, please also edit TestUtil::gTOrLt. Until I use reflection
+	 * and type inference in the method,
+	 */
 	@Id
 	private String clientProductId;                         // Provided by user
 	private String squareItemId;	                        // Provided by Square, guaranteed unique across all objects.
@@ -89,7 +90,7 @@ public class LiteProduct
 	 *                 of an instance of {@code this}.
 	 * @return An instance of {@code this}.
 	 */
-	public static LiteProduct buildLiteProductFromSquareResponse(@NonNull final SquareServiceResponseBody response)
+	public static LiteProduct fromSquareResponse(@NonNull final SquareServiceResponseBody response)
 	{
 		return LiteProduct.builder()
 		                  .clientProductId(response.getClientProductId())
@@ -100,28 +101,5 @@ public class LiteProduct
 					      .costInCents(response.getCostInCents())
 					      .version(response.getVersion())
 	                      .build();
-	}
-
-	/**
-	 * Build a {@link LiteProduct} instance out of two {@link ProductUpsertRequestBody} instances, one for a PUT
-	 * request and another for its originating POST. Since UPDATE requests (PUT, PATCH) are allowed to change as many fields
-	 * as they can, some of the crucial fields for the creation of a {@link LiteProduct} might be {@literal null}.
-	 * So we need both requests to build a {@link LiteProduct} instance.
-	 *
-	 * @param putRequest A {@link ProductUpsertRequestBody} instance corresponding to a PUT request.
-	 * @param postRequest A {@link ProductUpsertRequestBody} instance corresponding to the POST request that {@code putRequest}
-	 *                    comes after.
-	 * @return An instance of {@code this}.
-	 */
-	public static LiteProduct buildLiteProductFromPostAndPutRequests(@NonNull final ProductUpsertRequestBody putRequest,
-	                                                                 @NonNull final ProductUpsertRequestBody postRequest)
-	{
-		return LiteProduct.builder()
-		                  .clientProductId(postRequest.getClientProductId())
-		                  .productName(Optional.of(putRequest.getProductName()).orElse(postRequest.getProductName()))
-		                  .productType(Optional.of(putRequest.getProductType()).orElse(postRequest.getProductType()))
-		                  .costInCents(Optional.of(putRequest.getCostInCents()).orElse(postRequest.getCostInCents()))
-		                  .version(putRequest.getVersion())
-		                  .build();
 	}
 }

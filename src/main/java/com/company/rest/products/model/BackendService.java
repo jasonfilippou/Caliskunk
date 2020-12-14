@@ -82,7 +82,7 @@ public class BackendService
 				// local DB in order to grab the unique ID that Square provides us with.
 				final SquareServiceResponseBody squareServiceResponse = squareService.postProduct(postRequest);
 				validatePostResponse(squareServiceResponse, postRequest);
-				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(squareServiceResponse));
+				localRepo.save(LiteProduct.fromSquareResponse(squareServiceResponse));
 				return BackendServiceResponseBody.fromSquareResponse(squareServiceResponse);
 			}
 		}
@@ -239,7 +239,7 @@ public class BackendService
 
 	private boolean sortingFieldOk(final String sortBy)
 	{
-		return Arrays.asList("costInCents", "name", "clientProductId", "productType").contains(sortBy);
+		return Arrays.asList("costInCents", "name", "clientProductId", "productName", "productType").contains(sortBy);
 	}
 
 	/**
@@ -272,7 +272,7 @@ public class BackendService
 				final SquareServiceResponseBody squareServiceResponse = squareService.putProduct(putRequest);
 				validatePutResponse(squareServiceResponse, putRequest);
 				localRepo.deleteByClientProductId(id);                      // Since we PUT, we have to replace entirely. TODO: would it be faster to execute an HDL-assisted SQL UPDATE query for LiteProductRepository?
-				localRepo.save(LiteProduct.buildLiteProductFromSquareResponse(squareServiceResponse));   // This will replace the version as well.
+				localRepo.save(LiteProduct.fromSquareResponse(squareServiceResponse));   // This will replace the version as well.
 				return BackendServiceResponseBody.fromSquareResponse(squareServiceResponse);
 			}
 		}
