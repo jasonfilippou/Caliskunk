@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import static com.company.rest.products.test.requests_responses.get.GoodGetRequests.GOOD_GETS;
 import static com.company.rest.products.test.requests_responses.post.GoodPostRequests.GOOD_POSTS;
 import static com.company.rest.products.test.util.TestUtil.*;
-import static com.company.rest.products.test.util.TestUtil.SortingOrder.ASC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 /**
@@ -154,20 +153,21 @@ public class EndToEndGetTests
 			final ResponseEntity<ResponseMessage> postResponseEntity = controller.postProduct(goodPost);
 		}
 		final int totalPages  = Math.min(DEFAULT_NUM_PAGES, GOOD_POSTS.length);
-		final String sortBy = "costInCents";    // TODO: vary this
+		final String sortByField = "costInCents";    // TODO: vary this
+		final String sortOrder = "ASC";              //   and this
 		final Map<String, Comparator<LiteProduct>> sortingStrategies = createSortingStrategies();
 		final List<LiteProduct> goodPostsAsLiteProducts = Arrays.stream(GOOD_POSTS)
 		                                                        .map(TestUtil::toyLiteProduct)
-		                                                        .sorted(sortingStrategies.get(sortBy))
+		                                                        .sorted(sortingStrategies.get(sortByField))
 		                                                        .collect(Collectors.toList());
 		for(int i = 0; i < totalPages; i++)
 		{
 			final int expectedNumElementsInPage = getNumElementsInPage(i, totalPages, totalElements);
 			@SuppressWarnings("unchecked")
-			final Page<LiteProduct> page = (Page<LiteProduct>) Objects.requireNonNull(controller.getAll(i, expectedNumElementsInPage, sortBy).getBody()).getData();
+			final Page<LiteProduct> page = (Page<LiteProduct>) Objects.requireNonNull(controller.getAll(i, expectedNumElementsInPage, sortByField, sortOrder).getBody()).getData();
 			// Evaluate response
 			assertEquals("Unexpected number of elements in returned page", page.getNumberOfElements(), expectedNumElementsInPage);
-			assertTrue("Page did not return appropriately sorted elements." , fieldMonotonic(page, sortBy, ASC));
+			assertTrue("Page did not return appropriately sorted elements." , fieldMonotonic(page, sortByField, sortOrder));
 			assertTrue("Page has incorrect successor page information", checkPageSuccessor(i, totalPages, page));
 		}
 	}

@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+
 import static com.company.rest.products.util.Util.*;
 import static java.util.Optional.ofNullable;
 /**
@@ -66,38 +68,36 @@ public class ProductController
 		return response(ResponseMessage.SUCCESS, message, data, statusToReport);
 	}
 
-	/* *************************************************************************************** */
-	/* ************************** AGGREGATE ROOT GET AND POST ******************************** */
-	/* *************************************************************************************** */
 	/**
 	 * Entry point for a GET ALL request.
 	 *
-	 * @param pageIdx     the current index of the page in the paginated response.
-	 * @param itemsInPage the number of items in the current page.
-	 * @param sortBy      the field of {@link LiteProduct} which we will use for sorting the products.
+	 * @param page     the current index of the page in the paginated response.
+	 * @param size the number of items in the current page.
+	 * @param sortByField      the field of {@link LiteProduct} which we will use for sorting the products.
 	 * @return an appropriate JSON response.
 	 * @see BackendService#getAllProducts(Integer, Integer, String)
 	 */
 	@GetMapping(value = "/products")
-	public ResponseEntity<ResponseMessage> getAll(@PathVariable(required = false, name = "page") Integer pageIdx,
-	                                              @PathVariable(required = false, name = "items_in_page") Integer itemsInPage,
-	                                              @PathVariable(required = false, name = "sort_by") String sortBy)
+	public ResponseEntity<ResponseMessage> getAll(@RequestParam(name = "page", defaultValue = "0") final Integer page, // Default value wrapped around quotes after info from here: https://stackoverflow.com/questions/47813925/how-to-give-default-value-as-integer-in-requestparam
+	                                              @RequestParam(name = "items_in_page", defaultValue = "10") final Integer size,
+	                                              @RequestParam(name = "sort_by_field", defaultValue = "costInCents") final String sortByField,
+	                                              @RequestParam(name="sort_order", defaultValue = "ASC") final String sortOrder)
 	{
-		if (pageIdx == null) pageIdx = DEFAULT_PAGE_IDX;
-		if (itemsInPage == null) itemsInPage = DEFAULT_PAGE_SIZE;
-		if (sortBy == null) sortBy = "costInCents";
-		if ((pageIdx < 0) || (itemsInPage < 1)) // Autoboxed
+		if ((page < 0) || (size < 1)) // Autoboxed
 		{
-			log.error("Received a bad GET ALL request (page=" + pageIdx + ", itemsInPage=" + itemsInPage);
+			log.error("Received a bad GET ALL request");
 			return failure("Please provide non-negative page and items per page parameters", HttpStatus.BAD_REQUEST);
 		}
-		else
+		else if(!sortingParamsOk(sortByField, sortOrder))
+		{
+			log.error("Bad sorting parameters specified");
+			return failure("PLease specify an appropriate field to sort by, and a sorting order in the set {\"ASC\", \"DESC\"}", HttpStatus.BAD_REQUEST);
+		}
 		{
 			try
 			{
-				final Page<LiteProduct> retVal = backendService.getAllProducts(pageIdx, itemsInPage, sortBy);
-				return success("Successfully retrieved all products!",
-				               retVal, HttpStatus.OK);
+				final Page<LiteProduct> retVal = backendService.getAllProducts(page, size, sortByField, sortOrder);
+				return success("Successfully retrieved all products!", retVal, HttpStatus.OK);
 			}
 			catch (BackendServiceException exc)
 			{
@@ -105,6 +105,12 @@ public class ProductController
 				return failure(exc, exc.getStatus());
 			}
 		}
+	}
+
+	private boolean sortingParamsOk(final String sortByField, final String sortOrder)
+	{
+		return Arrays.asList("costInCents", "name", "clientProductId", "productName", "productType").contains(sortByField) &&
+		       Arrays.asList("ASC", "DESC").contains(sortOrder);
 	}
 	/**
 	 * Entry point for a POST request.
@@ -221,7 +227,7 @@ public class ProductController
 			final BackendServiceResponseBody backendResponse = backendService.getProduct(getRequest);
 			validateGetResponse(backendResponse, getRequest);
 			final ProductResponseBody productResponse = ProductResponseBody.fromBackendResponseBody(backendResponse);
-			return success("Successfully got product with ID " + id + ".", productResponse, HttpStatus.FOUND);
+			return success("Successful GET request" , productResponse, HttpStatus.FOUND);
 		}
 		catch (ProductNotFoundException e)
 		{
@@ -353,7 +359,7 @@ public class ProductController
 			final BackendServiceResponseBody backendResponse = backendService.deleteProduct(new ProductDeleteRequestBody(id));
 			validateDeleteResponse(backendResponse, deleteRequest);
 			final ProductResponseBody productResponse =  ProductResponseBody.fromBackendResponseBody(backendResponse);
-			return success("Successfully deleted product with ID " + id + ".",
+			return success("Successfully deleted product",
 			               productResponse, HttpStatus.OK);
 		}
 		catch (BackendServiceException e)

@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.company.rest.products.model.SquareService.*;
-import static com.company.rest.products.test.util.TestUtil.SortingOrder.ASC;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.POST;
 import static com.company.rest.products.test.util.TestUtil.UpsertType.PUT;
 import static com.company.rest.products.util.Util.*;
@@ -44,13 +43,6 @@ public class TestUtil
 	public enum UpsertType
 	{
 		POST, PUT, PATCH
-	}
-	/**
-	 * An enum encoding ascending or descending sorting order.
-	 */
-	public enum SortingOrder
-	{
-		DESC, ASC;
 	}
 
 	/**
@@ -635,17 +627,25 @@ public class TestUtil
 	 * @see EndToEndGetTests#testGetAll()
 	 * @return A {@link Map} that associates fields with appropriate sorting strategies for their type.
 	 */
-	public static Map<String, Comparator<LiteProduct>> createSortingStrategies()
+	public static Map<String, Comparator<LiteProduct>> createSortingStrategies(final String sortOrder)
 	{
+		final Comparator<String> cmpString = sortOrder.equals("ASC") ? Comparator.naturalOrder() : Comparator.reverseOrder();
+		final Comparator<Long> cmpLong = sortOrder.equals("ASC") ? Comparator.naturalOrder() : Comparator.reverseOrder();
 		return new HashMap<>()
 		{
 			{   // The following 4 fields are the only accepted ones for sorting reasons.
-				put("clientProductId", Comparator.comparing(LiteProduct::getClientProductId));
-				put("productName", Comparator.comparing(LiteProduct::getProductName));
-				put("productType", Comparator.comparing(LiteProduct::getProductType));
-				put("costInCents", Comparator.comparingLong(LiteProduct::getCostInCents));
+				put("clientProductId", Comparator.comparing(LiteProduct::getClientProductId, cmpString));
+				put("productName", Comparator.comparing(LiteProduct::getProductName, cmpString));
+				put("productType", Comparator.comparing(LiteProduct::getProductType, cmpString));
+				put("costInCents", Comparator.comparing(LiteProduct::getCostInCents, cmpLong)); // Instead of Comparator.comparingLong, in order to allow for the second argument.
+
 			}
 		};
+	}
+
+	private static Comparator<?> getComparisonOrder(final String sortOrder)
+	{
+		return sortOrder.equals("ASC") ? Comparator.naturalOrder() : Comparator.reverseOrder();
 	}
 	/**
 	 * Checks if the provided {@link Page}'s successor flag is the expected one.
@@ -665,15 +665,14 @@ public class TestUtil
 	 * Examines if the field provided is monotonically increasing or decreasing.
 	 * @param page An instance of {@link Page} .
 	 * @param sorterField The field of {@link LiteProduct} that will be used to sort the elements of {@code liteProducts}
-	 * @param sortingOrder An instance of {@link SortingOrder} which will determine if the sorting based on {@code sorterField}
-	 *      is in ascending or descending order.
+	 * @param sortingOrder \"ASC\" or \"DESC\"
 	 * @return  {@literal true} if the {@link Page}'s elements match the provided array's elements 1 - by - 1, {@literal false} otherwise.
 	 * @see ControllerGetTests#testGetAll()
 	 * @see BackendServiceGetTests#testGetAll()
 	 * @see EndToEndGetTests#testGetAll()
 	 *
 	 */
-	public static boolean fieldMonotonic(final Page<LiteProduct> page, final String sorterField, final SortingOrder sortingOrder)
+	public static boolean fieldMonotonic(final Page<LiteProduct> page, final String sorterField, final String sortingOrder)
 	{
 		if(page.getNumberOfElements() >=  2)
 		{
@@ -691,7 +690,7 @@ public class TestUtil
 		return true;                        // Either exhausted the page, or it was too small to begin with.
 	}
 
-	private static boolean gtOrLt(final LiteProduct lpFront, final LiteProduct lpBack, final String sorterField, final SortingOrder sortingOrder)
+	private static boolean gtOrLt(final LiteProduct lpFront, final LiteProduct lpBack, final String sorterField, final String sortingOrder)
 	{
 		// TODO: try to fix this with reflection and type inference
 		switch (sorterField)
@@ -719,14 +718,14 @@ public class TestUtil
 		}
 	}
 
-	private static boolean gtOrLt(final String valFront, final String valBack, final SortingOrder sortingOrder)
+	private static boolean gtOrLt(final String valFront, final String valBack, final String sortingOrder)
 	{
-		return sortingOrder.equals(ASC) ? valFront.compareTo(valBack) >= 0 : valFront.compareTo(valBack) <= 0;
+		return sortingOrder.equals("ASC") ? valFront.compareTo(valBack) >= 0 : valFront.compareTo(valBack) <= 0;
 	}
 
-	private static boolean gtOrLt(final Long valFront, final Long valBack, final SortingOrder sortingOrder)
+	private static boolean gtOrLt(final Long valFront, final Long valBack, final String sortingOrder)
 	{
-		return sortingOrder.equals(ASC) ? valFront.compareTo(valBack) >= 0 : valFront.compareTo(valBack) <= 0;
+		return sortingOrder.equals("ASC") ? valFront.compareTo(valBack) >= 0 : valFront.compareTo(valBack) <= 0;
 	}
 
 	/**

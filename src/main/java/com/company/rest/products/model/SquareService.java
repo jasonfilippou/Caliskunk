@@ -70,7 +70,7 @@ public class SquareService
 			final UpsertCatalogObjectRequest squarePostRequest = prepareCatalogPostRequest(clientPostRequest);
 			final UpsertCatalogObjectResponse squarePostResponse = catalogWrapper.postObject(squarePostRequest);
 			validatePostResponse(squarePostResponse, clientPostRequest);
-			log.info("New item / variation pair posted on Square, with ID " + squarePostResponse.getCatalogObject().getId() + ".");
+			log.info("New item / variation pair posted on Square.");
 			return SquareServiceResponseBody.fromUpsertRequestAndResponse(clientPostRequest, squarePostResponse);
 		}
 		catch (Throwable t)
@@ -220,7 +220,7 @@ public class SquareService
 			final UpsertCatalogObjectRequest squarePutRequest = prepareCatalogPutRequest(clientPutRequest);
 			final UpsertCatalogObjectResponse squarePutResponse = catalogWrapper.putObject(squarePutRequest);
 			validatePutResponse(squarePutResponse, clientPutRequest);
-			log.info("New item / variation pair updated on Square, with ID " + squarePutResponse.getCatalogObject().getId() + ".");
+			log.info("New item / variation pair updated on Square.");
 			return SquareServiceResponseBody.fromUpsertRequestAndResponse(clientPutRequest, squarePutResponse);
 		}
 		catch (InterruptedException | ExecutionException e)
@@ -323,7 +323,7 @@ public class SquareService
 			validateGetRequest(clientGetRequest);
 			final RetrieveCatalogObjectResponse squareGetResponse = catalogWrapper.retrieveObject(clientGetRequest);
 			validateGetResponse(squareGetResponse, clientGetRequest);
-			log.info("New item / variation pair retrieved from Square, with item ID: " + squareGetResponse.getObject().getId() + ".");
+			log.info("New item / variation pair retrieved from Square.");
 			return SquareServiceResponseBody.fromGetRequestAndResponse(clientGetRequest, squareGetResponse);
 		}
 		catch (Throwable t)

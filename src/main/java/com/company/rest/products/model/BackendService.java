@@ -15,7 +15,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static com.company.rest.products.util.Util.*;
@@ -207,7 +206,7 @@ public class BackendService
 	 *
 	 * @param pageIdx the current index of the page in the paginated response.
 	 * @param itemsInPage the number of items in the current page.
-	 * @param sortBy the field of {@link LiteProduct} which we will use for sorting the products.
+	 * @param sortByField the field of {@link LiteProduct} which we will use for sorting the products.
 	 * @throws BackendServiceException if {@link SquareService} throws a {@link SquareServiceException}.
 	 * @return A {@link BackendServiceResponseBody} instance describing the work done by this layer.
 	 * @see ProductController#getAll(Integer, Integer, String)
@@ -216,30 +215,37 @@ public class BackendService
 	 */
 	public Page<LiteProduct> getAllProducts(@NonNull final Integer pageIdx,
 	                                                       @NonNull final Integer itemsInPage,
-	                                                       @NonNull final String sortBy)
+	                                                       @NonNull final String sortByField,
+	                                                        @NonNull final String sortOrderString)
 	{
-		if(!sortingFieldOk(sortBy))
+		try
 		{
-			throw new BackendServiceException("Bad sorting field \"" + sortBy + "\" specified", HttpStatus.BAD_REQUEST);
+			// Paginated and sorted output from the cache.
+			final Sort sortOrder = determineSortOrder(sortByField, sortOrderString);
+			return localRepo.findAll(PageRequest.of(pageIdx, itemsInPage, sortOrder));
+		}
+		catch (Throwable t)
+		{
+			logException(t, this.getClass().getName() + "::getAllProducts");
+			throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	private Sort determineSortOrder(final String sortByField, final String sortOrderString)
+	{
+		if(sortOrderString.equals("ASC"))
+		{
+			return Sort.by(sortByField).ascending();
+		}
+		else if(sortOrderString.equals("DESC"))
+		{
+			return Sort.by(sortByField).descending();
 		}
 		else
 		{
-			try
-			{
-				// Paginated and sorted output from the cache.
-				return localRepo.findAll(PageRequest.of(pageIdx, itemsInPage, Sort.by(sortBy).ascending()));
-			}
-			catch (Throwable t)
-			{
-				logException(t, this.getClass().getName() + "::getAllProducts");
-				throw new BackendServiceException(t, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			throw new IllegalArgumentException("Bad sort order string provided.");
 		}
-	}
-
-	private boolean sortingFieldOk(final String sortBy)
-	{
-		return Arrays.asList("costInCents", "name", "clientProductId", "productName", "productType").contains(sortBy);
 	}
 
 	/**
