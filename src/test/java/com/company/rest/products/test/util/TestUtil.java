@@ -632,21 +632,16 @@ public class TestUtil
 		final Comparator<String> cmpString = sortOrder.equals("ASC") ? Comparator.naturalOrder() : Comparator.reverseOrder();
 		final Comparator<Long> cmpLong = sortOrder.equals("ASC") ? Comparator.naturalOrder() : Comparator.reverseOrder();
 		return new HashMap<>()
-		{
-			{   // The following 4 fields are the only accepted ones for sorting reasons.
-				put("clientProductId", Comparator.comparing(LiteProduct::getClientProductId, cmpString));
-				put("productName", Comparator.comparing(LiteProduct::getProductName, cmpString));
-				put("productType", Comparator.comparing(LiteProduct::getProductType, cmpString));
-				put("costInCents", Comparator.comparing(LiteProduct::getCostInCents, cmpLong)); // Instead of Comparator.comparingLong, in order to allow for the second argument.
-
-			}
-		};
+			{
+				{   // The following 4 fields are the only accepted ones for sorting reasons.
+					put("clientProductId", Comparator.comparing(LiteProduct::getClientProductId, cmpString));
+					put("productName", Comparator.comparing(LiteProduct::getProductName, cmpString));
+					put("productType", Comparator.comparing(LiteProduct::getProductType, cmpString));
+					put("costInCents", Comparator.comparing(LiteProduct::getCostInCents, cmpLong)); // Instead of Comparator.comparingLong, in order to allow for the second argument.
+				}
+			};
 	}
 
-	private static Comparator<?> getComparisonOrder(final String sortOrder)
-	{
-		return sortOrder.equals("ASC") ? Comparator.naturalOrder() : Comparator.reverseOrder();
-	}
 	/**
 	 * Checks if the provided {@link Page}'s successor flag is the expected one.
 	 * @param page An instance of {@link Page}.

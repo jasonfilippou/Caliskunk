@@ -190,8 +190,8 @@ public class BackendServiceGetTests
 		final long totalElements = GOOD_POSTS.length;
 		final int totalPages  = Math.min(DEFAULT_NUM_PAGES, GOOD_POSTS.length);
 		final String sortByField = "costInCents";    // TODO: vary this
-		final String sortOrder = "ASC";              //   and this
-		final Map<String, Comparator<LiteProduct>> sortingStrategies = createSortingStrategies();
+		final String sortOrder = "DESC";              //   and this
+		final Map<String, Comparator<LiteProduct>> sortingStrategies = createSortingStrategies(sortOrder);
 		final List<LiteProduct> goodPostsAsLiteProducts = Arrays.stream(GOOD_POSTS)
 		                                                        .map(TestUtil::toyLiteProduct)
 		                                                        .sorted(sortingStrategies.get(sortByField))
