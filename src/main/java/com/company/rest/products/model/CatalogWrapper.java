@@ -87,13 +87,11 @@ public class CatalogWrapper
 
 
 	/**
-	 * Sends a batch retrieve (GET) request to the Square API.
+	 * Sends a retrieve (GET) request to the Square API.
 	 * @param getRequest A {@link ProductGetRequestBody} containing the Square - provided ID of the product to retrieve.
 	 * @throws ExecutionException if Square throws it to us.
 	 * @throws InterruptedException if Square throws it to us.
-	 * @see BatchRetrieveCatalogObjectsRequest
-	 * @see BatchRetrieveCatalogObjectsResponse
-	 * @see UpsertCatalogObjectResponse
+	 * @see RetrieveCatalogObjectResponse
 	 * @return An instance of {@link BatchRetrieveCatalogObjectsResponse} which contains the data requested from the Square API.
 	 */
 	public RetrieveCatalogObjectResponse retrieveObject(@NonNull final ProductGetRequestBody getRequest)
