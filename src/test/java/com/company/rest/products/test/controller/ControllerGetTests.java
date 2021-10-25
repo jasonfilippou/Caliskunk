@@ -83,7 +83,7 @@ public class ControllerGetTests
 				.builder()
 				.name(postRequest.getProductName())
 				.clientProductId(postRequest.getClientProductId())
-				.squareItemId("#RANDOM_SQUARE_ITEM_ID")
+				.squareItemId("#RANDOM_SQUARE_ITEM_ID") 
 				.updatedAt(DEFAULT_UPDATED_AT_STRING)
 				.productType(postRequest.getProductType())
 				.costInCents(postRequest.getCostInCents())
