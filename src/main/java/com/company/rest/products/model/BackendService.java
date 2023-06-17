@@ -147,9 +147,7 @@ public class BackendService
 			final Optional<LiteProduct> cached = localRepo.findByClientProductId(getRequest.getClientProductId());
 			if (cached.isEmpty())
 			{
-				final ProductNotFoundException exc = new ProductNotFoundException(getRequest.getClientProductId());
-				logException(exc, this.getClass().getName() + "::getProduct");
-				throw exc;
+				throw new ProductNotFoundException(getRequest.getClientProductId());
 			}
 			else
 			{
